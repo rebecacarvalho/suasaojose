@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# Titulo: Shiny SJC\n# Autor: Rebeca Carvalho\n\n\nrm(list = ls())\n\n\n# Pacotes utilizados\n\nlibrary(cepespR)\nlibrary(knitr)\nlibrary(plyr)\nlibrary(tidyverse)\nlibrary(lubridate)\nlibrary(shiny)\nlibrary(shinyalert)\nlibrary(shinyBS)\nlibrary(ggplot2)\nlibrary(shiny)\nlibrary(readr)\nlibrary(shiny)\nlibrary(shinythemes)\nlibrary(magrittr)\nlibrary(shinydashboard)\nlibrary(shinyWidgets)\nlibrary(shinyjs)\nlibrary(plotly)\nlibrary(DT)\n\n# 1. Data -----------------------------------------------------------------\n\n\n\n# 2. User interface -------------------------------------------------------\n\nui <- fluidPage(\n  \n \n       navbarPage(\"DadosSJC\", theme = shinytheme(\"flatly\"),\n           \n            tabPanel(\"Caracterização do município\"),\n             \n             mainPanel(\n               \n               )))\n\n       \n      \n# 3. Server ---------------------------------------------------------------\n\nserver <- function(input, output,session){\n}\n\n\n\n\n\n\n# 4. ShinyApp -------------------------------------------------------------\n\nshinyApp(ui = ui, server = server)\n\n\n\n\n\n",
+    "created" : 1554135939685.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4180545632",
+    "id" : "16E04A25",
+    "lastKnownWriteTime" : 1554141427,
+    "last_content_update" : 1554141427163,
+    "path" : "~/cepesp/dados_sjc/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

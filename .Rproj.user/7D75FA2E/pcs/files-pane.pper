@@ -1,0 +1,9 @@
+{
+    "path" : "~/cepesp/dados_sjc",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

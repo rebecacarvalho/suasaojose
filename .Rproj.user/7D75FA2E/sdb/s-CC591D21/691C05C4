@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# Titulo: Dados SJC\n# Autor: Rebeca Carvalho\n\nrm(list = ls())\n\n# Pacotes utilizados\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(tidyverse)\nlibrary(lubridate)\n\n\n# 1. Dados ----------------------------------------------------------------\n\n\ndomicilios <- read_delim(\"C:/Users/rebeca.carvalho/Downloads/domicilios [SubtitleTools.com].txt\", \n                             \"\\t\", escape_double = FALSE, trim_ws = TRUE)\n\npessoas <- read_delim(\"C:/Users/rebeca.carvalho/Downloads/pessoas [SubtitleTools.com].txt\", \n                            \"\\t\", escape_double = FALSE, trim_ws = TRUE)\n\nviagens <- read_delim(\"C:/Users/rebeca.carvalho/Downloads/viagens [SubtitleTools.com].txt\", \n                              \"\\t\", escape_double = FALSE, trim_ws = TRUE)\n\nzonas <- read_delim(\"C:/Users/rebeca.carvalho/Downloads/zonas [SubtitleTools.com].txt\", \n                      \"\\t\", escape_double = FALSE, trim_ws = TRUE)\n\nzonas <- rename(zonas, \"ZONA\" = \"Zona\", \"DENOMINAÇÃO\" = \"Denominação\", \"LOCALIZAÇÃO\" = \"Localização\")\n\n\n\nod <- left_join(pessoas,domicilios, by = c(\"CHAVE DOM\", \"ZONA\", \"DOMIC\", \"NUM_FAM\"))\n\nod_viagens <- left_join(od, viagens, by = c(\"CHAVE DOM + PESS\", \"CHAVE DOM\", \"ZONA\", \"DOMIC\", \"NUM_FAM\", \"NUM_PESS\"))\n\nod$ZONA <- as.numeric(od$ZONA)\n\nod <- left_join(od, zonas, by = \"ZONA\")\n\nod <- od %>% \n  select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, DOMIC, NUM_FAM, TOT_PESS, NUM_PESS, SIT_FAM, SEXO, IDADE, GR_INSTR, COND_ATV, \n         VINCULO, SET_ATV, ZONA_ATV, `MACROZONA_ATV DESCRIÇĂO`, COND_AT2, VINCULO2, SET_ATV2, ZONA_AT2, `MACROZONA_ATV2 DESCRIÇĂO`,\n         RENDA, `FAT_EXP POP`, TIPO_IMÓVEL, Nş_CÔMODOS, ESGOTO, AGUA, CONSUMO, RADIO, TV, MAQ_LAV, GELADEIR, CELULAR, TEL_FIXO,\n         MICRO, MICRO_IN, MOTO, AUTO, QTE_FAM, TIPO_DOM, COND_MOR, TMP_CID, TMP_DOM, `FAT_EXP DOM`)\n\n\n\nsum(viagens$`FAT_EXP POP`)\n\n\nt <- viagens %>% \n  group_by(CLASSE, TIPO) %>% \n  summarise(\n    soma = sum(`FAT_EXP GERAL`),\n    soma2 = sum(`FAT_EXP POP`)\n  )\n\nte <- viagens %>% \n  filter(CLASSE == \"Motorizado\", TIPO == \"Individual\") \n\nsum(te$`FAT_EXP GERAL`)\n  \nglimpse(viagens)\n\n\ngabi<-function(string){\n  \n  paste0(round(string/1000,0),\".\", substr(round(string,0), start = nchar(round(string,0))- 2, stop = nchar(round(string,0))),\n         ifelse(round(string,2)==round(string,0),\"\",\n                paste0(\",\",substr(1 + round(string,2)-round(string,0),start = 3, stop = 4))))\n}\n\n\nviagens$`FAT_EXP GERAL` <- gabi(viagens$`FAT_EXP POP`)\n",
+    "created" : 1554138830318.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1582033694",
+    "id" : "691C05C4",
+    "lastKnownWriteTime" : 1553627498,
+    "last_content_update" : 1553627498,
+    "path" : "~/cepesp/dados_sjc/script_sjc.R",
+    "project_path" : "script_sjc.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
