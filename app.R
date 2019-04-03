@@ -35,11 +35,12 @@ library(DT)
 # 2. User interface -------------------------------------------------------
 
 ui <- fluidPage(
-  
  
        navbarPage("DadosSJC", theme = shinytheme("flatly"),
-           
+                  
             tabPanel("Caracterização do município"),
+            
+            tabPanel("Transportes"),
              
              mainPanel(
                
