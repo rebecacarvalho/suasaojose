@@ -16,6 +16,7 @@ library(lubridate)
 
 # Dados demograficos
 
+
 Basico_SP2 <- read_delim("dados demográficos/Basico_SP2.txt", 
                          ";", escape_double = FALSE, locale = locale(), 
                          trim_ws = TRUE)
@@ -25,9 +26,25 @@ Domicilio01_SP2 <- read_delim("dados demográficos/Domicilio01_SP2.txt",
                               trim_ws = TRUE)
 
 PessoaRenda_SP2 <- read_delim("dados demográficos/PessoaRenda_SP2.txt", 
-                              ";", escape_double = FALSE, 
-                              trim_ws = TRUE)
+                              ";", escape_double = FALSE, trim_ws = TRUE)
 
+
+# Dados escolares
+
+
+matriculasES2011 <- read_delim("censo escolar/Matrículas Ensino Superior 2011/matriculasES2011.txt", 
+                               ";", escape_double = FALSE, trim_ws = TRUE)
+
+matriculasES2016 <- read_delim("censo escolar/Matrículas  Ensino Superior - 2016/matriculassjc_ensinosup.txt", 
+                                      ";", escape_double = FALSE, trim_ws = TRUE)
+
+
+matriculasEB2013 <- read_delim("censo escolar/Matrículas Ensino Básico - 2013/matriculasEB2013.txt", 
+                               ";", escape_double = FALSE, trim_ws = TRUE)
+
+
+matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/matriculasEB2018.txt", 
+                               ";", escape_double = FALSE, trim_ws = TRUE)
 
 
 # Pesquisa OD
@@ -46,8 +63,12 @@ zonas <- read_delim("dados OD/zonas.txt",
                       "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
+# Linhas
 
 
+linhas <- read_delim("linhas/LInhas.txt", ";", 
+                     escape_double = FALSE, col_types = cols(X5 = col_skip()), 
+                     trim_ws = TRUE)
 
 
 
@@ -82,3 +103,29 @@ od <- od %>%
 
 table(od$CLASSE, od$TIPO)
 
+od2 <- od %>%
+  group_by(CLASSE, TIPO) %>% 
+  count()
+ 
+od2 <- left_join(od, od2, by = c("CLASSE", "TIPO"))
+
+od2$T <- od2$n * od2$`FAT_EXP GERAL`
+
+t <- od2 %>% 
+dplyr::filter(CLASSE == "Motorizado" & TIPO == "Individual")
+
+  
+table(od2$CLASSE, od2$TIPO, od2$T)
+
+mean(t$T)
+  
+od2$`FAT_EXP GERAL` <- od2$`FAT_EXP GERAL`/100
+
+  cat_transp <- data.frame(Categorias = c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo"),
+                           Viagens = " ", Participação = " ")
+
+  cat_transp$Categorias <- c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo")
+
+
+  
+  
