@@ -76,7 +76,6 @@ linhas <- read_delim("linhas/LInhas.txt", ";",
 
 
 
-
 zonas <- rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", "LOCALIZAÇÃO" = "Localização")
 
 
@@ -101,30 +100,44 @@ od <- od %>%
 
 # 3. Tabelas  -------------------------------------------------------------
 
-table(od$CLASSE, od$TIPO)
-
 od2 <- od %>%
   group_by(CLASSE, TIPO) %>% 
   count()
  
 od2 <- left_join(od, od2, by = c("CLASSE", "TIPO"))
 
-od2$T <- od2$n * od2$`FAT_EXP GERAL`
+od2$EXPAN <- od2$n * od2$`FAT_EXP GERAL`
 
-t <- od2 %>% 
-dplyr::filter(CLASSE == "Motorizado" & TIPO == "Individual")
+c1 <- od2 %>% 
+  filter(CLASSE == "Motorizado" & TIPO == "Individual")
 
-  
-table(od2$CLASSE, od2$TIPO, od2$T)
+mean(c1$EXPAN)
 
-mean(t$T)
-  
+c2 <- od2 %>% 
+  filter(CLASSE == "Motorizado" & TIPO == "Coletivo")
+
+mean(c2$EXPAN)
+
+c3 <- od2 %>% 
+  filter(CLASSE == "Não Motorizado" & TIPO == "Não Motorizado")
+
+mean(c3$EXPAN)
+
+
 od2$`FAT_EXP GERAL` <- od2$`FAT_EXP GERAL`/100
 
-  cat_transp <- data.frame(Categorias = c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo"),
-                           Viagens = " ", Participação = " ")
+cat_transp <- data.frame(Categorias = c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo"),
+                           Viagens = as.numeric(c("421.943", "764.043", "461.307")), Participação = " ")
 
-  cat_transp$Categorias <- c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo")
+cat_transp$Total <- sum(cat_transp$Viagens)
+
+cat_transp$Participação <- round(cat_transp$Viagens * 100/cat_transp$Total, 2) 
+
+cat_transp <- cat_transp %>% 
+  select(Categorias, Viagens, Participação)
+
+
+
 
 
   
