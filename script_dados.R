@@ -14,8 +14,15 @@ library(lubridate)
 
 # 1. Dados ----------------------------------------------------------------
 
-# Dados demograficos
+# Secao para importacao dos dados
 
+# 1.1. Dados demograficos -------------------------------------------------
+
+pop1 <- read_delim("C:/Users/rebeca.carvalho/Downloads/Tabela 4.20.1.1.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
+
+pop2 <- read_delim("C:/Users/rebeca.carvalho/Downloads/Tabela 4.20.1.2.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
 
 Basico_SP2 <- read_delim("dados demográficos/Basico_SP2.txt", 
                          ";", escape_double = FALSE, locale = locale(), 
@@ -25,11 +32,81 @@ Domicilio01_SP2 <- read_delim("dados demográficos/Domicilio01_SP2.txt",
                               ";", escape_double = FALSE, 
                               trim_ws = TRUE)
 
+Domicilio02_SP2 <- read_delim("dados demográficos/Domicilio02_SP2.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
+
+DomicilioRenda_SP2 <- read_delim("dados demográficos/DomicilioRenda_SP2.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
+
+Entorno01_SP2 <- read_delim("dados demográficos/Entorno01_SP2.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
+
+Entorno02_SP2 <- read_delim("dados demográficos/Entorno02_SP2.txt", 
+                            ";", escape_double = FALSE, trim_ws = TRUE)
+
+Entorno03_SP2 <- read_delim("dados demográficos/Entorno03_SP2.txt", 
+                            ";", escape_double = FALSE, trim_ws = TRUE)
+
+Entorno04_SP2 <- read_delim("dados demográficos/Entorno04_SP2.txt", 
+                            ";", escape_double = FALSE, trim_ws = TRUE)
+
+Entorno05_SP2 <- read_delim("dados demográficos/Entorno05_SP2.txt", 
+                            ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa01_SP <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+                            ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa02_SP <- read_delim("dados demográficos/Pessoa02_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa03_SP <- read_delim("dados demográficos/Pessoa031_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa04_SP <- read_delim("dados demográficos/Pessoa04_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa05_SP <- read_delim("dados demográficos/Pessoa05_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa06_SP <- read_delim("dados demográficos/Pessoa06_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa07_SP <- read_delim("dados demográficos/Pessoa07_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa08_SP <- read_delim("dados demográficos/Pessoa08_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa09_SP <- read_delim("dados demográficos/Pessoa09_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa10_SP <- read_delim("dados demográficos/Pessoa10_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa11_SP <- read_delim("dados demográficos/Pessoa11_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa12_SP <- read_delim("dados demográficos/Pessoa12_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+Pessoa13_SP <- read_delim("dados demográficos/Pessoa13_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
 PessoaRenda_SP2 <- read_delim("dados demográficos/PessoaRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
+responsavel01_sp2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
 
-# Dados escolares
+responsavel02_sp2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+ResponsavelRenda_SP2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+                          ";", escape_double = FALSE, trim_ws = TRUE)
+
+
+# 1.2. Dados escolares ----------------------------------------------------
+
 
 
 matriculasES2011 <- read_delim("censo escolar/Matrículas Ensino Superior 2011/matriculasES2011.txt", 
@@ -47,7 +124,29 @@ matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/
                                ";", escape_double = FALSE, trim_ws = TRUE)
 
 
-# Pesquisa OD
+# 1.3. RAIS ---------------------------------------------------------------
+
+
+estab_2010 <- read_csv("RAIS/estab_2010.txt")
+
+estab_2011 <- read_csv("RAIS/estab_2011.txt")
+
+estab_2012 <- read_csv("RAIS/estab_2012.txt")
+
+estab_2013 <- read_csv("RAIS/estab_2013.txt")
+
+estab_2014 <- read_csv("RAIS/estab_2014.txt")
+
+estab_2015 <- read_csv("RAIS/estab_2015.txt")
+
+estab_2016 <- read_csv("RAIS/estab_2016.txt")
+
+estab_2017 <- read_csv("RAIS/estab_2017.txt")
+
+
+
+# 1.4. Pesquisa OD --------------------------------------------------------
+
 
 
 domicilios <- read_delim("dados OD/domicilios.txt", 
@@ -63,7 +162,9 @@ zonas <- read_delim("dados OD/zonas.txt",
                       "\t", escape_double = FALSE, trim_ws = TRUE)
 
 
-# Linhas
+
+# 1.5. Linhas -------------------------------------------------------------
+
 
 
 linhas <- read_delim("linhas/LInhas.txt", ";", 
@@ -72,12 +173,33 @@ linhas <- read_delim("linhas/LInhas.txt", ";",
 
 
 
+
+
+
 # 2. Limpeza e organizacao dos dados --------------------------------------
 
 
+# Secao para padronizacao e limpeza dos dados importados
+
+
+# 2.1. Dados demograficos -------------------------------------------------
+
+
+Basico_SP2$V002 <- as.numeric(Basico_SP2$V002)
+
+
+glimpse(Basico_SP2)
+
+# 2.2. Dados escolares ----------------------------------------------------
+
+
+# 2.3. RAIS ---------------------------------------------------------------
+
+
+# 2.4. Pesquisa OD --------------------------------------------------------
+
 
 zonas <- rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", "LOCALIZAÇÃO" = "Localização")
-
 
 
 od <- left_join(pessoas,domicilios, by = c("CHAVE DOM", "ZONA", "DOMIC", "NUM_FAM"))
@@ -96,6 +218,10 @@ od <- od %>%
          INTEGRAÇÃO, Viagem, O_LOCAL, O_ZONA, `MACROZONA ORIG`, O_MOTIVO, `HORA SAIDA`, D_LOCAL, D_ZONA, `MACROZONA DEST`, D_MOTIVO, 
          `HORA CHEGA`, MOD_TRA, MODO_PRONCIPAL, CLASSE, TIPO, TMP_APEO, TMP_APED, FORM_PAG, ESTACION, `FAT_EXP POP`, `FAT_EXP GERAL`)
 
+
+
+
+# 2.5. Linhas -------------------------------------------------------------
 
 
 # 3. Tabelas  -------------------------------------------------------------
