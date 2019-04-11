@@ -199,24 +199,30 @@ glimpse(Basico_SP2)
 # 2.4. Pesquisa OD --------------------------------------------------------
 
 
-zonas <- rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", "LOCALIZAÇÃO" = "Localização")
+zonas <- rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", 
+                "LOCALIZAÇÃO" = "Localização")
 
 
-od <- left_join(pessoas,domicilios, by = c("CHAVE DOM", "ZONA", "DOMIC", "NUM_FAM"))
+od <- left_join(pessoas,domicilios, by = c("CHAVE DOM", "ZONA", "DOMIC", 
+                                           "NUM_FAM"))
 
-od <- left_join(viagens, od, by = c("CHAVE DOM + PESS", "CHAVE DOM", "ZONA", "DOMIC", "NUM_FAM", "NUM_PESS", "FAT_EXP POP"))
+od <- left_join(viagens, od, by = c("CHAVE DOM + PESS", "CHAVE DOM", "ZONA", 
+                                    "DOMIC", "NUM_FAM", "NUM_PESS", "FAT_EXP POP"))
 
 od$ZONA <- as.numeric(od$ZONA)
 
 od <- left_join(od, zonas, by = "ZONA")
 
 od <- od %>% 
-  select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, DOMIC, NUM_FAM, TOT_PESS, NUM_PESS, SIT_FAM, SEXO, 
-         IDADE, GR_INSTR, COND_ATV,VINCULO, SET_ATV, ZONA_ATV, `MACROZONA_ATV DESCRIÇÃO`, COND_AT2, VINCULO2, SET_ATV2, ZONA_AT2, 
-         `MACROZONA_ATV2 DESCRIÇÃO`,RENDA, `FAT_EXP POP`, TIPO_IMÓVEL, Nº_CÔMODOS, ESGOTO, AGUA, CONSUMO, RADIO, TV, MAQ_LAV, 
-         GELADEIR, CELULAR, TEL_FIXO,MICRO, MICRO_IN, MOTO, AUTO, QTE_FAM, TIPO_DOM, COND_MOR, TMP_CID, TMP_DOM, `FAT_EXP DOM`, NUM_VIAGEM,
-         INTEGRAÇÃO, Viagem, O_LOCAL, O_ZONA, `MACROZONA ORIG`, O_MOTIVO, `HORA SAIDA`, D_LOCAL, D_ZONA, `MACROZONA DEST`, D_MOTIVO, 
-         `HORA CHEGA`, MOD_TRA, MODO_PRONCIPAL, CLASSE, TIPO, TMP_APEO, TMP_APED, FORM_PAG, ESTACION, `FAT_EXP POP`, `FAT_EXP GERAL`)
+  select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, 
+         DOMIC, NUM_FAM, TOT_PESS, NUM_PESS, SIT_FAM, SEXO,IDADE, GR_INSTR, COND_ATV,
+         VINCULO, SET_ATV, ZONA_ATV, `MACROZONA_ATV DESCRIÇÃO`, COND_AT2, VINCULO2, 
+         SET_ATV2, ZONA_AT2,`MACROZONA_ATV2 DESCRIÇÃO`,RENDA, `FAT_EXP POP`, TIPO_IMÓVEL,
+         Nº_CÔMODOS, ESGOTO, AGUA, CONSUMO, RADIO, TV, MAQ_LAV,GELADEIR, CELULAR, TEL_FIXO,MICRO,
+         MICRO_IN, MOTO, AUTO, QTE_FAM, TIPO_DOM, COND_MOR, TMP_CID, TMP_DOM, `FAT_EXP DOM`, NUM_VIAGEM,
+         INTEGRAÇÃO, Viagem, O_LOCAL, O_ZONA, `MACROZONA ORIG`, O_MOTIVO, `HORA SAIDA`, D_LOCAL, D_ZONA,
+         `MACROZONA DEST`, D_MOTIVO,`HORA CHEGA`, MOD_TRA, MODO_PRONCIPAL, CLASSE, TIPO, TMP_APEO, TMP_APED,
+         FORM_PAG, ESTACION, `FAT_EXP POP`, `FAT_EXP GERAL`)
 
 
 
@@ -225,6 +231,26 @@ od <- od %>%
 
 
 # 3. Tabelas  -------------------------------------------------------------
+
+
+# 3.1. Dados demograficos -------------------------------------------------
+
+Basico_SP2 <- Basico_SP2 %>% 
+  dplyr::filter(Nome_do_municipio == "SÃO JOSÉ DOS CAMPOS")
+
+demografia <- data.frame(Demografia = c("População", "População (%)", "Área da macrozona (km²)",
+                                        "Área da macrozona (%)", "Densidade demográfica (hab/km²"), 
+                                        Centro = "", Sul = "", Leste = "", Oeste = "", Norte = "", 
+                                        Sudeste = "",`Extremo Norte` = " ", Município = " ")
+
+demografia[[1,9]] <- sum(Basico_SP2$V002, na.rm = TRUE)
+
+demografia$Município <- format(round(as.numeric(demografia$Município[1]), 1), big.mark=".")
+
+
+# 3.4. Pesquisa OD --------------------------------------------------------
+
+
 
 od2 <- od %>%
   group_by(CLASSE, TIPO) %>% 
@@ -252,8 +278,9 @@ mean(c3$EXPAN)
 
 od2$`FAT_EXP GERAL` <- od2$`FAT_EXP GERAL`/100
 
-cat_transp <- data.frame(Categorias = c("Transporte individual e não-motorizado", "Transporte individual e motorizado", "Transporte coletivo"),
-                           Viagens = as.numeric(c("421.943", "764.043", "461.307")), Participação = " ")
+cat_transp <- data.frame(Categorias = c("Transporte individual e não-motorizado", 
+                                        "Transporte individual e motorizado", "Transporte coletivo"),
+                         Viagens = as.numeric(c("421.943", "764.043", "461.307")), Participação = " ")
 
 cat_transp$Total <- sum(cat_transp$Viagens)
 
@@ -264,7 +291,4 @@ cat_transp <- cat_transp %>%
 
 
 
-
-
-  
   
