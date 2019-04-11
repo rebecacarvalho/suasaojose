@@ -236,18 +236,23 @@ od <- od %>%
 # 3.1. Dados demograficos -------------------------------------------------
 
 Basico_SP2 <- Basico_SP2 %>% 
-  dplyr::filter(Nome_do_municipio == "SÃO JOSÉ DOS CAMPOS")
+  dplyr::filter(Cod_municipio == 3549904)
 
 demografia <- data.frame(Demografia = c("População", "População (%)", "Área da macrozona (km²)",
                                         "Área da macrozona (%)", "Densidade demográfica (hab/km²"), 
                                         Centro = "", Sul = "", Leste = "", Oeste = "", Norte = "", 
                                         Sudeste = "",`Extremo Norte` = " ", Município = " ")
 
-demografia[[1,9]] <- sum(Basico_SP2$V002, na.rm = TRUE)
+sum(Basico_SP2$V002, na.rm = TRUE)
 
 demografia$Município <- format(round(as.numeric(demografia$Município[1]), 1), big.mark=".")
 
+setor_cen <- Basico_SP2$Cod_setor
 
+t <- Domicilio02_SP2 %>% 
+  filter(Cod_setor %in% setor_cen) 
+
+sum(t$V001)
 # 3.4. Pesquisa OD --------------------------------------------------------
 
 
