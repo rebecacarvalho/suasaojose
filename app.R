@@ -27,12 +27,11 @@ library(shinyWidgets)
 library(shinyjs)
 library(plotly)
 library(DT)
-library(Cepesp)
 
 
 # 1. Data -----------------------------------------------------------------
 
-
+#source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
@@ -46,6 +45,8 @@ ui <- fluidPage(
              
              mainPanel(
                
+               dataTableOutput("table1")
+               
                )))
 
        
@@ -53,7 +54,11 @@ ui <- fluidPage(
 # 3. Server ---------------------------------------------------------------
 
 server <- function(input, output,session){
-}
+  
+  
+  output$table1 <- renderDataTable(cat_transp)
+    
+  }
 
 
 

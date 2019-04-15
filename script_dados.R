@@ -18,12 +18,6 @@ library(lubridate)
 
 # 1.1. Dados demograficos -------------------------------------------------
 
-pop1 <- read_delim("C:/Users/rebeca.carvalho/Downloads/Tabela 4.20.1.1.txt", 
-                              ";", escape_double = FALSE, trim_ws = TRUE)
-
-pop2 <- read_delim("C:/Users/rebeca.carvalho/Downloads/Tabela 4.20.1.2.txt", 
-                              ";", escape_double = FALSE, trim_ws = TRUE)
-
 Basico_SP2 <- read_delim("dados demográficos/Basico_SP2.txt", 
                          ";", escape_double = FALSE, locale = locale(), 
                          trim_ws = TRUE)
@@ -59,7 +53,7 @@ Pessoa01_SP <- read_delim("dados demográficos/Pessoa01_SP.txt",
 Pessoa02_SP <- read_delim("dados demográficos/Pessoa02_SP.txt", 
                           ";", escape_double = FALSE, trim_ws = TRUE)
 
-Pessoa03_SP <- read_delim("dados demográficos/Pessoa031_SP.txt", 
+Pessoa03_SP <- read_delim("dados demográficos/Pessoa03_SP.txt", 
                           ";", escape_double = FALSE, trim_ws = TRUE)
 
 Pessoa04_SP <- read_delim("dados demográficos/Pessoa04_SP.txt", 
@@ -95,13 +89,13 @@ Pessoa13_SP <- read_delim("dados demográficos/Pessoa13_SP.txt",
 PessoaRenda_SP2 <- read_delim("dados demográficos/PessoaRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
-responsavel01_sp2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+responsavel01_sp2 <- read_delim("dados demográficos/responsavel01_sp2.txt", 
                           ";", escape_double = FALSE, trim_ws = TRUE)
 
-responsavel02_sp2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+responsavel02_sp2 <- read_delim("dados demográficos/responsavel02_sp2.txt", 
                           ";", escape_double = FALSE, trim_ws = TRUE)
 
-ResponsavelRenda_SP2 <- read_delim("dados demográficos/Pessoa01_SP.txt", 
+ResponsavelRenda_SP2 <- read_delim("dados demográficos/ResponsavelRenda_SP2.txt", 
                           ";", escape_double = FALSE, trim_ws = TRUE)
 
 
@@ -112,7 +106,7 @@ ResponsavelRenda_SP2 <- read_delim("dados demográficos/Pessoa01_SP.txt",
 matriculasES2011 <- read_delim("censo escolar/Matrículas Ensino Superior 2011/matriculasES2011.txt", 
                                ";", escape_double = FALSE, trim_ws = TRUE)
 
-matriculasES2016 <- read_delim("censo escolar/Matrículas  Ensino Superior - 2016/matriculassjc_ensinosup.txt", 
+matriculasES2016 <- read_delim("censo escolar/Matrículas Ensino Superior - 2016/matriculasES2016.txt", 
                                       ";", escape_double = FALSE, trim_ws = TRUE)
 
 
@@ -238,21 +232,36 @@ od <- od %>%
 Basico_SP2 <- Basico_SP2 %>% 
   dplyr::filter(Cod_municipio == 3549904)
 
+setor_cen <- Basico_SP2$Cod_setor
+
+pop <- Domicilio02_SP2 %>% 
+  filter(Cod_setor %in% setor_cen) 
+
 demografia <- data.frame(Demografia = c("População", "População (%)", "Área da macrozona (km²)",
                                         "Área da macrozona (%)", "Densidade demográfica (hab/km²"), 
                                         Centro = "", Sul = "", Leste = "", Oeste = "", Norte = "", 
-                                        Sudeste = "",`Extremo Norte` = " ", Município = " ")
+                                        Sudeste = "",`Extremo Norte` = " ", Município = c(sum(pop$V001), " 100", " 2", "2", "2"))
 
-sum(Basico_SP2$V002, na.rm = TRUE)
 
-demografia$Município <- format(round(as.numeric(demografia$Município[1]), 1), big.mark=".")
+#demografia$Município <- format(round(as.numeric(demografia$Município[1]), 1), big.mark=".")
 
-setor_cen <- Basico_SP2$Cod_setor
 
-t <- Domicilio02_SP2 %>% 
-  filter(Cod_setor %in% setor_cen) 
+bairro <- Basico_SP2 %>% 
+  dplyr::group_by(Nome_do_bairro) %>% 
+  summarise(
+    n = n())
 
-sum(t$V001)
+bairro <- left_join(bairro, pop, by = "Nome_do_bairro") 
+
+bairro <- bairro %>% 
+  select(Cod_setor, Nome_do_bairro, Situacao_setor, V001) %>% 
+  group_by(Nome_do_bairro) %>% 
+  summarise(
+    soma = sum(V001)
+  )
+
+
+
 # 3.4. Pesquisa OD --------------------------------------------------------
 
 
