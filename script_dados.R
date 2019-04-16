@@ -10,6 +10,10 @@ library(readr)
 library(dplyr)
 library(tidyverse)
 library(lubridate)
+library(maptools)
+library(rgdal)
+library(sf)
+
 
 
 # 1. Dados ----------------------------------------------------------------
@@ -247,11 +251,11 @@ demografia <- data.frame(Demografia = c("População", "População (%)", "Área
 
 
 bairro <- Basico_SP2 %>% 
-  dplyr::group_by(Nome_do_bairro) %>% 
+  dplyr::group_by(Cod_setor, Nome_do_bairro) %>% 
   summarise(
     n = n())
 
-bairro <- left_join(bairro, pop, by = "Nome_do_bairro") 
+bairro <- left_join(bairro, pop, by = "Cod_setor") 
 
 bairro <- bairro %>% 
   select(Cod_setor, Nome_do_bairro, Situacao_setor, V001) %>% 
@@ -260,7 +264,16 @@ bairro <- bairro %>%
     soma = sum(V001)
   )
 
+t <- readShapePoly("dados demográficos/setor_censitario_sjc_shp")
 
+t <- as.data.frame(rgdal::readOGR("dados demográficos/setor_censitario_sjc.shp"))
+
+t2 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.dbf"))
+
+t3 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.shx"))
+
+
+coordinates(t2)
 
 # 3.4. Pesquisa OD --------------------------------------------------------
 
