@@ -227,6 +227,9 @@ od <- od %>%
 
 # 2.5. Linhas -------------------------------------------------------------
 
+linhas$NOME <- str_to_title(linhas$NOME) 
+
+linhas <- rename(linhas, "Nome" = "NOME")
 
 # 3. Tabelas  -------------------------------------------------------------
 
@@ -264,7 +267,6 @@ bairro <- bairro %>%
     soma = sum(V001)
   )
 
-t <- readShapePoly("dados demográficos/setor_censitario_sjc_shp")
 
 t <- as.data.frame(rgdal::readOGR("dados demográficos/setor_censitario_sjc.shp"))
 
@@ -273,7 +275,6 @@ t2 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.dbf"))
 t3 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.shx"))
 
 
-coordinates(t2)
 
 # 3.4. Pesquisa OD --------------------------------------------------------
 
