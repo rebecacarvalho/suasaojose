@@ -10,7 +10,6 @@ rm(list = ls())
 
 library(cepespR)
 library(knitr)
-library(plyr)
 library(tidyverse)
 library(lubridate)
 library(shiny)
@@ -86,8 +85,8 @@ ui <- fluidPage(
                        br(),
                        br(),
                        br(),
-                       dataTableOutput("linhas"),
-                       plotOutput("plot")))),
+                       #dataTableOutput("linhas"),
+                       plotlyOutput("plot")))),
             
             tabPanel("Sobre")
        ))
@@ -157,30 +156,38 @@ output$linhas <- renderDataTable({
 # 4.2.2. Linhas -----------------------------------------------------------
 
 
-output$plot <- renderPlot({
+output$plot <- renderPlotly({
   
-linhas$Valor <- sample(seq(10,100), 103, replace=T)
-linhas$Id <- seq(1,103)
-empty_bar <- 4
-to_add <- data.frame(matrix(NA, empty_bar* nlevels(linhas$Empresa), ncol(linhas)))
-colnames(to_add) <- colnames(linhas)
-to_add$Empresa <- rep(levels(linhas$Empresa), each=empty_bar)
-linhas <- rbind(linhas, to_add)
-linhas <- linhas %>% 
-  arrange(Empresa)
-linhas$Id <- seq(1, nrow(linhas))
+linhas$Valor <- sample(seq(10,100), 111, replace=T)
+linhas$Id <- seq(1,111)
 
-colnames(linhas)
 
 label_data <- linhas
 number_of_bar <- nrow(label_data)
-angle= 90 - 360 * (label_data$Id-0.5) /number_of_bar
+angle <-  90 - 360 * (label_data$Id-0.5) /number_of_bar     
 label_data$hjust <-ifelse( angle < -90, 1, 0)
 label_data$angle <-ifelse(angle < -90, angle+180, angle)
 
+base_data <- linhas %>% 
+  group_by(Empresa) %>% 
+  summarize(start=min(Id), end=max(Id) - empty_bar) %>% 
+  rowwise() %>% 
+  mutate(title = mean(c(start, end)))
 
-p = ggplot(linhas, aes(x=Id, y = Valor, fill = Empresa)) +
-  geom_bar(stat="identity", alpha = 0.5) +
+grid_data <- base_data
+grid_data$end <- grid_data$end[ c( nrow(grid_data), 1:nrow(grid_data)-1)] + 1
+grid_data$start <- grid_data$start - 1
+grid_data <- grid_data[-1,]
+
+
+p = ggplot(linhas, aes(x=Id, y=Valor, fill=Empresa)) +
+  geom_bar(aes(x=as.factor(Id), y=Valor, fill=Empresa), stat="identity", alpha=0.5) +
+  geom_segment(data = grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data = grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data = grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data = grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  annotate("text", x = rep(max(linhas$Id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  geom_bar(aes(x=Id, y=Valor, fill=Empresa), stat="identity", alpha=0.5) +
   ylim(-100,120) +
   theme_minimal() +
   theme(
@@ -188,16 +195,24 @@ p = ggplot(linhas, aes(x=Id, y = Valor, fill = Empresa)) +
     axis.text = element_blank(),
     axis.title = element_blank(),
     panel.grid = element_blank(),
-    plot.margin = unit(rep(-1,4), "cm")   
+    plot.margin = unit(rep(-1,4), "cm") 
   ) +
-  coord_polar(start = 0) +
-  geom_text(data=label_data, aes(x=Id, y=Valor+10, label=Id, hjust=hjust), 
-            color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE )
+  coord_polar() + 
+  geom_text(data =label_data, aes(x=Id, y=Valor+10, label=Nome, hjust = hjust), 
+            color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
+  geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
+  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE)
 
-print(p)
+p
 
 })
 
+glimpse(linhas)
+
+
+grid_data$end <- as.numeric(grid_data$end)
+
+glimpse(grid_data)
 
 }
 # 5. ShinyApp -------------------------------------------------------------
