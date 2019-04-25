@@ -66,7 +66,7 @@ ui <- fluidPage(
                        sidebarPanel(h4("Opções"),width = 3,
                                     
                                     
-                                    checkboxGroupInput(inputId = "INDICADOR_CAR",
+                                    checkboxGroupInput(inputId = "INDICADOR_TR",
                                                        label = "Escolha um indicador:", 
                                                        choices = c("Linhas", "Categorias de transporte", "Distribuição modal 
                                                                    por motivo da viagem", "Distribuição modal por gênero", 
@@ -81,12 +81,8 @@ ui <- fluidPage(
                       
                        absolutePanel(top = 0, right = 0, left = 100),
                        dataTableOutput("categorias"),
-                       br(),
-                       br(),
-                       br(),
-                       br(),
-                       #dataTableOutput("linhas"),
-                       plotlyOutput("plot")))),
+                       dataTableOutput("linhas"),
+                       plotOutput("plot")))),
             
             tabPanel("Sobre")
        ))
@@ -116,16 +112,17 @@ server <- function(input, output,session){
 # 3.2. Transportes --------------------------------------------------------
 # 3.2.1. Pesquisa OD --------------------------------------------------------
 
-output$categorias <- renderDataTable(cat_transp)
+output$categorias <- DT::renderDataTable(
+  bcategorias()
+)
 
 # 3.2.2. Linhas -------------------------------------------------------------
 
 
 
-output$linhas <- renderDataTable({
-  linhas %>% 
-    select(Código, Nome, Empresa)
-})  
+output$linhas <- DT::renderDataTable(
+  blinhas()
+  )  
   
 
 
@@ -156,11 +153,12 @@ output$linhas <- renderDataTable({
 # 4.2.2. Linhas -----------------------------------------------------------
 
 
-output$plot <- renderPlotly({
+output$plot <- renderPlot({
   
 linhas$Valor <- sample(seq(10,100), 111, replace=T)
 linhas$Id <- seq(1,111)
 
+empty_bar <- 4
 
 label_data <- linhas
 number_of_bar <- nrow(label_data)
@@ -186,7 +184,7 @@ p = ggplot(linhas, aes(x=Id, y=Valor, fill=Empresa)) +
   geom_segment(data = grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   geom_segment(data = grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   geom_segment(data = grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  annotate("text", x = rep(max(linhas$Id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  annotate("text", x = rep(max(linhas$Id),4), y = c(20, 40, 60, 80) , label = c(20,40,60,80), color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
   geom_bar(aes(x=Id, y=Valor, fill=Empresa), stat="identity", alpha=0.5) +
   ylim(-100,120) +
   theme_minimal() +
@@ -198,24 +196,50 @@ p = ggplot(linhas, aes(x=Id, y=Valor, fill=Empresa)) +
     plot.margin = unit(rep(-1,4), "cm") 
   ) +
   coord_polar() + 
-  geom_text(data =label_data, aes(x=Id, y=Valor+10, label=Nome, hjust = hjust), 
+  geom_text(data =label_data, aes(x=Id, y=Valor+10, label=CE, hjust = hjust, na.rm = TRUE), 
             color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
   geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
-  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE)
+  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", na.rm = TRUE, inherit.aes = FALSE)
 
 p
 
 })
 
-glimpse(linhas)
 
 
-grid_data$end <- as.numeric(grid_data$end)
 
-glimpse(grid_data)
+
+
+# 5. Botao de acao --------------------------------------------------------
+
+bcategorias <- eventReactive(input$BA2, {
+  datatable({
+    caracteristicas <- input$INDICADOR_CAR
+    transportes <- input$INDICADOR_TR
+    if(transportes == "Categorias de transporte"){
+      cat_transp
+    }
+    
+  })
+  
+})
+  
+  
+  blinhas <- eventReactive(input$BA2, {
+    datatable({
+      caracteristicas <- input$INDICADOR_CAR
+      transportes <- input$INDICADOR_TR
+      if(transportes == "Linhas"){
+        linhas %>% 
+          select(Código, Nome, Empresa) 
+      }
+      
+    })
+})
 
 }
-# 5. ShinyApp -------------------------------------------------------------
+
+# 6. ShinyApp -------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
 
