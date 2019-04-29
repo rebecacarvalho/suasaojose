@@ -275,6 +275,31 @@ t2 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.dbf"))
 t3 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.shx"))
 
 
+# 3.2. Dados escolares ----------------------------------------------------
+
+matriculas <- data.frame(Ano = c("2013","2018"), `Nível de Ensino`= c("Ensino Básico", "Ensino Superior"), 
+                         Centro = "", Sul = "", Leste = "", Oeste = "", Norte = "", Sudeste = "",
+                         `Extremo Norte` = " ", Município = c(156496,30852 ))                                                                                                                            
+
+
+
+
+
+count(matriculasEB2018)
+count(matriculasES2016)
+
+# 3.3. RAIS ---------------------------------------------------------------
+
+empregos <- data.frame(Ano = c("2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"), `Administração pública` = "", Agricultura = "",
+                       `Alimentos e bebidas` = "", Comércio = "", `Construção civil` = "",
+                       Educação = "", Serviços = " ", `Transporte e comunicação` = "")
+
+table(estab_2010$`SUBS IBGE`)
+
+estab_2010 <- estab_2010 %>% 
+  
+  
+?recode
 
 # 3.4. Pesquisa OD --------------------------------------------------------
 
@@ -319,4 +344,3 @@ cat_transp <- cat_transp %>%
 
 
 
-  
