@@ -126,20 +126,30 @@ matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/
 
 
 estab_2010 <- read_csv("RAIS/estab_2010.txt")
+estab_2010$Ano <- 2010
 
 estab_2011 <- read_csv("RAIS/estab_2011.txt")
+estab_2011$Ano <- 2011
 
 estab_2012 <- read_csv("RAIS/estab_2012.txt")
+estab_2012$Ano <- 2012
 
 estab_2013 <- read_csv("RAIS/estab_2013.txt")
+estab_2013$Ano <- 2013
 
 estab_2014 <- read_csv("RAIS/estab_2014.txt")
+estab_2014$Ano <- 2014
 
 estab_2015 <- read_csv("RAIS/estab_2015.txt")
+estab_2015$Ano <- 2015
 
 estab_2016 <- read_csv("RAIS/estab_2016.txt")
+estab_2016$Ano <- 2016
 
 estab_2017 <- read_csv("RAIS/estab_2017.txt")
+estab_2017$Ano <- 2017
+
+ibge_sub <- read_delim("RAIS/ibge_sub.txt",";", escape_double = FALSE, trim_ws = TRUE)
 
 
 
@@ -174,6 +184,7 @@ linhas <- read_delim("linhas/LInhas.txt", ";",
 
 
 
+
 # 2. Limpeza e organizacao dos dados --------------------------------------
 
 
@@ -190,8 +201,82 @@ glimpse(Basico_SP2)
 
 # 2.2. Dados escolares ----------------------------------------------------
 
+# Ensino Basico
+
+matriculasEB2013 <- matriculasEB2013 %>% 
+  select(X1, pk_cod_matricula, lon, lat) %>% 
+  rename( "Ano do censo" = "X1","Código da matrícula" = "pk_cod_matricula", "Longitude" = "lon", "Latitude" = "lat") 
+
+
+matriculasEB2018 <- matriculasEB2018 %>% 
+  select(nu_ano_censo,id_matricula, lon, lat) %>% 
+  rename("Ano do censo" = "nu_ano_censo","Código da matrícula" = "id_matricula", "Longitude" = "lon", "Latitude" = "lat")
+
+matriculas_bas <- bind_rows(matriculasEB2013, matriculasEB2018)
+
+matriculas_bas$`Nível de ensino` <- "Básico"
+
+# Ensino Superior
+
+matriculasES2011$`Ano do censo` <- 2011
+
+matriculasES2011 <- matriculasES2011 %>% 
+  select(`Ano do censo`, co_aluno, lon, lat) %>% 
+  rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
+
+
+matriculasES2016$`Ano do censo` <- 2016
+
+matriculasES2016 <- matriculasES2016 %>% 
+  select(`Ano do censo`, co_aluno, lon, lat) %>% 
+  rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
+
+matriculas_sup <- bind_rows(matriculasES2011, matriculasES2016)
+
+matriculas_sup$`Nível de ensino` <- "Superior"
+
+
+matriculas <- bind_rows(matriculas_bas, matriculas_sup)
+
 
 # 2.3. RAIS ---------------------------------------------------------------
+
+estab_2010 <- estab_2010 %>%
+  select(Ano, CEP,`SUBS IBGE`, trabalhadores) %>% 
+   rename("CEP Estab" = "CEP", "IBGE Subsetor" = "SUBS IBGE", "Trabalhadores" = "trabalhadores")
+
+estab_2011 <- estab_2011 %>%
+  select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+
+estab_2012 <- estab_2012 %>%
+  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+
+estab_2013 <- estab_2013 %>%
+  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+
+estab_2014 <- estab_2014 %>%
+  select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+
+estab_2015 <- estab_2015 %>%
+  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+
+estab_2016 <- estab_2016 %>%
+  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+
+estab_2017 <- estab_2017 %>%
+  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+
+estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014, 
+                          estab_2015, estab_2016, estab_2017))
+
+estab_anos <- left_join(estab_anos, ibge_sub, by = "Código")
 
 
 # 2.4. Pesquisa OD --------------------------------------------------------
@@ -231,8 +316,10 @@ linhas$NOME <- str_to_title(linhas$NOME)
 
 linhas <- rename(linhas, "Nome" = "NOME")
 
+
 # 3. Tabelas  -------------------------------------------------------------
 
+# Secao para confeccao das tabelas do shinyApp
 
 # 3.1. Dados demograficos -------------------------------------------------
 
@@ -268,42 +355,29 @@ bairro <- bairro %>%
   )
 
 
-t <- as.data.frame(rgdal::readOGR("dados demográficos/setor_censitario_sjc.shp"))
-
-t2 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.dbf"))
-
-t3 <- as.data.frame(sf::st_read("dados demográficos/setor_censitario_sjc.shx"))
-
-
 # 3.2. Dados escolares ----------------------------------------------------
 
-matriculas <- data.frame(Ano = c("2013","2018"), `Nível de Ensino`= c("Ensino Básico", "Ensino Superior"), 
-                         Centro = "", Sul = "", Leste = "", Oeste = "", Norte = "", Sudeste = "",
-                         `Extremo Norte` = " ", Município = c(156496,30852 ))                                                                                                                            
+matriculas <- matriculas %>% 
+  group_by(`Ano do censo`, `Nível de ensino`) %>% 
+  count() %>% 
+  distinct() %>% 
+  na.omit()                                                                                                                
 
 
-
-
-
-count(matriculasEB2018)
-count(matriculasES2016)
 
 # 3.3. RAIS ---------------------------------------------------------------
 
-empregos <- data.frame(Ano = c("2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017"), `Administração pública` = "", Agricultura = "",
-                       `Alimentos e bebidas` = "", Comércio = "", `Construção civil` = "",
-                       Educação = "", Serviços = " ", `Transporte e comunicação` = "")
+empregos <- estab_anos %>% 
+  group_by(Ano, `IBGE Subsetor`) %>% 
+  summarise(
+    `Nº de trabalhadores` = sum(Trabalhadores)
+  ) %>% 
+  na.omit()
 
-table(estab_2010$`SUBS IBGE`)
-
-estab_2010 <- estab_2010 %>% 
-  
-  
-?recode
 
 # 3.4. Pesquisa OD --------------------------------------------------------
 
-
+# Categorias de transporte
 
 od2 <- od %>%
   group_by(CLASSE, TIPO) %>% 
@@ -342,5 +416,17 @@ cat_transp$Participação <- round(cat_transp$Viagens * 100/cat_transp$Total, 2)
 cat_transp <- cat_transp %>% 
   select(Categorias, Viagens, Participação)
 
+# Média de viagens por modo e faixa de renda
+
+viagens <- od2 %>% 
+  group_by(MOD_TRA, RENDA) %>% 
+  summarise(
+    n = n(),
+    Média = mean(n/24988)
+  )
+
+sum(viagens$n)
+
+# 3.5. Linhas -------------------------------------------------------------
 
 
