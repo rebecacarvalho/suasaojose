@@ -30,7 +30,7 @@ library(DT)
 
 # 1. Data -----------------------------------------------------------------
 
-source("script_dados.R", encoding = "UTF-8")
+#source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
@@ -57,7 +57,8 @@ ui <- fluidPage(
                      ),
                      mainPanel(
                        
-                       absolutePanel(top = 0, right = 0, left = 100)))),
+                       absolutePanel(top = 0, right = 0, left = 100),
+                       dataTableOutput("demografia")))),
             
             tabPanel("Transportes",
                      
@@ -80,9 +81,16 @@ ui <- fluidPage(
                      mainPanel(
                       
                        absolutePanel(top = 0, right = 0, left = 100),
+                       tags$style(type = "text/css",
+                                  ".dataTables_filter, .dataTables_info { display: none; }",
+                                  ".dataTable( {'lengthChange': false});"),
                        dataTableOutput("categorias"),
+                       br(),
+                       br(),
                        dataTableOutput("linhas"),
-                       plotOutput("plot")))),
+                       plotlyOutput("modal"),
+                       plotlyOutput("modal_genero"),
+                       plotlyOutput("viagens_modo")))),
             
             tabPanel("Sobre")
        ))
@@ -98,7 +106,10 @@ server <- function(input, output,session){
   
 # 3.1.1. Dados demograficos -------------------------------------------------
 
-
+  output$demografia <- DT::renderDataTable(
+    bdemografia()
+  )
+  
 
 
 # 3.1.2. Dados escolares ---------------------------------------------------
@@ -148,6 +159,26 @@ output$linhas <- DT::renderDataTable(
 
 # 4.2.1. Pesquisa OD ------------------------------------------------------
 
+# Distribuicao modal por motivo da viagem
+
+output$modal <- renderPlotly(
+  bm_modal()
+ )
+
+# Distribuicao modal por genero
+
+output$modal_genero <- renderPlotly(
+  bg_modal()
+)
+
+
+# Media de viagens por modal
+
+
+output$viagens_modo <- renderPlotly({
+  bv_modal()
+    
+  })
 
 
 # 4.2.2. Linhas -----------------------------------------------------------
@@ -199,7 +230,8 @@ p = ggplot(linhas, aes(x=Id, y=Valor, fill=Empresa)) +
   geom_text(data =label_data, aes(x=Id, y=Valor+10, label=CE, hjust = hjust, na.rm = TRUE), 
             color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
   geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
-  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", na.rm = TRUE, inherit.aes = FALSE)
+  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", 
+            na.rm = TRUE, inherit.aes = FALSE)
 
 p
 
@@ -212,11 +244,27 @@ p
 
 # 5. Botao de acao --------------------------------------------------------
 
-bcategorias <- eventReactive(input$BA2, {
+
+# 5.1. Caracterizacao do municipio ----------------------------------------
+
+bdemografia <- eventReactive(input$BA1, {
   datatable({
-    caracteristicas <- input$INDICADOR_CAR
-    transportes <- input$INDICADOR_TR
-    if(transportes == "Categorias de transporte"){
+    if("Demografia" %in% input$INDICADOR_CAR){
+      demografia
+    }
+    
+  })
+  
+})
+
+
+# 5.2. Transportes --------------------------------------------------------
+
+# Categorias de transporte
+
+  bcategorias <- eventReactive(input$BA2, {
+    datatable({
+    if("Categorias de transporte" %in% input$INDICADOR_TR){
       cat_transp
     }
     
@@ -224,16 +272,68 @@ bcategorias <- eventReactive(input$BA2, {
   
 })
   
+# Distribuicao modal por motivo da viagem
   
+  
+    bm_modal <- eventReactive(input$BA2, {
+    ggplotly( 
+         ggplot(data = modal_motivo, aes(MOD_TRA, n, fill = O_MOTIVO)) +
+            geom_bar(stat = "identity") +
+            coord_flip()+
+            labs(
+              title = "Distribuição modal por motivo da viagem",
+            fill = "Motivo da viagem"
+            )+
+           xlab("Modo de transporte") +
+           ylab("Número de viagens") +
+            theme(
+              plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  })
+  
+# Distribuicao modal por genero
+    
+    bg_modal <- eventReactive(input$BA2, {
+      ggplotly(
+        ggplot(data = modal_genero, aes(MOD_TRA, n, fill = SEXO)) +
+        geom_bar(stat = "identity") +
+        coord_flip()+
+        labs(
+          title = "Distribuição modal por gênero",
+          fill = "Gênero")+
+          xlab("Modo de transporte") +
+          ylab("Número de viagens") +
+        theme(
+          plot.title = element_text(hjust = 0.5),
+         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+    })
+    
+    
+    
+# Media de viagens por modal
+    
+    bv_modal <- eventReactive(input$BA2, {
+     ggplotly(
+       ggplot(data = viagens, aes(MOD_TRA, Média)) +
+          geom_bar(stat = "identity", fill = "blue", alpha = 0.5)+
+          coord_flip()+
+          labs(
+            title = "Média de viagens por modal")+
+          xlab("Modo de transporte") +
+          theme(
+            plot.title = element_text(hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+      })
+    
+        
+# Linhas
+   
   blinhas <- eventReactive(input$BA2, {
     datatable({
-      caracteristicas <- input$INDICADOR_CAR
-      transportes <- input$INDICADOR_TR
-      if(transportes == "Linhas"){
+      if("Linhas" %in% input$INDICADOR_TR){
         linhas %>% 
           select(Código, Nome, Empresa) 
       }
-      
     })
 })
 
