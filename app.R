@@ -69,9 +69,9 @@ ui <- fluidPage(
                                     
                                     checkboxGroupInput(inputId = "INDICADOR_TR",
                                                        label = "Escolha um indicador:", 
-                                                       choices = c("Linhas", "Categorias de transporte", "Distribuição modal 
-                                                                   por motivo da viagem", "Distribuição modal por gênero", 
-                                                                   "Média de viagens por faixa de renda", "Média de viagens por modal")),
+                                                       choices = c("Linhas", "Categorias de transporte", "Distribuição modal por motivo da viagem",
+                                                                   "Distribuição modal por gênero", "Média de viagens por faixa de renda", 
+                                                                   "Média de viagens por modal")),
                                     
                                     actionButton(inputId = "BA2",
                                                  label = strong("Atualizar"),
@@ -84,13 +84,12 @@ ui <- fluidPage(
                        tags$style(type = "text/css",
                                   ".dataTables_filter, .dataTables_info { display: none; }",
                                   ".dataTable( {'lengthChange': false});"),
-                       dataTableOutput("categorias"),
-                       br(),
-                       br(),
-                       dataTableOutput("linhas"),
-                       plotlyOutput("modal"),
+                       plotlyOutput("viagens_renda"),
+                       plotlyOutput("viagens_modo"),
+                       plotlyOutput("modal"), 
                        plotlyOutput("modal_genero"),
-                       plotlyOutput("viagens_modo")))),
+                       dataTableOutput("categorias"),
+                       dataTableOutput("linhas")))),
             
             tabPanel("Sobre")
        ))
@@ -121,6 +120,8 @@ server <- function(input, output,session){
   
   
 # 3.2. Transportes --------------------------------------------------------
+  
+  
 # 3.2.1. Pesquisa OD --------------------------------------------------------
 
 output$categorias <- DT::renderDataTable(
@@ -135,7 +136,6 @@ output$linhas <- DT::renderDataTable(
   blinhas()
   )  
   
-
 
 
 
@@ -170,6 +170,13 @@ output$modal <- renderPlotly(
 output$modal_genero <- renderPlotly(
   bg_modal()
 )
+
+# Media de viagens por faixa de renda
+
+output$viagens_renda <- renderPlotly({
+  br_modal()
+  
+})
 
 
 # Media de viagens por modal
@@ -275,25 +282,27 @@ bdemografia <- eventReactive(input$BA1, {
 # Distribuicao modal por motivo da viagem
   
   
-    bm_modal <- eventReactive(input$BA2, {
-    ggplotly( 
+   bm_modal <- eventReactive(input$BA2, {
+      if("Distribuição modal por motivo da viagem" %in% input$INDICADOR_TR){
+      ggplotly( 
          ggplot(data = modal_motivo, aes(MOD_TRA, n, fill = O_MOTIVO)) +
-            geom_bar(stat = "identity") +
-            coord_flip()+
-            labs(
-              title = "Distribuição modal por motivo da viagem",
-            fill = "Motivo da viagem"
-            )+
+         geom_bar(stat = "identity") +
+         coord_flip()+
+         labs(
+           title = "Distribuição modal por motivo da viagem",
+           fill = "Motivo da viagem")+
            xlab("Modo de transporte") +
            ylab("Número de viagens") +
-            theme(
-              plot.title = element_text(hjust = 0.5),
-              axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+          theme(
+            plot.title = element_text(hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  }      
   })
   
 # Distribuicao modal por genero
     
     bg_modal <- eventReactive(input$BA2, {
+      if("Distribuição modal por gênero" %in% input$INDICADOR_TR){
       ggplotly(
         ggplot(data = modal_genero, aes(MOD_TRA, n, fill = SEXO)) +
         geom_bar(stat = "identity") +
@@ -305,25 +314,48 @@ bdemografia <- eventReactive(input$BA1, {
           ylab("Número de viagens") +
         theme(
           plot.title = element_text(hjust = 0.5),
-         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+    }    
     })
     
+# Media de viagens por faixa de renda
+    
+    br_modal <- eventReactive(input$BA2, {
+      if("Média de viagens por faixa de renda" %in% input$INDICADOR_TR){
+        ggplotly(
+          ggplot(data = renda, aes(MOD_TRA, Média, fill = Renda)) +
+            geom_bar(stat = "identity") +
+            coord_flip()+
+            labs(
+              title = "Média de viagens por faixa de renda",
+              fill = "Faixa de renda")+
+            xlab("Modo de transporte") +
+            ylab("Média de viagens") +
+            theme(
+              plot.title = element_text(hjust = 0.5),
+              axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+      }    
+    })  
     
     
 # Media de viagens por modal
     
-    bv_modal <- eventReactive(input$BA2, {
-     ggplotly(
-       ggplot(data = viagens, aes(MOD_TRA, Média)) +
-          geom_bar(stat = "identity", fill = "blue", alpha = 0.5)+
-          coord_flip()+
-          labs(
-            title = "Média de viagens por modal")+
-          xlab("Modo de transporte") +
-          theme(
-            plot.title = element_text(hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
-      })
+    
+    
+  bv_modal <- eventReactive(input$BA2, {
+    if("Média de viagens por modal" %in% input$INDICADOR_TR){
+    ggplotly(
+     ggplot(data = viagens, aes(MOD_TRA, Média)) +
+        geom_bar(stat = "identity", fill = "blue", alpha = 0.5)+
+        coord_flip()+
+        labs(
+        title = "Média de viagens por modal")+
+        xlab("Modo de transporte") +
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+    }
+    })
     
         
 # Linhas
@@ -333,11 +365,10 @@ bdemografia <- eventReactive(input$BA1, {
       if("Linhas" %in% input$INDICADOR_TR){
         linhas %>% 
           select(Código, Nome, Empresa) 
-      }
+    }
     })
-})
-
-}
+    })
+    }
 
 # 6. ShinyApp -------------------------------------------------------------
 

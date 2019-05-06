@@ -161,7 +161,7 @@ domicilios <- read_delim("dados OD/domicilios.txt",
                              "\t", escape_double = FALSE, trim_ws = TRUE)
 
 pessoas <- read_delim("dados OD/pessoas.txt", 
-                            "\t", escape_double = FALSE, trim_ws = TRUE)
+                                 ";", escape_double = FALSE, trim_ws = TRUE)
 
 viagens <- read_delim("dados OD/viagens.txt", 
                               "\t", escape_double = FALSE, trim_ws = TRUE)
@@ -357,12 +357,6 @@ bairro <- bairro %>%
   )
 
 
-p1 <- sf::read_sf("dados demográficos/setor_censitario_sjc.shx")
-
-p2 <- as.data.frame(readOGR("dados demográficos/setor_censitario_sjc.shx", encoding = "UTF-8"))
-
-
-
 
 # 3.2. Dados escolares ----------------------------------------------------
 
@@ -455,11 +449,28 @@ viagens <- od2 %>%
 # Media de viagens por faixa de renda
 
 renda <- od2 %>% 
-  group_by(RENDA) %>% 
+  group_by(MOD_TRA, RENDA) %>% 
   summarise(
     n = n(),
     Média = mean(n/24988)
-  )
+  ) %>% 
+  na.omit()
+
+
+renda$Renda <- NA
+renda$RENDA <- as.numeric(renda$RENDA)
+
+renda$Renda[renda$RENDA <= 545] <- "Até 1 salário mínimo"
+renda$Renda[renda$RENDA > 545 & renda$RENDA <= 1635] <- "Até 3 salários mínimos"
+renda$Renda[renda$RENDA > 1635 & renda$RENDA <= 5450] <- "Entre 3 e 10 salários mínimos"
+renda$Renda[renda$RENDA > 5450 & renda$RENDA <= 10900] <- "Entre 10 e 20 salários mínimos"
+renda$Renda[renda$RENDA > 10900] <- "Acima de 20 salários mínimos"
+
+
+ renda <- na.omit(renda)                     
+                      
+  
+ 
 
 # 3.5. Linhas -------------------------------------------------------------
 
