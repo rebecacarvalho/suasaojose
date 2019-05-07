@@ -26,7 +26,7 @@ library(shinyWidgets)
 library(shinyjs)
 library(plotly)
 library(DT)
-
+library(scales)
 
 # 1. Data -----------------------------------------------------------------
 
@@ -53,12 +53,13 @@ ui <- fluidPage(
                                     
                                     actionButton(inputId = "BA1",
                                                  label = strong("Atualizar"),
-                                                 width = "95%")
+                                                 width = "100%")
                      ),
                      mainPanel(
                        
                        absolutePanel(top = 0, right = 0, left = 100),
-                       dataTableOutput("demografia")))),
+                       dataTableOutput("demografia", width = "100%"),
+                       plotlyOutput("matriculas", width = "100%")))),
             
             tabPanel("Transportes",
                      
@@ -75,7 +76,7 @@ ui <- fluidPage(
                                     
                                     actionButton(inputId = "BA2",
                                                  label = strong("Atualizar"),
-                                                 width = "95%")
+                                                 width = "100%")
                                     
                      ), 
                      mainPanel(
@@ -84,12 +85,12 @@ ui <- fluidPage(
                        tags$style(type = "text/css",
                                   ".dataTables_filter, .dataTables_info { display: none; }",
                                   ".dataTable( {'lengthChange': false});"),
-                       plotlyOutput("viagens_renda"),
-                       plotlyOutput("viagens_modo"),
-                       plotlyOutput("modal"), 
-                       plotlyOutput("modal_genero"),
+                       plotlyOutput("linhas"),
                        dataTableOutput("categorias"),
-                       dataTableOutput("linhas")))),
+                       plotlyOutput("modal"),
+                       plotlyOutput("modal_genero"),
+                       plotlyOutput("viagens_renda"),
+                       plotlyOutput("viagens_modo")))),
             
             tabPanel("Sobre")
        ))
@@ -150,6 +151,9 @@ output$linhas <- DT::renderDataTable(
 
 # 4.1.2. Dados escolares --------------------------------------------------
 
+output$matriculas <- renderPlotly(
+  bmatriculas()
+ )
 
 # 4.1.3. RAIS -------------------------------------------------------------
 
@@ -191,58 +195,9 @@ output$viagens_modo <- renderPlotly({
 # 4.2.2. Linhas -----------------------------------------------------------
 
 
-output$plot <- renderPlot({
-  
-linhas$Valor <- sample(seq(10,100), 111, replace=T)
-linhas$Id <- seq(1,111)
-
-empty_bar <- 4
-
-label_data <- linhas
-number_of_bar <- nrow(label_data)
-angle <-  90 - 360 * (label_data$Id-0.5) /number_of_bar     
-label_data$hjust <-ifelse( angle < -90, 1, 0)
-label_data$angle <-ifelse(angle < -90, angle+180, angle)
-
-base_data <- linhas %>% 
-  group_by(Empresa) %>% 
-  summarize(start=min(Id), end=max(Id) - empty_bar) %>% 
-  rowwise() %>% 
-  mutate(title = mean(c(start, end)))
-
-grid_data <- base_data
-grid_data$end <- grid_data$end[ c( nrow(grid_data), 1:nrow(grid_data)-1)] + 1
-grid_data$start <- grid_data$start - 1
-grid_data <- grid_data[-1,]
-
-
-p = ggplot(linhas, aes(x=Id, y=Valor, fill=Empresa)) +
-  geom_bar(aes(x=as.factor(Id), y=Valor, fill=Empresa), stat="identity", alpha=0.5) +
-  geom_segment(data = grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data = grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data = grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data = grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  annotate("text", x = rep(max(linhas$Id),4), y = c(20, 40, 60, 80) , label = c(20,40,60,80), color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
-  geom_bar(aes(x=Id, y=Valor, fill=Empresa), stat="identity", alpha=0.5) +
-  ylim(-100,120) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    axis.text = element_blank(),
-    axis.title = element_blank(),
-    panel.grid = element_blank(),
-    plot.margin = unit(rep(-1,4), "cm") 
-  ) +
-  coord_polar() + 
-  geom_text(data =label_data, aes(x=Id, y=Valor+10, label=CE, hjust = hjust, na.rm = TRUE), 
-            color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
-  geom_segment(data = base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
-  geom_text(data = base_data, aes(x = title, y = -18, label=Empresa), hjust=c(0,1,1,1), colour = "black", alpha=0.8, size=4, fontface="bold", 
-            na.rm = TRUE, inherit.aes = FALSE)
-
-p
-
-})
+output$linhas <- renderPlotly(
+  blinhas()
+  )
 
 
 
@@ -254,6 +209,8 @@ p
 
 # 5.1. Caracterizacao do municipio ----------------------------------------
 
+# Demografia
+
 bdemografia <- eventReactive(input$BA1, {
   datatable({
     if("Demografia" %in% input$INDICADOR_CAR){
@@ -264,8 +221,53 @@ bdemografia <- eventReactive(input$BA1, {
   
 })
 
+# Matriculas
+
+bmatriculas <- eventReactive(input$BA1, {
+  if("Matrícula por nível de ensino" %in% input$INDICADOR_CAR){
+    ggplotly( 
+      ggplot(data = matriculas, aes(MacroZona, n, fill = `Nível de ensino`)) +
+        geom_bar(stat = "identity", position = "fill") +
+        scale_y_continuous(labels = percent_format()) +
+        coord_flip()+
+        labs(
+          title = "Matrículas por nível de ensino",
+          fill = "Nível de ensino")+
+        xlab("Macrozona") +
+        ylab("Porcentagem de matrículas") +
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  }      
+})
+
+
 
 # 5.2. Transportes --------------------------------------------------------
+
+# Linhas
+
+blinhas <- eventReactive(input$BA2, {
+  if("Linhas" %in% input$INDICADOR_TR){
+    ggplotly(
+      plot_ly(linhas, labels = ~Nome, values = ~CE, type = 'pie',
+              textposition = 'inside',
+              textinfo = 'label',
+              insidetextfont = list(color = '#FFFFFF'),
+              hoverinfo = 'text',
+              text = ~paste(Nome),
+              marker = list(colors = ~Empresa,
+                            line = list(color = '#FFFFFF', width = 1)),
+              showlegend = FALSE) %>%
+        layout(title = 'Linhas',
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
+      
+  }
+  })
+      
+
 
 # Categorias de transporte
 
@@ -285,35 +287,41 @@ bdemografia <- eventReactive(input$BA1, {
    bm_modal <- eventReactive(input$BA2, {
       if("Distribuição modal por motivo da viagem" %in% input$INDICADOR_TR){
       ggplotly( 
-         ggplot(data = modal_motivo, aes(MOD_TRA, n, fill = O_MOTIVO)) +
-         geom_bar(stat = "identity") +
+         ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo)) +
+         geom_bar(stat = "identity", position = "fill") +
+         scale_y_continuous(labels = percent_format()) + 
          coord_flip()+
          labs(
            title = "Distribuição modal por motivo da viagem",
            fill = "Motivo da viagem")+
            xlab("Modo de transporte") +
-           ylab("Número de viagens") +
+           ylab("Porcentagem de viagens") +
           theme(
             plot.title = element_text(hjust = 0.5),
+            panel.background = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   }      
   })
+   
+   
   
 # Distribuicao modal por genero
     
     bg_modal <- eventReactive(input$BA2, {
       if("Distribuição modal por gênero" %in% input$INDICADOR_TR){
       ggplotly(
-        ggplot(data = modal_genero, aes(MOD_TRA, n, fill = SEXO)) +
-        geom_bar(stat = "identity") +
+        ggplot(data = modal_genero, aes(`Modo de transporte`, n, fill = SEXO)) +
+        geom_bar(stat = "identity", position = "fill") +
+        scale_y_continuous(labels = percent_format()) +
         coord_flip()+
         labs(
           title = "Distribuição modal por gênero",
           fill = "Gênero")+
           xlab("Modo de transporte") +
-          ylab("Número de viagens") +
+          ylab("Porcentagem de viagens") +
         theme(
           plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
     }    
     })
@@ -323,9 +331,11 @@ bdemografia <- eventReactive(input$BA1, {
     br_modal <- eventReactive(input$BA2, {
       if("Média de viagens por faixa de renda" %in% input$INDICADOR_TR){
         ggplotly(
-          ggplot(data = renda, aes(MOD_TRA, Média, fill = Renda)) +
-            geom_bar(stat = "identity") +
+          ggplot(data = renda, aes(`Modo de transporte`, Média, fill = Renda)) +
+            geom_bar(stat = "identity", position = "fill") +
+            scale_y_continuous(labels = percent_format()) +
             coord_flip()+
+            theme_classic() +
             labs(
               title = "Média de viagens por faixa de renda",
               fill = "Faixa de renda")+
@@ -333,6 +343,7 @@ bdemografia <- eventReactive(input$BA1, {
             ylab("Média de viagens") +
             theme(
               plot.title = element_text(hjust = 0.5),
+              panel.background = element_blank(),
               axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
       }    
     })  
@@ -345,18 +356,15 @@ bdemografia <- eventReactive(input$BA1, {
   bv_modal <- eventReactive(input$BA2, {
     if("Média de viagens por modal" %in% input$INDICADOR_TR){
     ggplotly(
-     ggplot(data = viagens, aes(MOD_TRA, Média)) +
-        geom_bar(stat = "identity", fill = "blue", alpha = 0.5)+
-        coord_flip()+
-        labs(
-        title = "Média de viagens por modal")+
-        xlab("Modo de transporte") +
-        theme(
-          plot.title = element_text(hjust = 0.5),
-          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
-    }
-    })
-    
+     plot_ly(viagens, labels = ~`Modo de transporte`, values = ~Média, type = "pie") %>% 
+        layout(title = "Média de viagens por modal",
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
+     }
+     })
+  
+  ?layout
+  
         
 # Linhas
    

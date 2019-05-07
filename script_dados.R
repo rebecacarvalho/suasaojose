@@ -36,21 +36,6 @@ Domicilio02_SP2 <- read_delim("dados demográficos/Domicilio02_SP2.txt",
 DomicilioRenda_SP2 <- read_delim("dados demográficos/DomicilioRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
-Entorno01_SP2 <- read_delim("dados demográficos/Entorno01_SP2.txt", 
-                              ";", escape_double = FALSE, trim_ws = TRUE)
-
-Entorno02_SP2 <- read_delim("dados demográficos/Entorno02_SP2.txt", 
-                            ";", escape_double = FALSE, trim_ws = TRUE)
-
-Entorno03_SP2 <- read_delim("dados demográficos/Entorno03_SP2.txt", 
-                            ";", escape_double = FALSE, trim_ws = TRUE)
-
-Entorno04_SP2 <- read_delim("dados demográficos/Entorno04_SP2.txt", 
-                            ";", escape_double = FALSE, trim_ws = TRUE)
-
-Entorno05_SP2 <- read_delim("dados demográficos/Entorno05_SP2.txt", 
-                            ";", escape_double = FALSE, trim_ws = TRUE)
-
 Pessoa01_SP <- read_delim("dados demográficos/Pessoa01_SP.txt", 
                             ";", escape_double = FALSE, trim_ws = TRUE)
 
@@ -107,20 +92,15 @@ ResponsavelRenda_SP2 <- read_delim("dados demográficos/ResponsavelRenda_SP2.txt
 
 
 
-matriculasES2011 <- read_delim("censo escolar/Matrículas Ensino Superior 2011/matriculasES2011.txt", 
-                               ";", escape_double = FALSE, trim_ws = TRUE)
-
 matriculasES2016 <- read_delim("censo escolar/Matrículas Ensino Superior - 2016/matriculasES2016.txt", 
                                       ";", escape_double = FALSE, trim_ws = TRUE)
-
-
-matriculasEB2013 <- read_delim("censo escolar/Matrículas Ensino Básico - 2013/matriculasEB2013.txt", 
-                               ";", escape_double = FALSE, trim_ws = TRUE)
 
 
 matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/matriculasEB2018.txt", 
                                ";", escape_double = FALSE, trim_ws = TRUE)
 
+lat_lon <- read_delim("~/cepesp/cepesp_mobilidadeSJC/censo escolar/lat_lon.txt", 
+                      ";", escape_double = FALSE, trim_ws = TRUE)
 
 # 1.3. RAIS ---------------------------------------------------------------
 
@@ -203,40 +183,34 @@ glimpse(Basico_SP2)
 
 # Ensino Basico
 
-matriculasEB2013 <- matriculasEB2013 %>% 
-  select(X1, pk_cod_matricula, lon, lat) %>% 
-  rename( "Ano do censo" = "X1","Código da matrícula" = "pk_cod_matricula", "Longitude" = "lon", "Latitude" = "lat") 
-
-
-matriculasEB2018 <- matriculasEB2018 %>% 
+matriculas_bas <- matriculasEB2018 %>% 
   select(nu_ano_censo,id_matricula, lon, lat) %>% 
   rename("Ano do censo" = "nu_ano_censo","Código da matrícula" = "id_matricula", "Longitude" = "lon", "Latitude" = "lat")
-
-matriculas_bas <- bind_rows(matriculasEB2013, matriculasEB2018)
 
 matriculas_bas$`Nível de ensino` <- "Básico"
 
 # Ensino Superior
 
-matriculasES2011$`Ano do censo` <- 2011
-
-matriculasES2011 <- matriculasES2011 %>% 
-  select(`Ano do censo`, co_aluno, lon, lat) %>% 
-  rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
-
-
 matriculasES2016$`Ano do censo` <- 2016
 
-matriculasES2016 <- matriculasES2016 %>% 
+matriculas_sup <- matriculasES2016 %>% 
   select(`Ano do censo`, co_aluno, lon, lat) %>% 
   rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
 
-matriculas_sup <- bind_rows(matriculasES2011, matriculasES2016)
 
 matriculas_sup$`Nível de ensino` <- "Superior"
 
+# Banco unico de matriculas
+
+lat_lon <- lat_lon %>% 
+  rename("Latitude" = "lat", "Longitude" = "lon")
+
+matriculas_bas <- left_join(matriculas_bas, lat_lon, by = c("Longitude", "Latitude"))
+
+matriculas_sup <- left_join(matriculas_sup, lat_lon, by = c("Longitude", "Latitude"))
 
 matriculas <- bind_rows(matriculas_bas, matriculas_sup)
+
 
 
 # 2.3. RAIS ---------------------------------------------------------------
@@ -361,7 +335,7 @@ bairro <- bairro %>%
 # 3.2. Dados escolares ----------------------------------------------------
 
 matriculas <- matriculas %>% 
-  group_by(`Ano do censo`, `Nível de ensino`) %>% 
+  group_by(`Ano do censo`, `Nível de ensino`, MacroZona) %>% 
   count() %>% 
   distinct() %>% 
   na.omit()                                                                                                                
@@ -419,10 +393,44 @@ cat_transp$Participação <- round(cat_transp$Viagens * 100/cat_transp$Total, 2)
 cat_transp <- cat_transp %>% 
   select(Categorias, Viagens, Participação)
 
-# Distribuicao modal por motivo da viagem
+ od2$Motivo <- NA    
+ od2$Motivo[od2$O_MOTIVO == "Estudo (Outros)"] <- "Estudo"
+ od2$Motivo[od2$O_MOTIVO == "Estudo (Regular)"] <- "Estudo"
+ od2$Motivo[od2$O_MOTIVO == "Transportar passag. p/ estudo"] <- "Estudo"
+ od2$Motivo[od2$O_MOTIVO == "Estudo"] <- "Estudo"
+ od2$Motivo[od2$O_MOTIVO == "Compras"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Assuntos Pessoais"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Assuntos Pessoais"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Lazer"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Saúde"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Outros"] <- "Outros"
+ od2$Motivo[od2$O_MOTIVO == "Transportar passag. p/ trabalho"] <- "Trabalho"
+ od2$Motivo[od2$O_MOTIVO == "Trabalho"] <- "Trabalho"
+ od2$Motivo[od2$O_MOTIVO == "Residência"] <- "Residência"
+
+ 
+ od2$`Modo de transporte` <- NA
+ od2$`Modo de transporte`[od2$MOD_TRA == "A pé"] <- "A pé"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Bicicleta"] <- "Bicicleta"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Lotação"] <- "Ônibus municipal"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Ônibus Municipal"] <- "Ônibus municipal"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Ônibus Executivo"] <- "Transporte fretado"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Transp. Fretado"] <- "Transporte fretado"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Transp. Escolar"] <- "Transporte escolar"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Motocicleta"] <- "Motocicleta"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Táxi"] <- "Outros"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Caminhão"] <- "Outros"
+ od2$`Modo de transporte`[od2$MOD_TRA == "ônibus Intermunicipal"] <- "Outros"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Condutor de Auto"] <- "Automóvel"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Passag de auto"] <- "Automóvel"
+ od2$`Modo de transporte`[od2$MOD_TRA == "Outros"] <- "Outros"
+ 
+ 
+
+ # Distribuicao modal por motivo da viagem
 
 modal_motivo <- od2 %>% 
-  group_by(O_MOTIVO, MOD_TRA) %>% 
+  group_by(Motivo, `Modo de transporte`) %>% 
   summarise(
     n = n()
   )
@@ -430,7 +438,7 @@ modal_motivo <- od2 %>%
 # Distribuicao modal por genero
 
 modal_genero <- od2 %>% 
-  group_by(SEXO, MOD_TRA) %>% 
+  group_by(SEXO, `Modo de transporte`) %>% 
   summarise(
     n = n()
   ) %>% 
@@ -440,7 +448,7 @@ modal_genero <- od2 %>%
 # Media de viagens por modo
 
 viagens <- od2 %>% 
-  group_by(MOD_TRA) %>% 
+  group_by(`Modo de transporte`) %>% 
   summarise(
     n = n(),
     Média = mean(n/24988)
@@ -449,7 +457,7 @@ viagens <- od2 %>%
 # Media de viagens por faixa de renda
 
 renda <- od2 %>% 
-  group_by(MOD_TRA, RENDA) %>% 
+  group_by(`Modo de transporte`, RENDA) %>% 
   summarise(
     n = n(),
     Média = mean(n/24988)
