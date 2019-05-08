@@ -85,12 +85,12 @@ ui <- fluidPage(
                        tags$style(type = "text/css",
                                   ".dataTables_filter, .dataTables_info { display: none; }",
                                   ".dataTable( {'lengthChange': false});"),
-                       plotlyOutput("linhas"),
+                       plotlyOutput("linhas", height = "900px"),
                        dataTableOutput("categorias"),
                        plotlyOutput("modal"),
                        plotlyOutput("modal_genero"),
                        plotlyOutput("viagens_renda"),
-                       plotlyOutput("viagens_modo")))),
+                       plotlyOutput("viagens_modo", height = "900px")))),
             
             tabPanel("Sobre")
        ))
@@ -131,12 +131,6 @@ output$categorias <- DT::renderDataTable(
 
 # 3.2.2. Linhas -------------------------------------------------------------
 
-
-
-output$linhas <- DT::renderDataTable(
-  blinhas()
-  )  
-  
 
 
 
@@ -196,7 +190,7 @@ output$viagens_modo <- renderPlotly({
 
 
 output$linhas <- renderPlotly(
-  blinhas()
+  b_linhas()
   )
 
 
@@ -248,30 +242,22 @@ bmatriculas <- eventReactive(input$BA1, {
 
 # Linhas
 
-blinhas <- eventReactive(input$BA2, {
-  if("Linhas" %in% input$INDICADOR_TR){
-    ggplotly(
-      plot_ly(linhas, labels = ~Nome, values = ~CE, type = 'pie',
-              textposition = 'inside',
-              textinfo = 'label',
-              insidetextfont = list(color = '#FFFFFF'),
-              hoverinfo = 'text',
-              text = ~paste(Nome),
-              marker = list(colors = ~Empresa,
-                            line = list(color = '#FFFFFF', width = 1)),
-              showlegend = FALSE) %>%
-        layout(title = 'Linhas',
-               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
+    b_linhas <- eventReactive(input$BA2, {
+      if("Linhas" %in% input$INDICADOR_TR){
+      ggplotly(
+       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst'
+            ) %>% 
+         layout(title = "Linhas"))
       
   }
   })
       
 
+?plot_ly
 
 # Categorias de transporte
 
-  bcategorias <- eventReactive(input$BA2, {
+    bcategorias <- eventReactive(input$BA2, {
     datatable({
     if("Categorias de transporte" %in% input$INDICADOR_TR){
       cat_transp
@@ -284,7 +270,7 @@ blinhas <- eventReactive(input$BA2, {
 # Distribuicao modal por motivo da viagem
   
   
-   bm_modal <- eventReactive(input$BA2, {
+    bm_modal <- eventReactive(input$BA2, {
       if("Distribuição modal por motivo da viagem" %in% input$INDICADOR_TR){
       ggplotly( 
          ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo)) +
@@ -363,7 +349,6 @@ blinhas <- eventReactive(input$BA2, {
      }
      })
   
-  ?layout
   
         
 # Linhas
