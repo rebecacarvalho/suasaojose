@@ -8,26 +8,19 @@ rm(list = ls())
 
 # Pacotes utilizados
 
-library(cepespR)
 library(knitr)
 library(tidyverse)
-library(lubridate)
 library(shiny)
-library(shinyalert)
-library(shinyBS)
 library(ggplot2)
-library(shiny)
 library(readr)
 library(shiny)
 library(shinythemes)
 library(magrittr)
-library(shinydashboard)
-library(shinyWidgets)
-library(shinyjs)
 library(plotly)
 library(DT)
 library(scales)
-library(viridis)
+
+
 
 # 1. Data -----------------------------------------------------------------
 
@@ -196,9 +189,6 @@ output$linhas <- renderPlotly(
 
 
 
-
-
-
 # 5. Botao de acao --------------------------------------------------------
 
 
@@ -223,7 +213,7 @@ bdemografia <- eventReactive(input$BA1, {
 bmatriculas <- eventReactive(input$BA1, {
   if("Matrícula por nível de ensino" %in% input$INDICADOR_CAR){
     ggplotly( 
-      ggplot(data = matriculas, aes(MacroZona, n, fill = `Nível de ensino`)) +
+      ggplot(data = matriculas, aes(`Nível de ensino`, n, fill = MacroZona)) +
         geom_bar(stat = "identity", position = "fill") +
         scale_y_continuous(labels = percent_format()) +
         coord_flip()+
@@ -249,7 +239,8 @@ bmatriculas <- eventReactive(input$BA1, {
     b_linhas <- eventReactive(input$BA2, {
       if("Linhas" %in% input$INDICADOR_TR){
       ggplotly(
-       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst') %>% 
+       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst', colors = paleta,
+               hovertext = ~nomes)%>%
          layout(title = "Linhas"))
       
   }
@@ -357,6 +348,7 @@ bmatriculas <- eventReactive(input$BA1, {
             panel.background = element_blank(),
             legend.title = element_blank(),
             legend.position = "none",
+            
             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   }    
   })

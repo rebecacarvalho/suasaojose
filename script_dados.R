@@ -13,6 +13,9 @@ library(lubridate)
 library(maptools)
 library(rgdal)
 library(sf)
+library(reticulate)
+library(berryFunctions)
+library(photon)
 
 
 
@@ -99,7 +102,7 @@ matriculasES2016 <- read_delim("censo escolar/Matrículas Ensino Superior - 2016
 matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/matriculasEB2018.txt", 
                                ";", escape_double = FALSE, trim_ws = TRUE)
 
-lat_lon <- read_delim("~/cepesp/cepesp_mobilidadeSJC/censo escolar/lat_lon.txt", 
+lat_lon <- read_delim("censo escolar/lat_lon.txt", 
                       ";", escape_double = FALSE, trim_ws = TRUE)
 
 # 1.3. RAIS ---------------------------------------------------------------
@@ -155,12 +158,9 @@ zonas <- read_delim("dados OD/zonas.txt",
 
 
 
-linhas <- read_delim("linhas/LInhas.txt", ";", 
+linhas <- read_delim("linhas/linhas.txt", ";", 
                      escape_double = FALSE, col_types = cols(X5 = col_skip()), 
                      trim_ws = TRUE)
-
-
-
 
 
 
@@ -253,6 +253,12 @@ estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014,
 estab_anos <- left_join(estab_anos, ibge_sub, by = "Código")
 
 
+# Localizacao dos CEPS
+
+p <- po
+
+
+
 # 2.4. Pesquisa OD --------------------------------------------------------
 
 
@@ -293,101 +299,44 @@ linhas <- rename(linhas, "Nome" = "NOME")
 linhas2 <- data.frame(
   ids = c(
     "CS Brasil", "Expresso Maringá", "Saens Peña", 
-    "CS Brasil - Costinha / Terminal Central",
-    "Vargem Grande / Terminal Central", "Canindu - Vl. Cândida / Terminal Central",
-    "Vl. Terezinha / Cta", "Taquari / Rodoviária", "Sertãozinho – Via Vila Cândida / Terminal Central",
-    "Buquirinha Ii / João Guilhermino", "Parque Tecnológico / Terminal Central","Bairrinho / Terminal Central",
-    "Bom Retiro / Terminal Central", "Eugenio De Melo - Galo Branco / Praça Afonso Pena", 
-    "Jd. Califórnia - Via Vista Verde / Santana – Via Vl. Cristina","Tesouro / Aquárius",
-    "Santa Maria - Av. Tancredo Neves / Av. Eng. Francisco José Longo", "Galo Branco / Jd. Aquárius", 
-    "Galo Branco / Av. São José - Semi Expressa", "Tesouro / Vl. Dirce", "Novo Horizonte / Av. São José",
-    "Novo Horizonte / Aquárius", "Novo Horizonte / Campo dos Alemães", "Majestic / Praça Afonso Pena", 
-    "Santa Maria - Jd. São José - Coqueiro / Av. Eng. Francisco José Longo", "Jd. São José - Frei Galvão - Santa Inês / Terminal Central",
-    "Praça 1º De Maio / Centro", "Alimentadora Paineiras - Dom Bosco - Santa Helena / Tancredo Neves", "Novo Horizonte Corujão", 
-    "Eugênio De Melo Corujão", "São Francisco Xavier / Cachoeira Do Roncador", "Cachoeira Do Roncador / São José Dos Campos",
-    "Novo Horizonte - Pedro Álvares Cabral / Terminal Central", "CS Brasil- Novo Horizonte / Av. Eng. Francisco José Longo", 
-    "Santa Inês - Pedro Álvares Cabral / Terminal Central", 
-    "CS Brasil - Santa Inês / Av. Eng. Francisco José Longo",  
-    "Expresso Maringá - Aeroporto / Terminal Central",  "Jd. Uirá / Terminal Central","Diamante / Terminal Central",
-    "Putim - Av. Dos Astronautas / Terminal Central",  "Santa Luzia / Terminal Central",  
-    "Res. São Francisco / Centro - Direto",  "Jd. Uirá Corujão", "Putim Tamoios / Praça Afonso Pena",
-    "São Judas Tadeu / Terminal Central",  "Morumbi / Terminal Central",  "Res. União / Terminal Central",
-    "Pq. Interlagos / Terminal Central", "Torrão de Ouro / Terminal Central",  "Campo dos Alemães / Rodoviária",
-    "Dom Pedro I / Terminal Central",  "Dom Pedro I / Rodoviária",  "Capuava / Terminal Central",
-    "Campo dos Alemães / Terminal Central",  "Bq. dos Ipês - Jd. Sul / Satélite",  "Corredor Sul 1",
-    "Jd. Santa Rosa – Via São Judas e Colinas / Terminal Central",  "Jd. São Judas Tadeu / Terminal Central via Tecnasa",
-    "Vila Adriana - Emha Ii / Praça Afonso Pena",  "Alimentadora Pousada do Vale / Eco Campos de São José",
-    "Alimentadora Serrote / Eco Campos de São José",  "Alimentadora Mariana Ii / Santa Cecília Ii",
-    "Petrobrás - Marginal Dutra / Praça Afonso Pena", "Alimentadora Monterrey / Eco Campos de São José",
-    "Colonial Corujão",  "Recanto Dos Eucaliptos / Res. Flamboyant",  "Bosque Dos Eucaliptos - Andrômeda / Terminal Central",
-    "Bosque dos Eucaliptos - Ouro Fino / Terminal Central", "Eco Campos de São José / Terminal Central - Semiexpressa",
-    "Eco Campos de São José / Av. Eng. Francisco José Longo",  "Eco Campos de São José / Terminal Central",
-    "Expresso Maringá - Eco Campos de São José / Av. Eng. Francisco José Longo",
-    "Saens Peña - Represa / Terminal Central", 
-    "Jaguari / Terminal Central", "Bairro dos Freitas / Av. Eng. Francisco José Longo",
-    "Vl. Paiva / Av. Eng. Francisco José Longo", "Vale dos Pinheiros / Monte Castelo", "Vl. Dirce - Altos De Santana / Av. Eng. Francisco José Longo",
-    "Morumbi / Aquárius", "Colonial / Aquárius", "Urbanova - Esplanada / Terminal Central", "Altos de Santana / Pq. Industrial", 
-    "Minas Gerais / Jd. Augusta", "Buquirinha - Vl. Dirce / Aquárius", "Urbanova - Colinas / Terminal Central", "Alimentadora Nova República - Vl. Das Flores / Colonial",
-    "Vale dos Pinheiros / Terminal Central", "Colonial- Vl. das Flores- Vl. São Bento / Rodoviária", "Corredor Norte 1", 
-    "Alimentadora Bairro São João - Sobrado / Caetê", "Corredor Sul 2", "Vl. Paiva Corujão", "Tesouro - Sebastião Gualberto / Av. Eng. Francisco José Longo", 
-    "Tesouro / Colonial", "Integração Zona Sul - Colonial / Ch. Reunidas", "Colonial / Rodoviária", "Colonial / Praça Afonso Pena",
-    "Limoeiro - Dutra / Terminal Central", "Pq. Industrial / Rodoviária", "Limoeiro / Praça Afonso Pena", "Aquárius - Colinas / Terminal Central", 
-    "Ch. Reunidas / Terminal Central", "Pq. Industrial - Jd. das Indústrias / Praça Afonso Pena", "Res. União / Praça Afonso Pena", 
-    "Saens Peña - Campo dos Alemães / Aquárius"
+    "CS Brasil - 103", "104", "108", "112", "116", "118", "124", "200", "201", "202", "205", "211", "215",
+    "216", "222", "225", "231", "232", "237", "240", "242", "243", "244", "245", "246", "250", "251", "130A",
+    "130B", "204A", "204B", "206A", "CS Brasil - 206B",  
+    "Expresso Maringá - 208", "209", "210", "212", "219", "229", "252", "302", "305", "307", "310", "315", "316",
+    "317", "318", "319", "322","323", "325", "330", "333", "334", "335", "342", "343", "344", "345", "347", "349", 
+    "350", "355", "308A", "308OF", "340A", "340B", "341A", "Expresso Maringá - 341B",
+    "Saens Peña - 101", "102", "105", "107", "111", "115", "117", "119", "121", "122", "123", "125", "128", "133",
+    "134", "135", "140", "141", "142", "150", "214", "230", "300", "303", "304", "306", "309", "311", "313", "314",
+    "320", "327", "Saens Peña - 331"
   ),
   labels = c("CS<br>Brasil", "Expresso<br>Maringá", "Saens<br>Peña",
-             "Costinha /<br>Terminal Central","Vargem Grande /<br>Terminal Central", "Canindu - Vl. Cândida /<br>Terminal Central",
-             "Vl. Terezinha /<br>Cta", "Taquari /<br>Rodoviária", "Sertãozinho – Via Vila Cândida /<br>Terminal Central",
-             "Buquirinha Li /<br>João Guilhermino", "Parque Tecnológico /<br>Terminal Central","Bairrinho /<br>Terminal Central",
-             "Bom Retiro /<br>Terminal Central", "Eugenio De Melo - Galo Branco /<br>Praça Afonso Pena", 
-             "Jd. Califórnia - Via Vista Verde /<br>Santana – Via Vl. Cristina","Tesouro /<br>Aquárius",
-             "Santa Maria - Av. Tancredo Neves /<br>Av. Eng. Francisco José Longo", "Galo Branco /<br>Jd. Aquárius", 
-             "Galo Branco /<br>Av. São José - Semi Expressa", "Tesouro /<br>Vl. Dirce", "Novo Horizonte /<br>Av. São José",
-             "Novo Horizonte /<br>Aquárius", "Novo Horizonte /<br>Campo dos Alemães", "Majestic /<br>Praça Afonso Pena", 
-             "Santa Maria - Jd. São José - Coqueiro /<br>Av. Eng. Francisco José Longo", "Jd. São José - Frei Galvão - Santa Inês /<br>Terminal Central",
-             "Praça 1º De Maio /<br>Centro", "Alimentadora Paineiras - Dom Bosco - Santa Helena /<br>Tancredo Neves", "Novo Horizonte Corujão", 
-             "Eugênio De Melo Corujão", "São Francisco Xavier /<br>Cachoeira Do Roncador", "Cachoeira Do Roncador /<br>São José Dos Campos",
-             "Novo Horizonte - Pedro Álvares Cabral / Terminal Central", "CS Brasil- Novo Horizonte / Av. Eng. Francisco José Longo", 
-             "Santa Inês - Pedro Álvares Cabral /<br>Terminal Central", "Santa Inês /<br>Av. Eng. Francisco José Longo",  
-             "Aeroporto /<br>Terminal Central",  "Jd. Uirá /<br>Terminal Central","Diamante /<br>Terminal Central",
-             "Putim - Av. Dos Astronautas /<br>Terminal Central",  "Santa Luzia /<br>Terminal Central",  
-             "Res. São Francisco /<br>Centro - Direto",  "Jd. Uirá Corujão", "Putim Tamoios /<br>Praça Afonso Pena",
-             "São Judas Tadeu /<br>Terminal Central",  "Morumbi /<br>Terminal Central",  "Res. União /<br>Terminal Central",
-             "Pq. Interlagos /<br>Terminal Central", "Torrão de Ouro /<br>Terminal Central",  "Campo dos Alemães /<br>Rodoviária",
-             "Dom Pedro I /<br>Terminal Central",  "Dom Pedro I /<br>Rodoviária",  "Capuava /<br>Terminal Central",
-             "Campo dos Alemães /<br>Terminal Central",  "Bq. dos Ipês - Jd. Sul /<br>Satélite",  "Corredor Sul 1",
-             "Jd. Santa Rosa – Via São Judas e Colinas /<br>Terminal Central",  "Jd. São Judas Tadeu /<br>Terminal Central via Tecnasa",
-             "Vila Adriana - Emha Li /<br>Praça Afonso Pena",  "Alimentadora Pousada do Vale /<br>Eco Campos de São José",
-             "Alimentadora Serrote /<br>Eco Campos de São José",  "Alimentadora Mariana Li /<br>Santa Cecília Li",
-             "Petrobrás - Marginal Dutra /<br>Praça Afonso Pena", "Alimentadora Monterrey /<br>Eco Campos de São José",
-             "Colonial Corujão",  "Recanto Dos Eucaliptos /<br>Res. Flamboyant",  "Bosque Dos Eucaliptos - Andrômeda /<br>Terminal Central",
-             "Bosque dos Eucaliptos - Ouro Fino / Terminal Central", "Eco Campos de São José / Terminal Central - Semiexpressa",
-             "Eco Campos de São José /<br>Av. Eng. Francisco José Longo",  "Eco Campos de São José /<br>Terminal Central",
-             "Eco Campos de São José /<br>Av. Eng. Francisco José Longo",
-             "Represa /<br>Terminal Central", "Jaguari /<br>Terminal Central", "Bairro dos Freitas /<br>Av. Eng. Francisco José Longo",
-             "Vl. Paiva /<br>Av. Eng. Francisco José Longo", "Vale dos Pinheiros /<br>Monte Castelo", "Vl. Dirce - Altos De Santana /<br>Av. Eng. Francisco José Longo",
-             "Morumbi /<br>Aquárius", "Colonial /<br>Aquárius", "Urbanova - Esplanada /<br>Terminal Central", "Altos de Santana /<br>Pq. Industrial", 
-             "Minas Gerais /<br>Jd. Augusta", "Buquirinha - Vl. Dirce /<br>Aquárius", "Urbanova - Colinas /<br>Terminal Central", "Alimentadora Nova República - Vl. das Flores /<br>Colonial",
-             "Vale dos Pinheiros /<br>Terminal Central", "Colonial- Vl. das Flores- Vl. São Bento /<br>Rodoviária", "Corredor Norte 1", 
-             "Alimentadora Bairro São João - Sobrado /<br>Caetê", "Corredor Sul 2", "Vl. Paiva Corujão", "Tesouro - Sebastião Gualberto /<br>Av. Eng. Francisco José Longo", 
-             "Tesouro /<br>Colonial", "Integração Zona Sul - Colonial /<br>Ch. Reunidas", "Colonial /<br>Rodoviária", "Colonial /<br>Praça Afonso Pena",
-             "Limoeiro - Dutra /<br>Terminal Central", "Pq. Industrial /<br>Rodoviária", "Limoeiro /<br>Praça Afonso Pena", "Aquárius - Colinas /<br>Terminal Central", 
-             "Ch. Reunidas /<br>Terminal Central", "Pq. Industrial - Jd. das Indústrias /<br>Praça Afonso Pena", "Res. União /<br>Praça Afonso Pena", "Campo dos Alemães /<br>Aquárius"
+    "103", "104", "108", "112", "116", "118", "124", "200", "201", "202", "205", "211", "215",
+    "216", "222", "225", "231", "232", "237", "240", "242", "243", "244", "245", "246", "250", "251", "130A",
+    "130B", "204A", "204B", "206A", "CS Brasil - 206B",  
+    "Expresso Maringá - 208", "209", "210", "212", "219", "229", "252", "302", "305", "307", "310", "315", "316",
+    "317", "318", "319", "322","323", "325", "330", "333", "334", "335", "342", "343", "344", "345", "347", "349", 
+    "350", "355", "308A", "308OF", "340A", "340B", "341A", "Expresso Maringá - 341B",
+    "Saens Peña - 101", "102", "105", "107", "111", "115", "117", "119", "121", "122", "123", "125", "128", "133",
+    "134", "135", "140", "141", "142", "150", "214", "230", "300", "303", "304", "306", "309", "311", "313", "314",
+    "320", "327", "331"
   ),
-  parents = c("","","","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", 
-              "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  
-              "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", 
-              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá",
-              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
-              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
-              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
-              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá",
-              "Saens Peña", "Saens Peña", "Saens Peña","Saens Peña", 
-              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
-              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
-              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña"
+  parents = c("","","","CS Brasil","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  
+              "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",
+              "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", "CS Brasil", 
+              "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", 
+              "CS Brasil",  "CS Brasil","Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá",
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", 
+              "Expresso Maringá", "Expresso Maringá", "Expresso Maringá", "Saens Peña", "Saens Peña", "Saens Peña","Saens Peña", 
+              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña",
+              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
+              "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
+              "Saens Peña", "Saens Peña"
   ),
-  nomes = c("", "", "",
+  nomes = c("", "","",
             "Costinha / Terminal Central","Vargem Grande / Terminal Central", "Canindu - Vl. Cândida / Terminal Central",
             "Vl. Terezinha / Cta", "Taquari / Rodoviária", "Sertãozinho – Via Vila Cândida / Terminal Central",
             "Buquirinha Ii / João Guilhermino", "Parque Tecnológico / Terminal Central","Bairrinho / Terminal Central",
@@ -399,19 +348,18 @@ linhas2 <- data.frame(
             "Santa Maria - Jd. São José - Coqueiro / Av. Eng. Francisco José Longo", "Jd. São José - Frei Galvão - Santa Inês / Terminal Central",
             "Praça 1º De Maio / Centro", "Alimentadora Paineiras - Dom Bosco - Santa Helena / Tancredo Neves", "Novo Horizonte Corujão", 
             "Eugênio De Melo Corujão", "São Francisco Xavier / Cachoeira Do Roncador", "Cachoeira Do Roncador / São José Dos Campos",
-            "Novo Horizonte - Pedro Álvares Cabral / Terminal Central", "CS Brasil- Novo Horizonte / Av. Eng. Francisco José Longo", 
-            "Santa Inês - Pedro Álvares Cabral / Terminal Central", 
-            "Santa Inês / Av. Eng. Francisco José Longo",  
+            "Novo Horizonte - Pedro Álvares Cabral / Terminal Central", "Novo Horizonte / Av. Eng. Francisco José Longo", 
+            "Santa Inês - Pedro Álvares Cabral / Terminal Central", "Santa Inês / Av. Eng. Francisco José Longo",  
             "Aeroporto / Terminal Central",  "Jd. Uirá / Terminal Central","Diamante / Terminal Central",
             "Putim - Av. Dos Astronautas / Terminal Central",  "Santa Luzia / Terminal Central",  
             "Res. São Francisco / Centro - Direto",  "Jd. Uirá Corujão", "Putim Tamoios / Praça Afonso Pena",
             "São Judas Tadeu / Terminal Central",  "Morumbi / Terminal Central",  "Res. União / Terminal Central",
             "Pq. Interlagos / Terminal Central", "Torrão de Ouro / Terminal Central",  "Campo dos Alemães / Rodoviária",
             "Dom Pedro I / Terminal Central",  "Dom Pedro I / Rodoviária",  "Capuava / Terminal Central",
-            "Campo dos Alemães / Terminal Central",  "Bq. dos Ipês - Jd. Sul / Satélite",  "Corredor Sul 1",
-            "Jd. Santa Rosa – Via São Judas e Colinas / Terminal Central",  "Jd. São Judas Tadeu / Terminal Central via Tecnasa",
+            "Campo dos Alemães / Terminal Central",  "Bosque dos Ipês - Jd. Sul / Satélite",  "Corredor Sul 1",
+            "Jardim Santa Rosa – Via São Judas e Colinas / Terminal Central",  "Jardim São Judas Tadeu / Terminal Central via Tecnasa",
             "Vila Adriana - Emha Ii / Praça Afonso Pena",  "Alimentadora Pousada do Vale / Eco Campos de São José",
-            "Alimentadora Serrote / Eco Campos de São José",  "Alimentadora Mariana Ii / Santa Cecília Ii",
+            "Alimentadora Serrote / Eco Campos de São José", "Alimentadora Campos De São José / Eco Campos De São José", "Alimentadora Mariana Ii / Santa Cecília Ii",
             "Petrobrás - Marginal Dutra / Praça Afonso Pena", "Alimentadora Monterrey / Eco Campos de São José",
             "Colonial Corujão",  "Recanto Dos Eucaliptos / Res. Flamboyant",  "Bosque Dos Eucaliptos - Andrômeda / Terminal Central",
             "Bosque dos Eucaliptos - Ouro Fino / Terminal Central", "Eco Campos de São José / Terminal Central - Semiexpressa",
@@ -431,6 +379,7 @@ linhas2 <- data.frame(
   ),
   stringsAsFactors = FALSE
 )
+
 
 
 
@@ -601,11 +550,7 @@ viagens <- od2 %>%
 
 renda <- od2 %>% 
   group_by(`Modo de transporte`, RENDA) %>% 
-  summarise(
-    n = n(),
-    Média = mean(n/24988)
-  ) %>% 
-  na.omit()
+  count()
 
 
 renda$Renda <- NA
@@ -618,7 +563,14 @@ renda$Renda[renda$RENDA > 5450 & renda$RENDA <= 10900] <- "Entre 10 e 20 salári
 renda$Renda[renda$RENDA > 10900] <- "Acima de 20 salários mínimos"
 
 
- renda <- na.omit(renda)                     
+
+renda <- renda %>% 
+  group_by(`Modo de transporte`, Renda) %>% 
+  summarise(
+    Média = mean(n)
+  ) %>% 
+  na.omit()
+   
                       
   
  
