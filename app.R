@@ -27,6 +27,7 @@ library(shinyjs)
 library(plotly)
 library(DT)
 library(scales)
+library(viridis)
 
 # 1. Data -----------------------------------------------------------------
 
@@ -201,6 +202,8 @@ output$linhas <- renderPlotly(
 # 5. Botao de acao --------------------------------------------------------
 
 
+paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#C56416", "#008FD6")
+
 # 5.1. Caracterizacao do municipio ----------------------------------------
 
 # Demografia
@@ -229,6 +232,7 @@ bmatriculas <- eventReactive(input$BA1, {
           fill = "Nível de ensino")+
         xlab("Macrozona") +
         ylab("Porcentagem de matrículas") +
+        scale_fill_manual(values = paleta)+
         theme(
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
@@ -245,15 +249,12 @@ bmatriculas <- eventReactive(input$BA1, {
     b_linhas <- eventReactive(input$BA2, {
       if("Linhas" %in% input$INDICADOR_TR){
       ggplotly(
-       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst'
-            ) %>% 
+       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst') %>% 
          layout(title = "Linhas"))
       
   }
   })
       
-
-?plot_ly
 
 # Categorias de transporte
 
@@ -282,6 +283,7 @@ bmatriculas <- eventReactive(input$BA1, {
            fill = "Motivo da viagem")+
            xlab("Modo de transporte") +
            ylab("Porcentagem de viagens") +
+           scale_fill_manual(values = paleta)+
           theme(
             plot.title = element_text(hjust = 0.5),
             panel.background = element_blank(),
@@ -305,6 +307,7 @@ bmatriculas <- eventReactive(input$BA1, {
           fill = "Gênero")+
           xlab("Modo de transporte") +
           ylab("Porcentagem de viagens") +
+          scale_fill_manual(values = paleta)+
         theme(
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
@@ -321,47 +324,43 @@ bmatriculas <- eventReactive(input$BA1, {
             geom_bar(stat = "identity", position = "fill") +
             scale_y_continuous(labels = percent_format()) +
             coord_flip()+
-            theme_classic() +
             labs(
               title = "Média de viagens por faixa de renda",
               fill = "Faixa de renda")+
             xlab("Modo de transporte") +
             ylab("Média de viagens") +
+            scale_fill_manual(values = paleta)+ 
             theme(
               plot.title = element_text(hjust = 0.5),
               panel.background = element_blank(),
               axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
-      }    
+    }    
     })  
     
     
 # Media de viagens por modal
     
     
-    
   bv_modal <- eventReactive(input$BA2, {
     if("Média de viagens por modal" %in% input$INDICADOR_TR){
     ggplotly(
-     plot_ly(viagens, labels = ~`Modo de transporte`, values = ~Média, type = "pie") %>% 
-        layout(title = "Média de viagens por modal",
-               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
-     }
-     })
-  
-  
-        
-# Linhas
-   
-  blinhas <- eventReactive(input$BA2, {
-    datatable({
-      if("Linhas" %in% input$INDICADOR_TR){
-        linhas %>% 
-          select(Código, Nome, Empresa) 
-    }
-    })
-    })
-    }
+        ggplot(data = viagens, aes(`Modo de transporte`, y = Média, fill = paleta)) +
+          geom_bar(stat = "identity") +
+          coord_flip()+
+          labs(
+            title = "Média de viagens por modal")+
+          xlab("Modo de transporte") +
+          ylab("Média de viagens") +
+          scale_fill_manual(values = paleta)+
+          theme(
+            plot.title = element_text(hjust = 0.5),
+            panel.background = element_blank(),
+            legend.title = element_blank(),
+            legend.position = "none",
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  }    
+  })
+  }
 
 # 6. ShinyApp -------------------------------------------------------------
 
