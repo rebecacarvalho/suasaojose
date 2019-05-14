@@ -2,24 +2,21 @@
 # Titulo: Dados SJC
 # Autor: Rebeca Carvalho
 
-rm(list = ls())
 
 # Pacotes utilizados
+
 
 library(readr)
 library(dplyr)
 library(tidyverse)
 library(lubridate)
-library(maptools)
-library(rgdal)
-library(sf)
-library(reticulate)
-library(berryFunctions)
-library(photon)
 
 
 
 # 1. Dados ----------------------------------------------------------------
+
+options(encoding = "UTF-8")
+parse(encoding = "UTF-8")
 
 # Secao para importacao dos dados
 
@@ -39,67 +36,16 @@ Domicilio02_SP2 <- read_delim("dados demográficos/Domicilio02_SP2.txt",
 DomicilioRenda_SP2 <- read_delim("dados demográficos/DomicilioRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
-Pessoa01_SP <- read_delim("dados demográficos/Pessoa01_SP.txt", 
-                            ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa02_SP <- read_delim("dados demográficos/Pessoa02_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa03_SP <- read_delim("dados demográficos/Pessoa03_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa04_SP <- read_delim("dados demográficos/Pessoa04_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa05_SP <- read_delim("dados demográficos/Pessoa05_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa06_SP <- read_delim("dados demográficos/Pessoa06_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa07_SP <- read_delim("dados demográficos/Pessoa07_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa08_SP <- read_delim("dados demográficos/Pessoa08_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa09_SP <- read_delim("dados demográficos/Pessoa09_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa10_SP <- read_delim("dados demográficos/Pessoa10_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa11_SP <- read_delim("dados demográficos/Pessoa11_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa12_SP <- read_delim("dados demográficos/Pessoa12_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-Pessoa13_SP <- read_delim("dados demográficos/Pessoa13_SP.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-PessoaRenda_SP2 <- read_delim("dados demográficos/PessoaRenda_SP2.txt", 
-                              ";", escape_double = FALSE, trim_ws = TRUE)
-
-responsavel01_sp2 <- read_delim("dados demográficos/responsavel01_sp2.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-responsavel02_sp2 <- read_delim("dados demográficos/responsavel02_sp2.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
-ResponsavelRenda_SP2 <- read_delim("dados demográficos/ResponsavelRenda_SP2.txt", 
-                          ";", escape_double = FALSE, trim_ws = TRUE)
-
 
 # 1.2. Dados escolares ----------------------------------------------------
 
 
 
-matriculasES2016 <- read_delim("censo escolar/Matrículas Ensino Superior - 2016/matriculasES2016.txt", 
+matriculasES2016 <- read_delim("censo escolar/matriculasES2016.txt", 
                                       ";", escape_double = FALSE, trim_ws = TRUE)
 
 
-matriculasEB2018 <- read_delim("censo escolar/Matrículas Ensino Básico - 2018/matriculasEB2018.txt", 
+matriculasEB2018 <- read_delim("censo escolar/matriculasEB2018.txt", 
                                ";", escape_double = FALSE, trim_ws = TRUE)
 
 lat_lon <- read_delim("censo escolar/lat_lon.txt", 
@@ -177,15 +123,14 @@ linhas <- read_delim("linhas/linhas.txt", ";",
 Basico_SP2$V002 <- as.numeric(Basico_SP2$V002)
 
 
-glimpse(Basico_SP2)
 
 # 2.2. Dados escolares ----------------------------------------------------
 
 # Ensino Basico
 
 matriculas_bas <- matriculasEB2018 %>% 
-  select(nu_ano_censo,id_matricula, lon, lat) %>% 
-  rename("Ano do censo" = "nu_ano_censo","Código da matrícula" = "id_matricula", "Longitude" = "lon", "Latitude" = "lat")
+  dplyr::select(nu_ano_censo,id_matricula, lon, lat) %>% 
+  dplyr::rename("Ano do censo" = "nu_ano_censo","Código da matrícula" = "id_matricula", "Longitude" = "lon", "Latitude" = "lat")
 
 matriculas_bas$`Nível de ensino` <- "Básico"
 
@@ -194,8 +139,8 @@ matriculas_bas$`Nível de ensino` <- "Básico"
 matriculasES2016$`Ano do censo` <- 2016
 
 matriculas_sup <- matriculasES2016 %>% 
-  select(`Ano do censo`, co_aluno, lon, lat) %>% 
-  rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
+  dplyr::select(`Ano do censo`, co_aluno, lon, lat) %>% 
+  dplyr::rename("Código do aluno" = "co_aluno", "Longitude" = "lon", "Latitude" = "lat")
 
 
 matriculas_sup$`Nível de ensino` <- "Superior"
@@ -203,7 +148,7 @@ matriculas_sup$`Nível de ensino` <- "Superior"
 # Banco unico de matriculas
 
 lat_lon <- lat_lon %>% 
-  rename("Latitude" = "lat", "Longitude" = "lon")
+  dplyr::rename("Latitude" = "lat", "Longitude" = "lon")
 
 matriculas_bas <- left_join(matriculas_bas, lat_lon, by = c("Longitude", "Latitude"))
 
@@ -216,36 +161,36 @@ matriculas <- bind_rows(matriculas_bas, matriculas_sup)
 # 2.3. RAIS ---------------------------------------------------------------
 
 estab_2010 <- estab_2010 %>%
-  select(Ano, CEP,`SUBS IBGE`, trabalhadores) %>% 
-   rename("CEP Estab" = "CEP", "IBGE Subsetor" = "SUBS IBGE", "Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, CEP,`SUBS IBGE`, trabalhadores) %>% 
+   dplyr::rename("CEP Estab" = "CEP", "IBGE Subsetor" = "SUBS IBGE", "Trabalhadores" = "trabalhadores")
 
 estab_2011 <- estab_2011 %>%
-  select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
 
 estab_2012 <- estab_2012 %>%
-  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
 estab_2013 <- estab_2013 %>%
-  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
 estab_2014 <- estab_2014 %>%
-  select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
 
 estab_2015 <- estab_2015 %>%
-  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
 estab_2016 <- estab_2016 %>%
-  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
 
 estab_2017 <- estab_2017 %>%
-  select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
+  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
+  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
 estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014, 
                           estab_2015, estab_2016, estab_2017))
@@ -253,16 +198,11 @@ estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014,
 estab_anos <- left_join(estab_anos, ibge_sub, by = "Código")
 
 
-# Localizacao dos CEPS
-
-p <- po
-
-
 
 # 2.4. Pesquisa OD --------------------------------------------------------
 
 
-zonas <- rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", 
+zonas <- dplyr::rename(zonas, "ZONA" = "Zona", "DENOMINAÇÃO" = "Denominação", 
                 "LOCALIZAÇÃO" = "Localização")
 
 
@@ -277,7 +217,7 @@ od$ZONA <- as.numeric(od$ZONA)
 od <- left_join(od, zonas, by = "ZONA")
 
 od <- od %>% 
-  select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, 
+  dplyr::select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, 
          DOMIC, NUM_FAM, TOT_PESS, NUM_PESS, SIT_FAM, SEXO,IDADE, GR_INSTR, COND_ATV,
          VINCULO, SET_ATV, ZONA_ATV, `MACROZONA_ATV DESCRIÇÃO`, COND_AT2, VINCULO2, 
          SET_ATV2, ZONA_AT2,`MACROZONA_ATV2 DESCRIÇÃO`,RENDA, `FAT_EXP POP`, TIPO_IMÓVEL,
@@ -294,7 +234,7 @@ od <- od %>%
 
 linhas$NOME <- str_to_title(linhas$NOME) 
 
-linhas <- rename(linhas, "Nome" = "NOME")
+linhas <- dplyr::rename(linhas, "Nome" = "NOME")
 
 linhas2 <- data.frame(
   ids = c(
@@ -395,7 +335,7 @@ Basico_SP2 <- Basico_SP2 %>%
 setor_cen <- Basico_SP2$Cod_setor
 
 Domicilio02_SP2 <- Domicilio02_SP2 %>% 
-  filter(Cod_setor %in% setor_cen) 
+  dplyr::filter(Cod_setor %in% setor_cen) 
 
 demografia <- data.frame(Demografia = c("População", "População (%)", "Área da macrozona (km²)",
                                         "Área da macrozona (%)", "Densidade demográfica (hab/km²)"), 
@@ -405,20 +345,17 @@ demografia <- data.frame(Demografia = c("População", "População (%)", "Área
                          `Extremo Norte` = c("15.514", "2,46", "696,47", "63,39", "22,28"), Município = c("629.921", " 100,00", "1.098,79", "100,00", "573,29"))
 
 
-#demografia$Município <- format(round(as.numeric(demografia$Município[1]), 1), big.mark=".")
-
-
 bairro <- Basico_SP2 %>% 
   dplyr::group_by(Cod_setor, Nome_do_bairro) %>% 
-  summarise(
+  dplyr::summarise(
     n = n())
 
 bairro <- left_join(bairro, Domicilio02_SP2, by = "Cod_setor") 
 
 bairro <- bairro %>% 
-  select(Cod_setor, Nome_do_bairro, Situacao_setor, V001) %>% 
-  group_by(Nome_do_bairro) %>% 
-  summarise(
+  dplyr::select(Cod_setor, Nome_do_bairro, Situacao_setor, V001) %>% 
+  dplyr::group_by(Nome_do_bairro) %>% 
+  dplyr::summarise(
     soma = sum(V001)
   )
 
@@ -427,7 +364,7 @@ bairro <- bairro %>%
 # 3.2. Dados escolares ----------------------------------------------------
 
 matriculas <- matriculas %>% 
-  group_by(`Ano do censo`, `Nível de ensino`, MacroZona) %>% 
+  dplyr::group_by(`Ano do censo`, `Nível de ensino`, MacroZona) %>% 
   count() %>% 
   distinct() %>% 
   na.omit()                                                                                                                
@@ -437,8 +374,8 @@ matriculas <- matriculas %>%
 # 3.3. RAIS ---------------------------------------------------------------
 
 empregos <- estab_anos %>% 
-  group_by(Ano, `IBGE Subsetor`) %>% 
-  summarise(
+  dplyr::group_by(Ano, `IBGE Subsetor`) %>% 
+  dplyr::summarise(
     `Nº de trabalhadores` = sum(Trabalhadores)
   ) %>% 
   na.omit()
@@ -449,7 +386,7 @@ empregos <- estab_anos %>%
 # Categorias de transporte
 
 od2 <- od %>%
-  group_by(CLASSE, TIPO) %>% 
+  dplyr::group_by(CLASSE, TIPO) %>% 
   count()
  
 od2 <- left_join(od, od2, by = c("CLASSE", "TIPO"))
@@ -457,17 +394,17 @@ od2 <- left_join(od, od2, by = c("CLASSE", "TIPO"))
 od2$EXPAN <- od2$n * od2$`FAT_EXP GERAL`
 
 c1 <- od2 %>% 
-  filter(CLASSE == "Motorizado" & TIPO == "Individual")
+  dplyr::filter(CLASSE == "Motorizado" & TIPO == "Individual")
 
 mean(c1$EXPAN)
 
 c2 <- od2 %>% 
-  filter(CLASSE == "Motorizado" & TIPO == "Coletivo")
+  dplyr::filter(CLASSE == "Motorizado" & TIPO == "Coletivo")
 
 mean(c2$EXPAN)
 
 c3 <- od2 %>% 
-  filter(CLASSE == "Não Motorizado" & TIPO == "Não Motorizado")
+  dplyr::filter(CLASSE == "Não Motorizado" & TIPO == "Não Motorizado")
 
 mean(c3$EXPAN)
 
@@ -483,7 +420,7 @@ cat_transp$Total <- sum(cat_transp$Viagens)
 cat_transp$Participação <- round(cat_transp$Viagens * 100/cat_transp$Total, 2) 
 
 cat_transp <- cat_transp %>% 
-  select(Categorias, Viagens, Participação)
+  dplyr::select(Categorias, Viagens, Participação)
 
  od2$Motivo <- NA    
  od2$Motivo[od2$O_MOTIVO == "Estudo (Outros)"] <- "Estudo"
@@ -522,16 +459,16 @@ cat_transp <- cat_transp %>%
  # Distribuicao modal por motivo da viagem
 
 modal_motivo <- od2 %>% 
-  group_by(Motivo, `Modo de transporte`) %>% 
-  summarise(
+  dplyr::group_by(Motivo, `Modo de transporte`) %>% 
+  dplyr::summarise(
     n = n()
   )
 
 # Distribuicao modal por genero
 
 modal_genero <- od2 %>% 
-  group_by(SEXO, `Modo de transporte`) %>% 
-  summarise(
+  dplyr::group_by(SEXO, `Modo de transporte`) %>% 
+  dplyr::summarise(
     n = n()
   ) %>% 
   na.omit()
@@ -540,8 +477,8 @@ modal_genero <- od2 %>%
 # Media de viagens por modo
 
 viagens <- od2 %>% 
-  group_by(`Modo de transporte`) %>% 
-  summarise(
+  dplyr::group_by(`Modo de transporte`) %>% 
+  dplyr::summarise(
     n = n(),
     Média = mean(n/24988)
   )
@@ -549,8 +486,8 @@ viagens <- od2 %>%
 # Media de viagens por faixa de renda
 
 renda <- od2 %>% 
-  group_by(`Modo de transporte`, RENDA) %>% 
-  count()
+  dplyr::group_by(`Modo de transporte`, RENDA) %>% 
+  dplyr::count()
 
 
 renda$Renda <- NA
@@ -565,8 +502,8 @@ renda$Renda[renda$RENDA > 10900] <- "Acima de 20 salários mínimos"
 
 
 renda <- renda %>% 
-  group_by(`Modo de transporte`, Renda) %>% 
-  summarise(
+  dplyr::group_by(`Modo de transporte`, Renda) %>% 
+  dplyr::summarise(
     Média = mean(n)
   ) %>% 
   na.omit()
