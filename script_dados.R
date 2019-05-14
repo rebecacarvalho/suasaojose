@@ -12,28 +12,24 @@ library(tidyverse)
 library(lubridate)
 
 
-
 # 1. Dados ----------------------------------------------------------------
-
-options(encoding = "UTF-8")
-parse(encoding = "UTF-8")
 
 # Secao para importacao dos dados
 
 # 1.1. Dados demograficos -------------------------------------------------
 
-Basico_SP2 <- read_delim("dados demográficos/Basico_SP2.txt", 
+Basico_SP2 <- read_delim("demograficos/Basico_SP2.txt", 
                          ";", escape_double = FALSE, locale = locale(), 
                          trim_ws = TRUE)
 
-Domicilio01_SP2 <- read_delim("dados demográficos/Domicilio01_SP2.txt", 
+Domicilio01_SP2 <- read_delim("demograficos/Domicilio01_SP2.txt", 
                               ";", escape_double = FALSE, 
                               trim_ws = TRUE)
 
-Domicilio02_SP2 <- read_delim("dados demográficos/Domicilio02_SP2.txt", 
+Domicilio02_SP2 <- read_delim("demograficos/Domicilio02_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
-DomicilioRenda_SP2 <- read_delim("dados demográficos/DomicilioRenda_SP2.txt", 
+DomicilioRenda_SP2 <- read_delim("demograficos/DomicilioRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
 
@@ -53,27 +49,6 @@ lat_lon <- read_delim("censo escolar/lat_lon.txt",
 
 # 1.3. RAIS ---------------------------------------------------------------
 
-
-estab_2010 <- read_csv("RAIS/estab_2010.txt")
-estab_2010$Ano <- 2010
-
-estab_2011 <- read_csv("RAIS/estab_2011.txt")
-estab_2011$Ano <- 2011
-
-estab_2012 <- read_csv("RAIS/estab_2012.txt")
-estab_2012$Ano <- 2012
-
-estab_2013 <- read_csv("RAIS/estab_2013.txt")
-estab_2013$Ano <- 2013
-
-estab_2014 <- read_csv("RAIS/estab_2014.txt")
-estab_2014$Ano <- 2014
-
-estab_2015 <- read_csv("RAIS/estab_2015.txt")
-estab_2015$Ano <- 2015
-
-estab_2016 <- read_csv("RAIS/estab_2016.txt")
-estab_2016$Ano <- 2016
 
 estab_2017 <- read_csv("RAIS/estab_2017.txt")
 estab_2017$Ano <- 2017
@@ -107,8 +82,6 @@ zonas <- read_delim("dados OD/zonas.txt",
 linhas <- read_delim("linhas/linhas.txt", ";", 
                      escape_double = FALSE, col_types = cols(X5 = col_skip()), 
                      trim_ws = TRUE)
-
-
 
 
 # 2. Limpeza e organizacao dos dados --------------------------------------
@@ -160,42 +133,11 @@ matriculas <- bind_rows(matriculas_bas, matriculas_sup)
 
 # 2.3. RAIS ---------------------------------------------------------------
 
-estab_2010 <- estab_2010 %>%
-  dplyr::select(Ano, CEP,`SUBS IBGE`, trabalhadores) %>% 
-   dplyr::rename("CEP Estab" = "CEP", "IBGE Subsetor" = "SUBS IBGE", "Trabalhadores" = "trabalhadores")
-
-estab_2011 <- estab_2011 %>%
-  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
-
-estab_2012 <- estab_2012 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2013 <- estab_2013 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2014 <- estab_2014 %>%
-  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
-
-estab_2015 <- estab_2015 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2016 <- estab_2016 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
-
 estab_2017 <- estab_2017 %>%
   dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
   dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
-estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014, 
-                          estab_2015, estab_2016, estab_2017))
-
-estab_anos <- left_join(estab_anos, ibge_sub, by = "Código")
+estab_anos <- left_join(estab_2017, ibge_sub, by = "Código")
 
 
 
@@ -217,13 +159,13 @@ od$ZONA <- as.numeric(od$ZONA)
 od <- left_join(od, zonas, by = "ZONA")
 
 od <- od %>% 
-  dplyr::select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA,DENOMINAÇÃO, LOCALIZAÇÃO, MACROZONA, 
+  dplyr::select(`CHAVE DOM + PESS`, `CHAVE DOM`, ZONA, `DENOMINAÇÃO`,  `LOCALIZAÇÃO`, MACROZONA, 
          DOMIC, NUM_FAM, TOT_PESS, NUM_PESS, SIT_FAM, SEXO,IDADE, GR_INSTR, COND_ATV,
          VINCULO, SET_ATV, ZONA_ATV, `MACROZONA_ATV DESCRIÇÃO`, COND_AT2, VINCULO2, 
-         SET_ATV2, ZONA_AT2,`MACROZONA_ATV2 DESCRIÇÃO`,RENDA, `FAT_EXP POP`, TIPO_IMÓVEL,
-         Nº_CÔMODOS, ESGOTO, AGUA, CONSUMO, RADIO, TV, MAQ_LAV,GELADEIR, CELULAR, TEL_FIXO,MICRO,
+         SET_ATV2, ZONA_AT2,`MACROZONA_ATV2 DESCRIÇÃO`,RENDA, `FAT_EXP POP`,  `TIPO_IMÓVEL`,
+         `Nº_CÔMODOS`, ESGOTO, AGUA, CONSUMO, RADIO, TV, MAQ_LAV,GELADEIR, CELULAR, TEL_FIXO,MICRO,
          MICRO_IN, MOTO, AUTO, QTE_FAM, TIPO_DOM, COND_MOR, TMP_CID, TMP_DOM, `FAT_EXP DOM`, NUM_VIAGEM,
-         INTEGRAÇÃO, Viagem, O_LOCAL, O_ZONA, `MACROZONA ORIG`, O_MOTIVO, `HORA SAIDA`, D_LOCAL, D_ZONA,
+         `INTEGRAÇÃO`, Viagem, O_LOCAL, O_ZONA, `MACROZONA ORIG`, O_MOTIVO, `HORA SAIDA`, D_LOCAL, D_ZONA,
          `MACROZONA DEST`, D_MOTIVO,`HORA CHEGA`, MOD_TRA, MODO_PRONCIPAL, CLASSE, TIPO, TMP_APEO, TMP_APED,
          FORM_PAG, ESTACION, `FAT_EXP POP`, `FAT_EXP GERAL`)
 
@@ -249,7 +191,7 @@ linhas2 <- data.frame(
     "134", "135", "140", "141", "142", "150", "214", "230", "300", "303", "304", "306", "309", "311", "313", "314",
     "320", "327", "Saens Peña - 331"
   ),
-  labels = c("CS<br>Brasil", "Expresso<br>Maringá", "Saens<br>Peña",
+  labels = c("CS<br>Brasil<br>33", "Expresso<br>Maringá<br>37", "Saens<br>Peña<br>33",
     "103", "104", "108", "112", "116", "118", "124", "200", "201", "202", "205", "211", "215",
     "216", "222", "225", "231", "232", "237", "240", "242", "243", "244", "245", "246", "250", "251", "130A",
     "130B", "204A", "204B", "206A", "CS Brasil - 206B",  
@@ -480,7 +422,7 @@ viagens <- od2 %>%
   dplyr::group_by(`Modo de transporte`) %>% 
   dplyr::summarise(
     n = n(),
-    Média = mean(n/24988)
+    `Média` = mean(n/24988)
   )
 
 # Media de viagens por faixa de renda
@@ -504,13 +446,11 @@ renda$Renda[renda$RENDA > 10900] <- "Acima de 20 salários mínimos"
 renda <- renda %>% 
   dplyr::group_by(`Modo de transporte`, Renda) %>% 
   dplyr::summarise(
-    Média = mean(n)
+    `Média` = mean(n)
   ) %>% 
   na.omit()
    
                       
-  
- 
 
 # 3.5. Linhas -------------------------------------------------------------
 

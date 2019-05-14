@@ -1,7 +1,6 @@
 # Titulo: Regioes
 # Autora: Rebeca Carvalho
 
-rm(list(ls =())
 
 # Pacotes utilizados
 
@@ -10,83 +9,57 @@ library(maptools)
 library(rgdal)
 library(sf)
 library(dplyr)
+library(sp)
+library(rgeos)
 
 
 # 1. Dados ----------------------------------------------------------------
 
-load("Dados/cep_taina.Rda")
+# RAIS
 
-load("Dados/cep_miguel.Rda")
+load("RAIS/cep_taina.Rda")
 
-estab_2010 <- read_csv("RAIS/estab_2010.txt")
-estab_2010$Ano <- 2010
-
-estab_2011 <- read_csv("RAIS/estab_2011.txt")
-estab_2011$Ano <- 2011
-
-estab_2012 <- read_csv("RAIS/estab_2012.txt")
-estab_2012$Ano <- 2012
-
-estab_2013 <- read_csv("RAIS/estab_2013.txt")
-estab_2013$Ano <- 2013
-
-estab_2014 <- read_csv("RAIS/estab_2014.txt")
-estab_2014$Ano <- 2014
-
-estab_2015 <- read_csv("RAIS/estab_2015.txt")
-estab_2015$Ano <- 2015
-
-estab_2016 <- read_csv("RAIS/estab_2016.txt")
-estab_2016$Ano <- 2016
+load("RAIS/cep_miguel.Rda")
 
 estab_2017 <- read_csv("RAIS/estab_2017.txt")
 estab_2017$Ano <- 2017
 
 ibge_sub <- read_delim("RAIS/ibge_sub.txt",";", escape_double = FALSE, trim_ws = TRUE)
 
+# IBGE
+
+
+basico <- read_delim("demograficos/Basico_SP2.txt", 
+                         ";", escape_double = FALSE, locale = locale(), 
+                         trim_ws = TRUE)
+
+renda_domicilio <- read_delim("demograficos/DomicilioRenda_SP2.txt", 
+                              ";", escape_double = FALSE, trim_ws = TRUE)
+
 
 # 2. Limpeza dos dados ----------------------------------------------------
 
-estab_2010 <- estab_2010 %>%
-  dplyr::select(Ano, CEP,`SUBS IBGE`, trabalhadores) %>% 
-  dplyr::rename("CEP Estab" = "CEP", "IBGE Subsetor" = "SUBS IBGE", "Trabalhadores" = "trabalhadores")
-
-estab_2011 <- estab_2011 %>%
-  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
-
-estab_2012 <- estab_2012 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2013 <- estab_2013 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2014 <- estab_2014 %>%
-  dplyr::select(Ano,`CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
-
-estab_2015 <- estab_2015 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
-
-estab_2016 <- estab_2016 %>%
-  dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
-  dplyr::rename("Código" = "IBGE Subsetor" , "Trabalhadores" = "trabalhadores")
+# RAIS
 
 estab_2017 <- estab_2017 %>%
   dplyr::select(Ano, `CEP Estab`,`IBGE Subsetor`, trabalhadores) %>% 
   dplyr::rename("Código" = "IBGE Subsetor" ,"Trabalhadores" = "trabalhadores")
 
-estab_anos <- bind_rows(list(estab_2011, estab_2012, estab_2013, estab_2014, 
-                             estab_2015, estab_2016, estab_2017))
+estab_anos <- left_join(estab_2017, ibge_sub, by = "Código")
 
-estab_anos <- left_join(estab_anos, ibge_sub, by = "Código")
+# IBGE
 
+basico <- basico %>% 
+  dplyr::filter(Cod_municipio == 3549904)
+
+setor_cen <- basico$Cod_setor
+
+renda_domicilio <- renda_domicilio %>% 
+  dplyr::filter(Cod_setor %in% setor_cen) 
 
 # 3. Localizacao dos CEPS -------------------------------------------------
 
+# RAIS
 
 cep_taina <- cep_taina %>%
   rename("CEP Estab" = "cep")
@@ -107,27 +80,75 @@ estab_anos <- estab_anos %>%
 trab_por_cep <- estab_anos %>% 
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
-sjc_censitario <- read_sf("Dados/setores_sjc.shp") %>%
+macrozonas <- read_sf("RAIS/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>%
   st_transform(4326)
 
 pontos_sjc <- trab_por_cep %>% 
-  st_intersection(sjc_censitario)
+  st_intersection(macrozonas)
 
-sum(pontos_sjc$Trabalhadores) 
+rais <- pontos_sjc %>% 
+  group_by(IBGE.Subsetor, regiao) %>%
+  count()
 
-pontos_sjc <- pontos_sjc %>% 
-  mutate(contador = 1)
+# IBGE
 
-pontos_sjc <- pontos_sjc %>% 
-  group_by(ID) %>% 
-  summarise(trab = sum(contador)) %>% 
-  st_set_geometry(NULL) %>% 
-  as.data.frame() 
 
-sjc_censitario <- sjc_censitario %>% 
-  left_join(pontos_sjc, by = "ID")
+censitario <- read_sf("demograficos/setor_censitario_sjc.shp") %>% 
+  st_transform(4326)
 
-sum(sjc_censitario$trab, na.rm = T) == sum(trab_por_cep$contador, na.rm = T) #TRUE eh bom
+centroides <- censitario %>% st_centroid()
 
-sjc_censitario <- sjc_censitario %>% 
-  mutate(trab = ifelse(is.na(sjc_censitario$trab), 0, sjc_censitario$trab))
+pontos_ <- censitario %>% 
+  st_intersection(st_buffer(macrozonas, 0))
+
+pontos_ <- pontos_ %>% 
+  rename("Cod_setor" = "CD_GEOCODI")
+
+pontos_$Cod_setor <- as.numeric(pontos_$Cod_setor)
+
+censitario <- left_join(renda_domicilio, pontos_, by = "Cod_setor") 
+
+
+censitario$V002 <- as.numeric(censitario$V002) 
+
+censitario <- censitario %>% 
+  select(V002,regiao) %>% 
+  rename("Renda" = "V002", "Região" = "regiao") %>% 
+  na.omit()
+
+
+renda <- censitario %>% 
+  group_by(Região) %>% 
+ summarise(
+   n = n(),
+   soma = sum(Renda),
+   media = soma/n
+ )
+
+table(censitario$regiao)
+
+
+
+# 4. Mapas ----------------------------------------------------------------
+
+
+#censitario %>% ggplot() +geom_sf() + coord_sf()
+
+#censitario %>% ggplot() +geom_sf() + geom_sf(data = centroides) + coord_sf()
+
+#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+
+
+#macrozonas <- read_sf("demograficos/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>% st_transform(4326)
+
+#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+
+#limite_mun <- read_sf("demograficos/LIMITE_MUNICIPAL.shp") %>% st_transform(4326)
+
+#limite_mun %>% ggplot() + geom_sf() + geom_sf(data = macrozonas) + coord_sf()
+
+#macrozonas <- macrozonas %>% filter(regiao != "São Francisco Xavier")
+
+#extremo_norte <- limite_mun %>% st_difference(macrozonas)
+
+
