@@ -21,7 +21,7 @@ library(rsconnect)
 
 # 1. Data -----------------------------------------------------------------
 
-#source("script_dados.R", encoding = "UTF-8")
+source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 

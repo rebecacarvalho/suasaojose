@@ -2,6 +2,7 @@
 # Autora: Rebeca Carvalho
 
 
+
 # Pacotes utilizados
 
 library(readr)
@@ -69,11 +70,6 @@ cep_miguel <- cep_miguel %>%
 
 estab_anos <- left_join(estab_anos, cep_taina, by = "CEP Estab")
 
-na <- estab_anos %>% 
-  dplyr::filter(is.na(latitude))
-
-estab <- left_join(na,cep_miguel, by = c("CEP Estab", "latitude", "longitude"))
-
 estab_anos <- estab_anos %>% 
   na.omit()
 
@@ -83,15 +79,21 @@ trab_por_cep <- estab_anos %>%
 macrozonas <- read_sf("RAIS/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>%
   st_transform(4326)
 
+macrozonas$regiao[macrozonas$regiao == "São Francisco Xavier"] <- "Extremo Norte"
+
+
 pontos_sjc <- trab_por_cep %>% 
-  st_intersection(macrozonas)
+  st_intersection(st_buffer(macrozonas, 0))
 
 rais <- pontos_sjc %>% 
-  group_by(IBGE.Subsetor, regiao) %>%
-  count()
+  select(regiao, IBGE.Subsetor, Trabalhadores) %>% 
+  rename("Região" = "regiao", "Subsetor" = "IBGE.Subsetor") %>% 
+  na.omit()
+
+st_geometry(rais) <- NULL
+
 
 # IBGE
-
 
 censitario <- read_sf("demograficos/setor_censitario_sjc.shp") %>% 
   st_transform(4326)
@@ -108,24 +110,15 @@ pontos_$Cod_setor <- as.numeric(pontos_$Cod_setor)
 
 censitario <- left_join(renda_domicilio, pontos_, by = "Cod_setor") 
 
+glimpse(censitario)
+
 
 censitario$V002 <- as.numeric(censitario$V002) 
 
-censitario <- censitario %>% 
+renda <- censitario %>% 
   select(V002,regiao) %>% 
   rename("Renda" = "V002", "Região" = "regiao") %>% 
   na.omit()
-
-
-renda <- censitario %>% 
-  group_by(Região) %>% 
- summarise(
-   n = n(),
-   soma = sum(Renda),
-   media = soma/n
- )
-
-table(censitario$regiao)
 
 
 
@@ -152,3 +145,8 @@ table(censitario$regiao)
 #extremo_norte <- limite_mun %>% st_difference(macrozonas)
 
 
+
+# 5. Arquivo ------------------------------------------------------------------
+
+write.csv(rais, "rais.csv")
+write.csv(renda, "renda.csv")
