@@ -2,6 +2,7 @@
 # Titulo: Dados SJC
 # Autor: Rebeca Carvalho
 
+rm(list = ls())
 
 # Pacotes utilizados
 
@@ -10,6 +11,7 @@ library(readr)
 library(dplyr)
 library(tidyverse)
 library(lubridate)
+library(tibble)
 
 
 # 1. Dados ----------------------------------------------------------------
@@ -95,7 +97,7 @@ setor_cen <- Basico_SP2$Cod_setor
 Domicilio02_SP2 <- Domicilio02_SP2 %>% 
   dplyr::filter(Cod_setor %in% setor_cen) 
 
-
+renda$Renda <- as.numeric(renda$Renda)
 
 # 2.2. Dados escolares ----------------------------------------------------
 
@@ -131,6 +133,26 @@ matriculas_sup <- left_join(matriculas_sup, lat_lon, by = c("Longitude", "Latitu
 matriculas <- bind_rows(matriculas_bas, matriculas_sup)
 
 # 2.3. RAIS ---------------------------------------------------------------
+
+
+rais$Setor <- NA
+rais$Setor[rais$Subsetor == "Agricultura, silvicultura, criaçao de animais, extrativismo vegetal"] <- "Agricultura"
+rais$Setor[rais$Subsetor == "Indústria de produtos alimentícios, bebidas e álcool etílico"] <- "Indústria"
+rais$Setor[rais$Subsetor == "Serviços industriais de utilidade pública"] <- "Indústria"
+rais$Setor[rais$Subsetor == "Ind. química de produtos farmacêuticos, veterinários, perfumaria"] <- "Indústria"
+rais$Setor[rais$Subsetor == "Indústria têxtil do vestuário e artefatos de tecidos"] <- "Indústria"
+rais$Setor[rais$Subsetor == "Com. e administraçao de imóveis, valores mobiliários, serv. Técnico"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Comércio varejista"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Ensino"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Instituiçoes de crédito, seguros e capitalizaçao"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Serviços industriais de utilidade pública"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Transportes e comunicaçoes"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Comércio atacadista"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Construçao civil"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Serv. de alojamento, alimentaçao, reparaçao, manutençao, redaçao"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Serviços médicos, odontológicos e veterinários"] <- "Comércio e serviços"
+rais$Setor[rais$Subsetor == "Administraçao pública direta e autárquica"] <- "Administração pública"
+table(rais$Subsetor)
 
 # 2.4. Pesquisa OD --------------------------------------------------------
 
@@ -316,15 +338,18 @@ demografia <- data.frame(Demografia = c("População", "População (%)", "Área
                                         Município = c("629.921", " 100,00", "1.098,79", "100,00", 
                                                       "573,29"))
 
-# Media da renda por macrozona
+# Renda media por macrozona
+
+renda$Rmedia <- renda$Renda/renda$População
+
+renda$Rmedia <- round(renda$Rmedia)
+
+renda <- na.omit(renda)
 
 renda <- renda %>% 
   group_by(Região) %>% 
   summarise(
-    n = n(),
-    soma = sum(Renda),
-    media = soma/n
-  )
+    Média = round(mean(Rmedia))) 
 
 
 
@@ -343,7 +368,7 @@ matriculas <- matriculas %>%
 # Empregos por setor de atividade e macrozona
 
 rais <- rais %>% 
-  group_by(Subsetor, Região) %>%
+  group_by(Setor, Região) %>%
   summarise(
     Trabalhadores = sum(Trabalhadores)
   )
@@ -459,12 +484,11 @@ renda2 <- od2 %>%
 
 
 renda2$Renda <- NA
-renda2$RENDA <- as.numeric(renda$RENDA)
-
+renda2$RENDA <- as.numeric(renda2$RENDA)
 renda2$Renda[renda2$RENDA <= 545] <- "Até 1 salário mínimo"
-renda2$Renda[renda2$RENDA > 545 & renda$RENDA <= 1635] <- "Até 3 salários mínimos"
-renda2$Renda[renda2$RENDA > 1635 & renda$RENDA <= 5450] <- "Entre 3 e 10 salários mínimos"
-renda2$Renda[renda2$RENDA > 5450 & renda$RENDA <= 10900] <- "Entre 10 e 20 salários mínimos"
+renda2$Renda[renda2$RENDA > 545 & renda2$RENDA <= 1635] <- "Até 3 salários mínimos"
+renda2$Renda[renda2$RENDA > 1635 & renda2$RENDA <= 5450] <- "Entre 3 e 10 salários mínimos"
+renda2$Renda[renda2$RENDA > 5450 & renda2$RENDA <= 10900] <- "Entre 10 e 20 salários mínimos"
 renda2$Renda[renda2$RENDA > 10900] <- "Acima de 20 salários mínimos"
 
 

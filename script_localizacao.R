@@ -2,6 +2,7 @@
 # Autora: Rebeca Carvalho
 
 
+rm(list = ls())
 
 # Pacotes utilizados
 
@@ -34,6 +35,10 @@ basico <- read_delim("demograficos/Basico_SP2.txt",
                          ";", escape_double = FALSE, locale = locale(), 
                          trim_ws = TRUE)
 
+domicilio <-  read_delim("demograficos/Domicilio02_SP2.txt", 
+                         ";", escape_double = FALSE, locale = locale(), 
+                         trim_ws = TRUE)
+
 renda_domicilio <- read_delim("demograficos/DomicilioRenda_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
@@ -55,8 +60,15 @@ basico <- basico %>%
 
 setor_cen <- basico$Cod_setor
 
+domicilio <- domicilio %>% 
+  dplyr::filter(Cod_setor %in% setor_cen) %>% 
+  select(Cod_setor, V001) %>% 
+  rename("População" = "V001")
+
 renda_domicilio <- renda_domicilio %>% 
-  dplyr::filter(Cod_setor %in% setor_cen) 
+  dplyr::filter(Cod_setor %in% setor_cen) %>% 
+  select(Cod_setor, V002) %>% 
+  rename("Renda" = "V002")
 
 # 3. Localizacao dos CEPS -------------------------------------------------
 
@@ -108,16 +120,17 @@ pontos_ <- pontos_ %>%
 
 pontos_$Cod_setor <- as.numeric(pontos_$Cod_setor)
 
-censitario <- left_join(renda_domicilio, pontos_, by = "Cod_setor") 
-
-glimpse(censitario)
+censitario <- left_join(domicilio, renda_domicilio, by = "Cod_setor")
 
 
-censitario$V002 <- as.numeric(censitario$V002) 
+censitario <- left_join(censitario, pontos_, by = "Cod_setor")
+
+
+censitario$V002 <- as.numeric(censitario$Renda) 
 
 renda <- censitario %>% 
-  select(V002,regiao) %>% 
-  rename("Renda" = "V002", "Região" = "regiao") %>% 
+  select(População, Renda, regiao) %>% 
+  rename("Região" = "regiao") %>% 
   na.omit()
 
 

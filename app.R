@@ -50,7 +50,9 @@ ui <- fluidPage(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
                           dataTableOutput("demografia", width = "100%"),
-                          plotlyOutput("matriculas", width = "100%")))),
+                          plotlyOutput("matriculas", width = "100%"),
+                          plotlyOutput("empregos", width = "100%"),
+                          plotlyOutput("renda", width = "100%")))),
              
              tabPanel("Transportes",
                       
@@ -133,6 +135,9 @@ server <- function(input, output,session){
   
   # 4.1.1. Dados demograficos -----------------------------------------------
   
+  output$renda <- renderPlotly(
+    brenda()
+  )
   
   # 4.1.2. Dados escolares --------------------------------------------------
   
@@ -142,6 +147,9 @@ server <- function(input, output,session){
   
   # 4.1.3. RAIS -------------------------------------------------------------
   
+  output$empregos <- renderPlotly(
+    bempregos()
+  )
   
   # 4.2.Transportes ---------------------------------------------------------
   
@@ -218,6 +226,7 @@ server <- function(input, output,session){
             title = "Matrículas por nível de ensino",
             fill = "Macrozona")+
           ylab("Porcentagem de matrículas") +
+          xlab("") +
           scale_fill_manual(values = paleta)+
           theme(
             plot.title = element_text(hjust = 0.5),
@@ -227,6 +236,50 @@ server <- function(input, output,session){
   })
   
   
+  # Empregos por area de atividade
+  
+  bempregos <- eventReactive(input$BA1, {
+    if("Relação de empregos por área de atividade" %in% input$INDICADOR_CAR){
+      ggplotly( 
+        ggplot(data = rais, aes(Setor, Trabalhadores, fill = `Região` )) +
+          geom_bar(stat = "identity", position = "fill") +
+          scale_y_continuous(labels = percent_format()) +
+          coord_flip()+
+          labs(
+            title = "Relação de empregos por por área de atividade",
+            fill = "Macrozona")+
+          ylab("Porcentagem de trabalhadores") +
+          xlab("")+
+          scale_fill_manual(values = paleta)+
+          theme(
+            plot.title = element_text(hjust = 0.5),
+            panel.background = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+    }      
+  })
+  
+  
+  # Renda media por macrozona
+  
+  brenda <- eventReactive(input$BA1, {
+    if("Renda média por macrozona" %in% input$INDICADOR_CAR){
+      ggplotly( 
+        ggplot(data = renda, aes(`Região`, `Média`, fill = `Região`)) +
+          geom_bar(stat = "identity") +
+          coord_flip()+
+          labs(
+            title = "Renda média por macrozona")+
+          ylab("Renda média") +
+          xlab("")+
+          scale_fill_manual(values = paleta)+
+          theme(
+            plot.title = element_text(hjust = 0.5),
+            panel.background = element_blank(),
+            legend.title = element_blank(),
+            legend.position = "none",
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+    }      
+  })
   
   # 5.2. Transportes --------------------------------------------------------
   
@@ -268,7 +321,7 @@ server <- function(input, output,session){
           labs(
             title = "Distribuição modal por motivo da viagem",
             fill = "Motivo da viagem")+
-          xlab("Modo de transporte") +
+          xlab("") +
           ylab("Porcentagem de viagens") +
           scale_fill_manual(values = paleta)+
           theme(
@@ -292,7 +345,7 @@ server <- function(input, output,session){
           labs(
             title = "Distribuição modal por gênero",
             fill = "Gênero")+
-          xlab("Modo de transporte") +
+          xlab("") +
           ylab("Porcentagem de viagens") +
           scale_fill_manual(values = paleta)+
           theme(
@@ -307,14 +360,14 @@ server <- function(input, output,session){
   br_modal <- eventReactive(input$BA2, {
     if("Média de viagens por faixa de renda" %in% input$INDICADOR_TR){
       ggplotly(
-        ggplot(data = renda, aes(`Modo de transporte`, `Média`, fill = Renda)) +
+        ggplot(data = renda2, aes(`Modo de transporte`, `Média`, fill = Renda)) +
           geom_bar(stat = "identity", position = "fill") +
           scale_y_continuous(labels = percent_format()) +
           coord_flip()+
           labs(
             title = "Média de viagens por faixa de renda",
             fill = "Faixa de renda")+
-          xlab("Modo de transporte") +
+          xlab("") +
           ylab("Média de viagens") +
           scale_fill_manual(values = paleta)+ 
           theme(
@@ -336,7 +389,7 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Média de viagens por modal")+
-          xlab("Modo de transporte") +
+          xlab("") +
           ylab("Média de viagens") +
           scale_fill_manual(values = paleta)+
           theme(
