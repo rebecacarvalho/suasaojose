@@ -325,17 +325,16 @@ linhas2 <- data.frame(
 # Demografia
 
 
-demografia <- data.frame(Demografia = c("População", "População (%)", "Área da macrozona (km²)",
-                                        "Área da macrozona (%)", "Densidade demográfica (hab/km²)"), 
-                                        Centro = c("72.115", "11,45", "18,68", "1,70", "3.860,55"), 
-                                        Sul = c("233.536", "37,07", "56,51", "5,14", "4.132,65"), 
-                                        Leste = c("160.990", "25,56", "134,69", "12,26", "1.195,26"),
-                                        Oeste = c("41.163", "6,53", "44,01", "4,01", "935,31"), 
-                                        Norte = c("59.800", "9,49", "63,73", "5,80", "938,33"),
-                                        Sudeste = c("46.803", "7,43", "84,70", "7,71", "552,57"),
-                                        `Extremo Norte` = c("15.514", "2,46", "696,47", "63,39", 
+demografia <- data.frame(Demografia = c("População", "Área da macrozona (km²)", "Densidade demográfica (hab/km²)"), 
+                                        Centro = c("72.115", "18,68", "3.860,55"), 
+                                        Sul = c("233.536", "56,51", "4.132,65"), 
+                                        Leste = c("160.990", "134,69", "1.195,26"),
+                                        Oeste = c("41.163", "44,01", "935,31"), 
+                                        Norte = c("59.800", "63,73", "938,33"),
+                                        Sudeste = c("46.803", "84,70", "552,57"),
+                                        `Extremo Norte` = c("15.514", "696,47", 
                                                             "22,28"), 
-                                        Município = c("629.921", " 100,00", "1.098,79", "100,00", 
+                                        Município = c("629.921", "1.098,79", 
                                                       "573,29"))
 
 # Renda media por macrozona

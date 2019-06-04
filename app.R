@@ -21,7 +21,7 @@ library(rsconnect)
 
 # 1. Data -----------------------------------------------------------------
 
-source("script_dados.R", encoding = "UTF-8")
+#source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
@@ -29,6 +29,7 @@ ui <- fluidPage(
   
   navbarPage("DadosSJC", theme = shinytheme("flatly"),
              
+            
              tabPanel("Caracterização do município",
                       
                       sidebarLayout(
@@ -49,10 +50,11 @@ ui <- fluidPage(
                         mainPanel(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
-                          dataTableOutput("demografia", width = "100%"),
+                          dataTableOutput("demografia", width = "100%", height = "auto"),
                           plotlyOutput("matriculas", width = "100%"),
+                          column(1,
                           plotlyOutput("empregos", width = "100%"),
-                          plotlyOutput("renda", width = "100%")))),
+                          plotlyOutput("renda", width = "100%"))))),
              
              tabPanel("Transportes",
                       
@@ -79,12 +81,13 @@ ui <- fluidPage(
                                      ".dataTables_filter, .dataTables_info { display: none; }",
                                      ".dataTable( {'lengthChange': false});"),
                           plotlyOutput("linhas", height = "900px"),
-                          dataTableOutput("categorias"),
-                          plotlyOutput("modal"),
-                          plotlyOutput("modal_genero"),
-                          plotlyOutput("viagens_renda"),
-                          plotlyOutput("viagens_modo")))),
-             
+                          dataTableOutput("categorias", width = "100%"),
+                          plotlyOutput("modal", width = "100%"),
+                          plotlyOutput("modal_genero", width = "100%"),
+                          plotlyOutput("viagens_renda", width = "100%"),
+                          plotlyOutput("viagens_modo", width = "100%")))),
+   
+                       
              tabPanel("Sobre")
   ))
 
@@ -204,7 +207,7 @@ server <- function(input, output,session){
   # Demografia
   
   bdemografia <- eventReactive(input$BA1, {
-    datatable({
+    datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
       if("Demografia" %in% input$INDICADOR_CAR){
         demografia
       }
@@ -299,7 +302,7 @@ server <- function(input, output,session){
   # Categorias de transporte
   
   bcategorias <- eventReactive(input$BA2, {
-    datatable({
+    datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
       if("Categorias de transporte" %in% input$INDICADOR_TR){
         cat_transp
       }
