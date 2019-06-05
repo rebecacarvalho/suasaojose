@@ -51,10 +51,10 @@ ui <- fluidPage(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
                           dataTableOutput("demografia", width = "100%", height = "auto"),
+                          plotlyOutput("plot7", height = 600),
                           plotlyOutput("matriculas", width = "100%"),
-                          column(1,
                           plotlyOutput("empregos", width = "100%"),
-                          plotlyOutput("renda", width = "100%"))))),
+                          plotlyOutput("renda", width = "100%")))),
              
              tabPanel("Transportes",
                       
@@ -199,8 +199,28 @@ server <- function(input, output,session){
   
   # 5. Botao de acao --------------------------------------------------------
   
+  output$plot7 <- renderPlotly({
+    ggplotly(
+      ggplot(data = macro) + 
+        geom_sf(aes(fill = `Região`, text = paste("População:", `População`, "\n",
+                                                  "Área da macrozona:", `Área da macrozona (km²)`))) + 
+        coord_sf()+
+          labs(
+          title = "Demografia",
+          fill = "Região")+
+        scale_fill_manual(values = paleta)+
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank()))
+  })
   
-  paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#C56416", "#008FD6")
+  
+  
+  paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#C56416", "#008FD6", "#ce097a")
   
   # 5.1. Caracterizacao do municipio ----------------------------------------
   
@@ -221,13 +241,13 @@ server <- function(input, output,session){
   bmatriculas <- eventReactive(input$BA1, {
     if("Matrícula por nível de ensino" %in% input$INDICADOR_CAR){
       ggplotly( 
-        ggplot(data = matriculas, aes(`Nível de ensino`, n, fill = MacroZona)) +
+        ggplot(data = matriculas, aes(MacroZona, n, fill = `Nível de ensino`)) +
           geom_bar(stat = "identity", position = "fill") +
           scale_y_continuous(labels = percent_format()) +
           coord_flip()+
           labs(
             title = "Matrículas por nível de ensino",
-            fill = "Macrozona")+
+            fill = "Nível de ensino")+
           ylab("Porcentagem de matrículas") +
           xlab("") +
           scale_fill_manual(values = paleta)+
@@ -244,13 +264,13 @@ server <- function(input, output,session){
   bempregos <- eventReactive(input$BA1, {
     if("Relação de empregos por área de atividade" %in% input$INDICADOR_CAR){
       ggplotly( 
-        ggplot(data = rais, aes(Setor, Trabalhadores, fill = `Região` )) +
+        ggplot(data = rais, aes(`Região`, Trabalhadores, fill = Setor)) +
           geom_bar(stat = "identity", position = "fill") +
           scale_y_continuous(labels = percent_format()) +
           coord_flip()+
           labs(
             title = "Relação de empregos por por área de atividade",
-            fill = "Macrozona")+
+            fill = "Área de atividade")+
           ylab("Porcentagem de trabalhadores") +
           xlab("")+
           scale_fill_manual(values = paleta)+

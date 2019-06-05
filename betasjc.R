@@ -11,7 +11,9 @@ library(rsconnect)
 library(shinydashboardPlus)
 library(shinydashboard)
 library(shiny)
-
+library(plotly)
+library(DT)
+library(scales)
 
 
 # 1. User interface -------------------------------------------------------
@@ -19,77 +21,38 @@ library(shiny)
 
 ui <- dashboardPage(skin = "blue",
                     dashboardHeader(title = "Sua São José"
-                                    # This drop-down menu offers user and system administration within the application
-                                    #dropdownMenu(type = "messages",
-                                                 #messageItem(
-                                                  # from = "Sales Dept",
-                                                  # message = "Sales are steady this month."
-                                                 #),
-                                                # messageItem(
-                                                 #  from = "New User",
-                                                  # message = "How do I register?",
-                                                  # icon = icon("question"),
-                                                  # time = "13:45"
-                                                # ),
-                                                # messageItem(
-                                                 #  from = "Support",
-                                                  # message = "The new server is ready.",
-                                                  # icon = icon("life-ring"),
-                                                  # time = "2014-12-01"
-                                                # )
-                                  #  ),
-                                    # This is a drop-down menu for checking notifications.
-                                    # This should alert users of alerts that have not been merged to a case in the last 15 days.
-                                   # dropdownMenu(type = "notifications",
-                                                  # notificationItem(
-                                                  # text = "5 new users today",
-                                                  # icon("users")
-                                                # ),
-                                                # notificationItem(
-                                                #   text = "12 items delivered",
-                                                #   icon("truck"),
-                                                #   status = "success"
-                                                # ),
-                                                # notificationItem(
-                                                #   text = "Server load at 86%",
-                                                #   icon = icon("exclamation-triangle"),
-                                                #   status = "warning"
-                                                # )
-                                    #),
-                                    # This is a drop-down menu for checking tasks.
-                                    # This drop-down menu will eventually offer suggestions based off of ML Algorithms.
-                                    #dropdownMenu(type = "tasks", badgeStatus = "success",
-                                     #            taskItem(value = 90, color = "green",
-                                      #                    "Documentation"
-                                       #          ),
-                                        #         taskItem(value = 17, color = "aqua",
-                                         #                 "Project X"
-                                          #       ),
-                                           #      taskItem(value = 75, color = "yellow",
-                                            #              "Server deployment"
-                                             #    ),
-                                              #   taskItem(value = 80, color = "red",
-                                               #           "Overall project"
-                                                # )
-                                   # )
-                                    
-                                    
-                                    
-                    ),
-                    dashboardSidebar(
+                          ),
+                    sidebar <- dashboardSidebar(
                       sidebarMenu(
-                          menuItem("Caracterização do Município", tabName = "Caracterização do Município"),
+                          menuItem("Caracterização do Município", tabName = "Caracterização do município"),
                           menuItem("Transportes", tabName = "Transportes")
                           )),
                            
 
-                    dashboardBody(
+                    body <- dashboardBody(
+                      tabItems(
+                        tabItem(tabName = "Caracterização do município",
                             fluidRow(
-                           box(dataTableOutput("plot1", height = 300)),
+                           box(dataTableOutput("plot1", height = 310)),
                            box(plotlyOutput("plot2", height = 310)),
                            box(plotlyOutput("plot3", height = 310)),
                            box(plotlyOutput("plot4", height = 310)))
-                          ))
+                          ),
+                      tabItem(tabName = "Transportes",
+                              
+                        fluidRow(
+                          box(title = "Linhas", width = 10, status = "primary", solidHeader = TRUE, plotlyOutput("plot5", height = 800)),
+                          box(title = "Distribuição modal por gênero", width = 5, status = "primary", solidHeader = TRUE,plotlyOutput("plot7", height = 310)),
+                          box(title = "Distribuição modal por motivo da viagem", width = 5, status = "primary", solidHeader = TRUE,plotlyOutput("plot6", height = 310)),
+                          box(title = "Média de viagens por faixa de renda", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot8", height = 310)),
+                          box(title = "Média de viagens por modal", width = 5, status = "primary", solidHeader = TRUE,plotlyOutput("plot9", height = 310)),
+                          box(title = "Categorias de transporte", width = 4, status = "primary", solidHeader = TRUE, dataTableOutput("table2", height = 310))
+                        )
+                        
+                        
+                      )
+                      
+                      )))
 
 
 
@@ -171,16 +134,115 @@ paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#
 
 # 2.2. Transportes ----------------------------------------
 
-  output$plot5 <- renderPlotly({
+
+  # Linhas
+  
+    output$plot5 <- renderPlotly({
     ggplotly(
       plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst', colors = paleta,
-              hovertext = ~nomes)%>%
-        layout(title = "Linhas"))
+              hovertext = ~nomes))
+  })
+  
+
+
+  # Categorias de transporte
+
+ 
+  output$table2 <- renderDataTable({
+    
+    datatable(data = cat_transp,options = list(dom = 't', paging = FALSE, ordering = FALSE))
+      
+    
+  })
+  
+  # Distribuicao modal por motivo da viagem
+  
+  output$plot6 <- renderPlotly({
+    
+    
+    ggplotly( 
+      ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo)) +
+        geom_bar(stat = "identity", position = "fill") +
+        scale_y_continuous(labels = percent_format()) + 
+        coord_flip()+
+        labs(
+          title = "Distribuição modal por motivo da viagem",
+          fill = "Motivo da viagem")+
+        xlab("") +
+        ylab("Porcentagem de viagens") +
+        scale_fill_manual(values = paleta)+
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  })
+  
+  # Distribuicao modal por genero
+  
+  output$plot7 <- renderPlotly({
+    
+    ggplotly(
+      ggplot(data = modal_genero, aes(`Modo de transporte`, n, fill = SEXO)) +
+        geom_bar(stat = "identity", position = "fill") +
+        scale_y_continuous(labels = percent_format()) +
+        coord_flip()+
+        labs(
+          title = "Distribuição modal por gênero",
+          fill = "Gênero")+
+        xlab("") +
+        ylab("Porcentagem de viagens") +
+        scale_fill_manual(values = paleta)+
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  })
+  
+  
+  # Media de viagens por faixa de renda
+  
+  output$plot8 <- renderPlotly({
+    ggplotly(
+      ggplot(data = renda2, aes(`Modo de transporte`, `Média`, fill = Renda)) +
+        geom_bar(stat = "identity", position = "fill") +
+        scale_y_continuous(labels = percent_format()) +
+        coord_flip()+
+        labs(
+          title = "Média de viagens por faixa de renda",
+          fill = "Faixa de renda")+
+        xlab("") +
+        ylab("Média de viagens") +
+        scale_fill_manual(values = paleta)+ 
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+  })
+  
+  
+  # Media de viagens por modal
+  
+  output$plot9 <- renderPlotly({
+    
+    ggplotly(
+      ggplot(data = viagens, aes(`Modo de transporte`, y = `Média`, fill = paleta)) +
+        geom_bar(stat = "identity") +
+        coord_flip()+
+        labs(
+          title = "Média de viagens por modal")+
+        xlab("") +
+        ylab("Média de viagens") +
+        scale_fill_manual(values = paleta)+
+        theme(
+          plot.title = element_text(hjust = 0.5),
+          panel.background = element_blank(),
+          legend.title = element_blank(),
+          legend.position = "none",
+          
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   })
   
 }
-
-
 
 # 3. ShinyApp -------------------------------------------------------------
 

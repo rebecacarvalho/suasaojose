@@ -138,28 +138,75 @@ renda <- censitario %>%
 # 4. Mapas ----------------------------------------------------------------
 
 
-#censitario %>% ggplot() +geom_sf() + coord_sf()
+censitario %>% ggplot() +geom_sf() + coord_sf()
 
-#censitario %>% ggplot() +geom_sf() + geom_sf(data = centroides) + coord_sf()
+censitario %>% ggplot() +geom_sf() + geom_sf(data = centroides) + coord_sf()
 
-#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+
+macrozonas <- read_sf("demograficos/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>% st_transform(4326)
+
+macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+
+limite_mun <- read_sf("demograficos/LIMITE_MUNICIPAL.shp") %>% st_transform(4326)
+
+limite_mun %>% ggplot() + geom_sf() + geom_sf(data = macrozonas) + coord_sf()
+
+limite_mun$regiao <- "Extremo Norte"
+
+limite_mun <- limite_mun %>% 
+  select(regiao, geometry)
+
+macrozonas <- macrozonas %>% filter(regiao != "São Francisco Xavier")
+
+macro <- rbind(macrozonas, limite_mun)
 
 
-#macrozonas <- read_sf("demograficos/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>% st_transform(4326)
+macro <- macro %>% 
+  select(regiao, geometry) %>% 
+  rename("Região" = "regiao")
 
-#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
 
-#limite_mun <- read_sf("demograficos/LIMITE_MUNICIPAL.shp") %>% st_transform(4326)
+extremo_norte <- limite_mun %>% st_difference(macrozonas)
 
-#limite_mun %>% ggplot() + geom_sf() + geom_sf(data = macrozonas) + coord_sf()
 
-#macrozonas <- macrozonas %>% filter(regiao != "São Francisco Xavier")
 
-#extremo_norte <- limite_mun %>% st_difference(macrozonas)
+macro %>% ggplot() + geom_sf(aes(fill = `Região`)) + coord_sf() 
 
+
+# Demografia
+
+macro$População <- NA
+macro$População[macro$Região == "Centro"] <- 72.115
+macro$População[macro$Região == "Oeste"] <- 41.163
+macro$População[macro$Região == "Sul"] <- 233.536
+macro$População[macro$Região == "Leste"] <- 160.990
+macro$População[macro$Região == "Sudeste"] <- 46.803
+macro$População[macro$Região == "Norte"] <- 59.800
+macro$População[macro$Região == "Extremo Norte"] <- 15.514
+
+
+macro$`Área da macrozona (km²)` <- NA
+macro$`Área da macrozona (km²)`[macro$Região == "Centro"] <- "18,68"
+macro$`Área da macrozona (km²)`[macro$Região == "Oeste"] <- "44,01"
+macro$`Área da macrozona (km²)`[macro$Região == "Sul"] <- "56,51"
+macro$`Área da macrozona (km²)`[macro$Região == "Leste"] <- "134,69"
+macro$`Área da macrozona (km²)`[macro$Região == "Sudeste"] <- "84,70"
+macro$`Área da macrozona (km²)`[macro$Região == "Norte"] <- "63,73"
+macro$`Área da macrozona (km²)`[macro$Região == "Extremo Norte"] <- "696,47"
+
+
+macro$`Densidade demográfica (hab/km²)` <- NA
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Centro"] <- "3.860,55"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Oeste"] <- "935,31"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sul"] <- "4.132,65"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Leste"] <- "1.195,26"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
 
 
 # 5. Arquivo ------------------------------------------------------------------
 
-write.csv(rais, "rais.csv")
-write.csv(renda, "renda.csv")
+#write.csv(rais, "rais.csv")
+#write.csv(renda, "renda.csv")
