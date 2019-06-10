@@ -33,6 +33,9 @@ Domicilio02_SP2 <- read_delim("demograficos/Domicilio02_SP2.txt",
 
 renda <- read_csv("renda.txt")
 
+macro <- read_sf("demograficos/macrozonas.shp") %>% 
+  st_transform(4326)
+
 # 1.2. Dados escolares ----------------------------------------------------
 
 
@@ -98,6 +101,43 @@ Domicilio02_SP2 <- Domicilio02_SP2 %>%
   dplyr::filter(Cod_setor %in% setor_cen) 
 
 renda$Renda <- as.numeric(renda$Renda)
+
+# Macrozonas
+
+macro <- macro %>% 
+  select(MacroZona, geometry) %>% 
+  rename("Região" = "MacroZona")
+
+# Demografia
+
+macro$População <- NA
+macro$População[macro$Região == "Centro"] <- 72.115
+macro$População[macro$Região == "Oeste"] <- 41.163
+macro$População[macro$Região == "Sul"] <- 233.536
+macro$População[macro$Região == "Leste"] <- 160.990
+macro$População[macro$Região == "Sudeste"] <- 46.803
+macro$População[macro$Região == "Norte"] <- 59.800
+macro$População[macro$Região == "Extremo Norte"] <- 15.514
+
+
+macro$`Área da macrozona (km²)` <- NA
+macro$`Área da macrozona (km²)`[macro$Região == "Centro"] <- "18,68"
+macro$`Área da macrozona (km²)`[macro$Região == "Oeste"] <- "44,01"
+macro$`Área da macrozona (km²)`[macro$Região == "Sul"] <- "56,51"
+macro$`Área da macrozona (km²)`[macro$Região == "Leste"] <- "134,69"
+macro$`Área da macrozona (km²)`[macro$Região == "Sudeste"] <- "84,70"
+macro$`Área da macrozona (km²)`[macro$Região == "Norte"] <- "63,73"
+macro$`Área da macrozona (km²)`[macro$Região == "Extremo Norte"] <- "696,47"
+
+
+macro$`Densidade demográfica (hab/km²)` <- NA
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Centro"] <- "3.860,55"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Oeste"] <- "935,31"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sul"] <- "4.132,65"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Leste"] <- "1.195,26"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
+macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
 
 # 2.2. Dados escolares ----------------------------------------------------
 
@@ -414,22 +454,27 @@ cat_transp$Participação <- round(cat_transp$Viagens * 100/cat_transp$Total, 2)
 cat_transp <- cat_transp %>% 
   dplyr::select(Categorias, Viagens, Participação)
 
- od2$Motivo <- NA    
- od2$Motivo[od2$O_MOTIVO == "Estudo (Outros)"] <- "Estudo"
- od2$Motivo[od2$O_MOTIVO == "Estudo (Regular)"] <- "Estudo"
- od2$Motivo[od2$O_MOTIVO == "Transportar passag. p/ estudo"] <- "Estudo"
- od2$Motivo[od2$O_MOTIVO == "Estudo"] <- "Estudo"
- od2$Motivo[od2$O_MOTIVO == "Compras"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Assuntos Pessoais"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Assuntos Pessoais"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Lazer"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Saúde"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Outros"] <- "Outros"
- od2$Motivo[od2$O_MOTIVO == "Transportar passag. p/ trabalho"] <- "Trabalho"
- od2$Motivo[od2$O_MOTIVO == "Trabalho"] <- "Trabalho"
- od2$Motivo[od2$O_MOTIVO == "Residência"] <- "Residência"
 
- 
+od2$D_MOTIVO <- ifelse(od2$D_MOTIVO == "Residência",od2$O_MOTIVO, od2$D_MOTIVO)
+
+
+
+ od2$Motivo <- NA    
+ od2$Motivo[od2$D_MOTIVO == "Estudo (Outros)"] <- "Estudo"
+ od2$Motivo[od2$D_MOTIVO == "Estudo (Regular)"] <- "Estudo"
+ od2$Motivo[od2$D_MOTIVO == "Transportar passag. p/ estudo"] <- "Estudo"
+ od2$Motivo[od2$D_MOTIVO == "Estudo"] <- "Estudo"
+ od2$Motivo[od2$D_MOTIVO == "#N/D"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Compras"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Assuntos Pessoais"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Lazer"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Saúde"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Outros"] <- "Outros"
+ od2$Motivo[od2$D_MOTIVO == "Transportar passag. p/ trabalho"] <- "Trabalho"
+ od2$Motivo[od2$D_MOTIVO == "Trabalho"] <- "Trabalho"
+ od2$Motivo[od2$D_MOTIVO == "Residência"] <- "Outros"
+
+
  od2$`Modo de transporte` <- NA
  od2$`Modo de transporte`[od2$MOD_TRA == "A pé"] <- "A pé"
  od2$`Modo de transporte`[od2$MOD_TRA == "Bicicleta"] <- "Bicicleta"

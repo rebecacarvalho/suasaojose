@@ -21,7 +21,7 @@ library(rsconnect)
 
 # 1. Data -----------------------------------------------------------------
 
-#source("script_dados.R", encoding = "UTF-8")
+source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
@@ -50,8 +50,7 @@ ui <- fluidPage(
                         mainPanel(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
-                          dataTableOutput("demografia", width = "100%", height = "auto"),
-                          plotlyOutput("plot7", height = 600),
+                          plotlyOutput("demografia", height = 700),
                           plotlyOutput("matriculas", width = "100%"),
                           plotlyOutput("empregos", width = "100%"),
                           plotlyOutput("renda", width = "100%")))),
@@ -102,7 +101,7 @@ server <- function(input, output,session){
   
   # 3.1.1. Dados demograficos -------------------------------------------------
   
-  output$demografia <- DT::renderDataTable(
+  output$demografia <- renderPlotly(
     bdemografia()
   )
   
@@ -111,11 +110,7 @@ server <- function(input, output,session){
   # 3.1.2. Dados escolares ---------------------------------------------------
   # 3.1.3. RAIS ---------------------------------------------------------------
   
-  
-  
-  
-  
-  
+
   # 3.2. Transportes --------------------------------------------------------
   
   
@@ -199,42 +194,37 @@ server <- function(input, output,session){
   
   # 5. Botao de acao --------------------------------------------------------
   
-  output$plot7 <- renderPlotly({
-    ggplotly(
-      ggplot(data = macro) + 
-        geom_sf(aes(fill = `Região`, text = paste("População:", `População`, "\n",
-                                                  "Área da macrozona:", `Área da macrozona (km²)`))) + 
-        coord_sf()+
-          labs(
-          title = "Demografia",
-          fill = "Região")+
-        scale_fill_manual(values = paleta)+
-        theme(
-          plot.title = element_text(hjust = 0.5),
-          panel.background = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.x = element_blank(),
-          axis.text.y = element_blank()))
-  })
-  
-  
-  
-  paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#C56416", "#008FD6", "#ce097a")
+ 
+  paleta <- c("#f39c18", "#007479", "#1e5fa6", "#e95b23", "#213a73", "#66388D", "#C56416", "#008FD6")
   
   # 5.1. Caracterizacao do municipio ----------------------------------------
   
   # Demografia
   
   bdemografia <- eventReactive(input$BA1, {
-    datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
-      if("Demografia" %in% input$INDICADOR_CAR){
-        demografia
-      }
-      
+    if("Demografia" %in% input$INDICADOR_CAR){
+        ggplotly(
+          ggplot(data = macro) + 
+            geom_sf(aes(fill = `Região`, 
+                        text = paste("População:", `População`, "\n",
+                        "Área da macrozona:", `Área da macrozona (km²)`, "\n",
+                        "Densidade demográfica (hab/km²):", `Densidade demográfica (hab/km²)`))) + 
+            coord_sf()+
+            labs(
+              title = "Demografia",
+              fill = "Região")+
+            scale_fill_manual(values = paleta)+
+            theme(
+              plot.title = element_text(hjust = 0.5),
+              panel.background = element_blank(),
+              axis.ticks.y = element_blank(),
+              axis.ticks.x = element_blank(),
+              axis.text.x = element_blank(),
+              axis.text.y = element_blank()))
+    }
     })
     
-  })
+
   
   # Matriculas
   
@@ -420,7 +410,6 @@ server <- function(input, output,session){
             panel.background = element_blank(),
             legend.title = element_blank(),
             legend.position = "none",
-            
             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
     }    
   })

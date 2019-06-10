@@ -2,7 +2,7 @@
 # Autora: Rebeca Carvalho
 
 
-rm(list = ls())
+
 
 # Pacotes utilizados
 
@@ -107,8 +107,13 @@ st_geometry(rais) <- NULL
 
 # IBGE
 
+
+
 censitario <- read_sf("demograficos/setor_censitario_sjc.shp") %>% 
   st_transform(4326)
+
+macros <- read_sf("demograficos/macrozonas.shp") %>% 
+  st_transform()
 
 centroides <- censitario %>% st_centroid()
 
@@ -137,29 +142,31 @@ renda <- censitario %>%
 
 # 4. Mapas ----------------------------------------------------------------
 
+macro <- read_sf("demograficos/macrozonas.shp") %>% 
+  st_transform(4326)
 
-censitario %>% ggplot() +geom_sf() + coord_sf()
+#censitario %>% ggplot() +geom_sf() + coord_sf()
 
-censitario %>% ggplot() +geom_sf() + geom_sf(data = centroides) + coord_sf()
+#censitario %>% ggplot() +geom_sf() + geom_sf(data = centroides) + coord_sf()
 
-macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
 
-macrozonas <- read_sf("demograficos/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>% st_transform(4326)
+#macrozonas <- read_sf("demograficos/REGIOES_GEOGRAFICAS_REV12_2017.shp") %>% st_transform(4326)
 
-macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
+#macrozonas %>% ggplot() +geom_sf(aes(fill = regiao)) + coord_sf()
 
-limite_mun <- read_sf("demograficos/LIMITE_MUNICIPAL.shp") %>% st_transform(4326)
+#limite_mun <- read_sf("demograficos/LIMITE_MUNICIPAL.shp") %>% st_transform(4326)
 
-limite_mun %>% ggplot() + geom_sf() + geom_sf(data = macrozonas) + coord_sf()
+#limite_mun %>% ggplot() + geom_sf() + geom_sf(data = macrozonas) + coord_sf()
 
-limite_mun$regiao <- "Extremo Norte"
+#limite_mun$regiao <- "Extremo Norte"
 
-limite_mun <- limite_mun %>% 
-  select(regiao, geometry)
+#limite_mun <- limite_mun %>% 
+  #select(regiao, geometry)
 
-macrozonas <- macrozonas %>% filter(regiao != "São Francisco Xavier")
+#macrozonas <- macrozonas %>% filter(regiao != "São Francisco Xavier")
 
-macro <- rbind(macrozonas, limite_mun)
+#macro <- rbind(macrozonas, limite_mun)
 
 
 macro <- macro %>% 
@@ -167,11 +174,11 @@ macro <- macro %>%
   rename("Região" = "regiao")
 
 
-extremo_norte <- limite_mun %>% st_difference(macrozonas)
+#extremo_norte <- limite_mun %>% st_difference(macrozonas)
 
 
 
-macro %>% ggplot() + geom_sf(aes(fill = `Região`)) + coord_sf() 
+#macro %>% ggplot() + geom_sf(aes(fill = `Região`)) + coord_sf() 
 
 
 # Demografia
