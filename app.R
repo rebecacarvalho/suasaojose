@@ -21,13 +21,30 @@ library(rsconnect)
 
 # 1. Data -----------------------------------------------------------------
 
-source("script_dados.R", encoding = "UTF-8")
+#source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
 ui <- fluidPage(
   
-  navbarPage("DadosSJC", theme = shinytheme("flatly"),
+  
+  
+  navbarPage("Sua São José", theme = shinytheme("flatly"),
+             
+                         #tags$header(class = "cabecalho-bg",
+                         
+                         #style =
+                         #"padding-top: 12px;
+                         #max-width: 100%;
+                         #border-bottom: 5px solid #f8af05;
+                         #border-bottom-width: 5px;
+                         #border-bottom-style: solid;
+                         #border-bottom-color: rgb(248, 175, 5);
+                         #background-color: #004997;
+                         #box-sizing: border-box;
+                         #margin: 0;
+                         #padding: 0;
+                         #display: block;"),
              
             
              tabPanel("Caracterização do município",
@@ -36,7 +53,7 @@ ui <- fluidPage(
                         
                         sidebarPanel(h4("Opções"),width = 3,
                                      
-                                     
+                                    
                                      checkboxGroupInput(inputId = "INDICADOR_CAR",
                                                         label = "Escolha um indicador:", 
                                                         choices = c("Demografia", "Relação de empregos por área de atividade",
@@ -51,9 +68,10 @@ ui <- fluidPage(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
                           plotlyOutput("demografia", height = 700),
-                          plotlyOutput("matriculas", width = "100%"),
                           plotlyOutput("empregos", width = "100%"),
-                          plotlyOutput("renda", width = "100%")))),
+                          plotlyOutput("matriculas", width = "100%"),
+                          plotlyOutput("renda", width = "100%"),
+                          dataTableOutput("motorizacao")))),
              
              tabPanel("Transportes",
                       
@@ -87,14 +105,100 @@ ui <- fluidPage(
                           plotlyOutput("viagens_modo", width = "100%")))),
    
                        
-             tabPanel("Sobre")
-  ))
+             tabPanel("Sobre", htmlOutput("sobre"))),
+             
+             br(),
+             
+             
+             tags$footer(class = "rodape",
+                         
+                         style =
+                           
+                         "max-width: 100%;
+                         padding: 10px 0;
+                         min-height: 40px;
+                         background-color: #2c3e50;;
+                         color: #fff;
+                         font-family: 'Segoe UI';
+                         font-size: 14px;
+                         text-align: left;",
+                         
+                         tags$div(class = "rodape-container",
+                                  
+                                  style =
+                                    
+                                  "max-width: 960px;
+                                  margin: 0 auto;
+                                  display: flex;
+                                  flex-wrap: wrap;
+                                  box-sizing: border-box;
+                                  padding: 0;",
+                                  
+                                  
+                                  tags$div(class = "rodape-texto", "© 2019 CEPESP Todos os direitos reservados.",
+                                           
+                                           style = 
+                                             
+                                             "
+                                           max-width: 50%;
+                                           align: left;
+                                           flex: 1 1 200px;
+                                           display: flex;
+                                           padding-left: 5%;
+                                           padding-top: 10px;
+                                           font-size: .9em;
+                                           box-sizing: border-box;
+                                           margin: 0;
+                                           padding: 0;")))
+  )
 
 
 
 # 3. Server ---------------------------------------------------------------
 
 server <- function(input, output,session){
+  
+  # Sobre
+  
+  output$sobre <- renderUI({
+    sobre <- paste0(
+      "
+      <h2 align = 'center'>
+      <font size ='6' color = 'black'><strong>
+
+      Sobre </font></h4>
+
+      <font size = '1' color = 'black'>
+
+      <h4 align = 'justify'><br />
+      A mobilidade faz parte do dia-a-dia das pessoas que vivem em cidades. 
+      Deslocamentos ocorrem, principalmente, em razão de trabalho, estudo, 
+      afazeres pessoais ou lazer e impactam diretamente a qualidade de vida
+      das pessoas, a inclusão social e a equidade na apropriação da cidade e
+      dos serviços que ela tem a oferecer.
+      <p><br />
+      As inovações tecnológicas atingiram todas as áreas do conhecimento e, de
+      forma muito intensa, os serviços ligados ao transporte urbano. O novo paradigma
+      da mobilidade urbana (aplicativos de transporte privado, aplicativos de entregas,
+      sistemas de compartilhamento de bicicletas, patinetes, carros particulares, ônibus sob demanda, 
+      mobilidade como serviço...) impõe desafios para os usuários e principalmente para os operadores 
+      (poder público e empresas privadas) do sistema tradicional.
+      <p><br />
+      Para pensar a mobilidade que queremos no futuro é preciso entender os dados que existem sobre o
+      sistema atual, para que a discussão sobre as possibilidades e limitações das novas mudanças sejam qualificadas.
+      <p><br />
+      O objetivo desse app/site/portal, desenvolvido por Rebeca de Jesus Carvalho, é reunir informações sobre a mobilidade
+      urbana no município de São José dos Campos, para que todas as pessoas interessadas em participar das discussões sobre
+      a reestruturação do novo transporte público estejam informadas sobre o assunto.
+      <p><br />
+      As informações aqui disponibilizadas têm como fonte o Atlas da Pesquisa Origem e Destino, realizada em 2011, bem como 
+      dados mais recentes sobre a operação do transporte na cidade.</h3></font>")
+    
+    HTML(sobre)
+    
+  })
+  
+  
   
   # 3.1. Caracterizacao do municipio ----------------------------------------  
   
@@ -105,7 +209,9 @@ server <- function(input, output,session){
     bdemografia()
   )
   
-  
+  output$motorizacao <- renderDataTable(
+    bmotorizacao()
+  )
   
   # 3.1.2. Dados escolares ---------------------------------------------------
   # 3.1.3. RAIS ---------------------------------------------------------------
@@ -212,6 +318,7 @@ server <- function(input, output,session){
             coord_sf()+
             labs(
               title = "Demografia",
+              caption = "Fonte: Pesquisa OD/2011",
               fill = "Região")+
             scale_fill_manual(values = paleta)+
             theme(
@@ -220,12 +327,12 @@ server <- function(input, output,session){
               axis.ticks.y = element_blank(),
               axis.ticks.x = element_blank(),
               axis.text.x = element_blank(),
-              axis.text.y = element_blank()))
+              axis.text.y = element_blank(),
+              plot.caption = element_text()))
     }
     })
     
 
-  
   # Matriculas
   
   bmatriculas <- eventReactive(input$BA1, {
@@ -237,6 +344,8 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Matrículas por nível de ensino",
+            subtitle = "",
+            caption = "Fonte: Censo Escolar/2016-2018 ",
             fill = "Nível de ensino")+
           ylab("Porcentagem de matrículas") +
           xlab("") +
@@ -244,9 +353,11 @@ server <- function(input, output,session){
           theme(
             plot.title = element_text(hjust = 0.5),
             panel.background = element_blank(),
-            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+            plot.caption = element_text()))
     }      
   })
+  
   
   
   # Empregos por area de atividade
@@ -260,6 +371,7 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Relação de empregos por por área de atividade",
+            caption = "Fonte: RAIS/2017 ",
             fill = "Área de atividade")+
           ylab("Porcentagem de trabalhadores") +
           xlab("")+
@@ -267,7 +379,8 @@ server <- function(input, output,session){
           theme(
             plot.title = element_text(hjust = 0.5),
             panel.background = element_blank(),
-            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+            plot.caption = element_text()))
     }      
   })
   
@@ -281,7 +394,9 @@ server <- function(input, output,session){
           geom_bar(stat = "identity") +
           coord_flip()+
           labs(
-            title = "Renda média por macrozona")+
+            title = "Renda média por macrozona",
+            subtitle = "Teste",
+            caption = "Fonte: IBGE/2010 ")+
           ylab("Renda média") +
           xlab("")+
           scale_fill_manual(values = paleta)+
@@ -294,6 +409,18 @@ server <- function(input, output,session){
     }      
   })
   
+  
+  # Taxa de motorizacao
+  
+  bmotorizacao <- eventReactive(input$BA1, {
+    datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
+    if("Taxa de motorização no município" %in% input$INDICADOR_CAR){
+      motorizacao
+      
+  }
+  })
+  })
+  
   # 5.2. Transportes --------------------------------------------------------
   
   # Linhas
@@ -303,9 +430,10 @@ server <- function(input, output,session){
       ggplotly(
         plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst', colors = paleta,
                 hovertext = ~nomes)%>%
-          layout(title = "Linhas"))
+          layout(title = "Linhas"
+                 ))
       
-    }
+  }
   })
   
   
@@ -333,6 +461,7 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Distribuição modal por motivo da viagem",
+            caption = "Fonte: Pesquisa OD/2011",
             fill = "Motivo da viagem")+
           xlab("") +
           ylab("Porcentagem de viagens") +
@@ -357,6 +486,7 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Distribuição modal por gênero",
+            caption = "Fonte: Pesquisa OD/2011",
             fill = "Gênero")+
           xlab("") +
           ylab("Porcentagem de viagens") +
@@ -379,6 +509,7 @@ server <- function(input, output,session){
           coord_flip()+
           labs(
             title = "Média de viagens por faixa de renda",
+            caption = "Fonte: Pesquisa OD/2011",
             fill = "Faixa de renda")+
           xlab("") +
           ylab("Média de viagens") +
@@ -401,7 +532,8 @@ server <- function(input, output,session){
           geom_bar(stat = "identity") +
           coord_flip()+
           labs(
-            title = "Média de viagens por modal")+
+            title = "Média de viagens por modal",
+            caption = "Fonte: Pesquisa OD/2011")+
           xlab("") +
           ylab("Média de viagens") +
           scale_fill_manual(values = paleta)+
@@ -413,6 +545,27 @@ server <- function(input, output,session){
             axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
     }    
   })
+  
+  tags$footer(class = "rodape",
+              
+              tags$div(class = "rodape-container",
+                       
+                       style =
+                         
+                         "max-width: 960px;
+                          margin: 0 auto;
+                          display: flex;
+                          flex-wrap: wrap;
+                          box-sizing: border-box;
+                          padding: 0;
+
+                       
+                       "
+                       
+                       )
+              
+              )
+  
 }
 
 # 6. ShinyApp -------------------------------------------------------------

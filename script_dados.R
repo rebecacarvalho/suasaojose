@@ -12,6 +12,11 @@ library(dplyr)
 library(tidyverse)
 library(lubridate)
 library(tibble)
+library(sp)
+library(rgeos)
+library(maptools)
+library(rgdal)
+library(sf)
 
 
 # 1. Dados ----------------------------------------------------------------
@@ -192,7 +197,7 @@ rais$Setor[rais$Subsetor == "Construçao civil"] <- "Comércio e serviços"
 rais$Setor[rais$Subsetor == "Serv. de alojamento, alimentaçao, reparaçao, manutençao, redaçao"] <- "Comércio e serviços"
 rais$Setor[rais$Subsetor == "Serviços médicos, odontológicos e veterinários"] <- "Comércio e serviços"
 rais$Setor[rais$Subsetor == "Administraçao pública direta e autárquica"] <- "Administração pública"
-table(rais$Subsetor)
+
 
 # 2.4. Pesquisa OD --------------------------------------------------------
 
@@ -366,8 +371,8 @@ linhas2 <- data.frame(
 
 
 demografia <- data.frame(Demografia = c("População", "Área da macrozona (km²)", "Densidade demográfica (hab/km²)"), 
-                                        Centro = c("72.115", "18,68", "3.860,55"), 
-                                        Sul = c("233.536", "56,51", "4.132,65"), 
+                         Centro = c("72.115", "18,68", "3.860,55"), 
+                         Sul = c("233.536", "56,51", "4.132,65"), 
                                         Leste = c("160.990", "134,69", "1.195,26"),
                                         Oeste = c("41.163", "44,01", "935,31"), 
                                         Norte = c("59.800", "63,73", "938,33"),
@@ -376,6 +381,16 @@ demografia <- data.frame(Demografia = c("População", "Área da macrozona (km²
                                                             "22,28"), 
                                         Município = c("629.921", "1.098,79", 
                                                       "573,29"))
+
+motorizacao <- data.frame("x" = c("População", "Taxa de motorização", "Taxa de motorização veículos particulares","Habitantes/moto"),
+                          '2000' = c("539.313", "2,91", "3,39", "24,18"),
+                          "2010" = c("629.921", "1,91", "2,21", "11,83"),
+                          Crescimento = c("17%", "52%", "53%", "153%"))
+
+motorizacao <- motorizacao %>% 
+  rename("Indicadores" = "x", "2000" = "X2000", "2010" = "X2010")
+
+
 
 # Renda media por macrozona
 
@@ -545,7 +560,5 @@ renda2 <- renda2 %>%
   na.omit()
    
                       
-
-# 3.5. Linhas -------------------------------------------------------------
 
 
