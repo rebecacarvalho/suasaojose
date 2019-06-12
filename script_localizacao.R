@@ -13,6 +13,7 @@ library(sf)
 library(dplyr)
 library(sp)
 library(rgeos)
+library(ggplot2)
 
 
 # 1. Dados ----------------------------------------------------------------
@@ -212,6 +213,20 @@ macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
 
+
+# Rotas
+
+rotas <- read_sf("demograficos/shapes_rotas.shp") %>% 
+  st_transform(4326)
+
+rotas <- rotas %>% 
+  rename("Código" = "route_shor")
+
+lrotas <- left_join(linhas,rotas, by = "Código")
+
+nrotas <- anti_join(rotas, linhas, by = "Código")
+  
+lrotas %>% filter(Código == 104) %>% ggplot() + geom_sf(aes(color = as.factor(fid))) + coord_sf()
 
 # 5. Arquivo ------------------------------------------------------------------
 

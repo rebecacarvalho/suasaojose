@@ -7,16 +7,7 @@ rm(list = ls())
 # Pacotes utilizados
 
 
-library(readr)
-library(dplyr)
-library(tidyverse)
-library(lubridate)
-library(tibble)
-library(sp)
-library(rgeos)
-library(maptools)
-library(rgdal)
-library(sf)
+
 
 
 # 1. Dados ----------------------------------------------------------------
@@ -40,6 +31,11 @@ renda <- read_csv("renda.txt")
 
 macro <- read_sf("demograficos/macrozonas.shp") %>% 
   st_transform(4326)
+
+rotas <- read_sf("demograficos/shapes_rotas.shp") %>% 
+  st_transform(4326)
+
+
 
 # 1.2. Dados escolares ----------------------------------------------------
 
@@ -84,6 +80,7 @@ zonas <- read_delim("dados OD/zonas.txt",
 linhas <- read_delim("linhas/linhas.txt", ";", 
                      escape_double = FALSE, col_types = cols(X5 = col_skip()), 
                      trim_ws = TRUE)
+
 
 
 # 2. Limpeza e organizacao dos dados --------------------------------------
@@ -143,6 +140,8 @@ macro$`Densidade demográfica (hab/km²)`[macro$Região == "Leste"] <- "1.195,26
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57"
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
+
+
 
 # 2.2. Dados escolares ----------------------------------------------------
 
@@ -236,9 +235,79 @@ linhas$NOME <- str_to_title(linhas$NOME)
 
 linhas <- dplyr::rename(linhas, "Nome" = "NOME")
 
+
+rotas <- rotas %>% 
+  rename("Código" = "route_shor", "Nome" = "route_long")
+
+rotas$Nome <- str_to_title(rotas$Nome)
+
+nrotas <- anti_join(rotas, linhas, by = "Código")
+
+linhas <- full_join(linhas, nrotas, by = c("Código", "Nome"))
+
+linhas <- linhas %>% 
+  select(Código, Nome, Empresa, CE)
+
+linhas$Nome[linhas$Nome == "Jd. Das Indãšstrias / OlãMpio Catãƒo"] <- "Jd. das Indústrias / Olímpio Catão"
+linhas$Nome[linhas$Nome == "ChãCaras Havaã / Av. Eng. Francisco Josã‰ Longo"] <- "Chácaras Havaí / Av. Eng. Francisco José Longo"
+linhas$Nome[linhas$Nome == "Jd. Portugal / OlãMpio Catãƒo"] <- "Jd. Portugal / Olímpio Catão"
+linhas$Nome[linhas$Código == "Alt 20"] <- "Colorado / Olímpio Catão"
+linhas$Nome[linhas$Nome == "Ch. Reunidas / OlãMpio Catãƒo"] <- "Ch. Reunidas / Olímpio Catão"
+linhas$Nome[linhas$Nome == "Jd. Morumbi / OlãMpio Catãƒo"] <- "Jd. Morumbi / Olímpio Catão"              
+linhas$Nome[linhas$Nome == "Michigan / Av. Eng. Francisco Josã‰ Longo"] <- "Michigan / Av. Eng. Francisco José Longo"
+linhas$Nome[linhas$Nome == "Canindu / Av. Eng. Francisco Josã‰ Longo"] <- "Canindu / Av. Eng. Francisco José Longo"
+linhas$Nome[linhas$Nome == "Terras Do Sul / OlãMpio Catãƒo"] <- "Terras do Sul / Olímpio Catão"
+linhas$Nome[linhas$Nome == "Jd. Guimarãƒes / Centro"] <- "Jd. Guimarães / Centro"
+
+
+linhas$Empresa[linhas$Código == "Alt 10"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 11"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 14"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 15"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 20"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 21"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 24"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 25"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 28"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 30"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 31"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 32"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 33"] <- "Alternativo"
+linhas$Empresa[linhas$Código == "Alt 38"] <- "Alternativo"
+
+linhas$CE[linhas$Código == "Alt 10"] <- "4"
+linhas$CE[linhas$Código == "Alt 11"] <- "4"
+linhas$CE[linhas$Código == "Alt 14"] <- "4"
+linhas$CE[linhas$Código == "Alt 15"] <- "4"
+linhas$CE[linhas$Código == "Alt 20"] <- "4"
+linhas$CE[linhas$Código == "Alt 21"] <- "4"
+linhas$CE[linhas$Código == "Alt 24"] <- "4"
+linhas$CE[linhas$Código == "Alt 25"] <- "4"
+linhas$CE[linhas$Código == "Alt 28"] <- "4"
+linhas$CE[linhas$Código == "Alt 30"] <- "4"
+linhas$CE[linhas$Código == "Alt 31"] <- "4"
+linhas$CE[linhas$Código == "Alt 32"] <- "4"
+linhas$CE[linhas$Código == "Alt 33"] <- "4"
+linhas$CE[linhas$Código == "Alt 38"] <- "4"
+
+linhas <- unique(linhas)
+
+rotas <- rotas %>% 
+  select(fid, Código, direction_, geometry)
+
+
+lrotas <- left_join(linhas,rotas, by = c("Código"))
+
+table(lrotas$Código)
+
+lrotas <- subset(lrotas, !duplicated(subset(lrotas, select=c(Código))))
+
+lrotas <- na.omit(lrotas)
+
+
 linhas2 <- data.frame(
   ids = c(
-    "CS Brasil", "Expresso Maringá", "Saens Peña", 
+    "CS Brasil", "Expresso Maringá", "Saens Peña", "Alternativo", 
     "CS Brasil - 103", "104", "108", "112", "116", "118", "124", "200", 
     "201", "202", "205", "211", "215","216", "222", "225", "231", "232",
     "237", "240", "242", "243", "244", "245", "246", "250", "251", "130A",
@@ -249,21 +318,23 @@ linhas2 <- data.frame(
     "Expresso Maringá - 341B","Saens Peña - 101", "102", "105", "107", "111", "115", 
     "117", "119", "121", "122", "123", "125", "128", "133","134", "135", "140", "141", 
     "142", "150", "214", "230", "300", "303", "304", "306", "309", "311", "313", "314",
-    "320", "327", "Saens Peña - 331"
+    "320", "327", "Saens Peña - 331", "Alternativo - Alt 10", "Alt 11", "Alt 14", "Alt 15",
+    "Alt 20", "Alt 21", "Alt 24", "Alt 25", "Alt 28", "Alt 30", "Alt 31", "Alt 32", "Alt 33", "Alternativo - Alt 38"
   ),
-  labels = c("CS<br>Brasil<br>33", "Expresso<br>Maringá<br>37", "Saens<br>Peña<br>33",
+  labels = c("CS<br>Brasil<br>33", "Expresso<br>Maringá<br>37", "Saens<br>Peña<br>33", "Alternativo<br>14",
     "103", "104", "108", "112", "116", "118", "124", "200", "201", "202", "205", "211", 
     "215","216", "222", "225", "231", "232", "237", "240", "242", "243", "244", "245", 
-    "246", "250", "251", "130A","130B", "204A", "204B", "206A", "CS Brasil - 206B",  
-    "Expresso Maringá - 208", "209", "210", "212", "219", "229", "252", "302", "305", 
+    "246", "250", "251", "130A","130B", "204A", "204B", "206A", "206B",  
+    "208", "209", "210", "212", "219", "229", "252", "302", "305", 
     "307", "310", "315", "316","317", "318", "319", "322","323", "325", "330", "333", 
     "334", "335", "342", "343", "344", "345", "347", "349","350", "355", "308A", "308OF",
-    "340A", "340B", "341A", "Expresso Maringá - 341B","Saens Peña - 101", "102", "105", 
+    "340A", "340B", "341A", "341B","101", "102", "105", 
     "107", "111", "115", "117", "119", "121", "122", "123", "125", "128", "133",
     "134", "135", "140", "141", "142", "150", "214", "230", "300", "303", "304", "306", 
-    "309", "311", "313", "314","320", "327", "331"
+    "309", "311", "313", "314","320", "327", "331", "Alt 10", "Alt 11", "Alt 14", "Alt 15",
+    "Alt 20", "Alt 21", "Alt 24", "Alt 25", "Alt 28", "Alt 30", "Alt 31", "Alt 32", "Alt 33", "Alt 38"
   ),
-  parents = c("","","","CS Brasil","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", 
+  parents = c("","","","","CS Brasil","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", 
               "CS Brasil",  "CS Brasil","CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",
               "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil","CS Brasil",  "CS Brasil",
               "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil",  "CS Brasil", "CS Brasil", 
@@ -283,9 +354,11 @@ linhas2 <- data.frame(
               "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
               "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
               "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", "Saens Peña", 
-              "Saens Peña", "Saens Peña", "Saens Peña"
+              "Saens Peña", "Saens Peña", "Saens Peña", "Alternativo", "Alternativo", "Alternativo",
+              "Alternativo", "Alternativo", "Alternativo", "Alternativo", "Alternativo", "Alternativo",
+              "Alternativo", "Alternativo", "Alternativo", "Alternativo", "Alternativo"
   ),
-  nomes = c("", "","",
+  nomes = c("", "","","",
             "Costinha / Terminal Central","Vargem Grande / Terminal Central", 
             "Canindu - Vl. Cândida / Terminal Central","Vl. Terezinha / Cta", 
             "Taquari / Rodoviária", "Sertãozinho – Via Vila Cândida / Terminal Central",
@@ -353,7 +426,11 @@ linhas2 <- data.frame(
             "Limoeiro / Praça Afonso Pena", "Aquárius - Colinas / Terminal Central", 
             "Ch. Reunidas / Terminal Central", 
             "Pq. Industrial - Jd. das Indústrias / Praça Afonso Pena", 
-            "Res. União / Praça Afonso Pena","Campo dos Alemães / Aquárius"
+            "Res. União / Praça Afonso Pena","Campo dos Alemães / Aquárius", "Canindu / Av. Eng. Francisco José Longo",
+            "Altos De Santana / Centro", "Vl. Paiva / Centro", "Jd. Guimarães / Centro", "Colorado / Olímpio Catão",
+            "Vl. Do Tesouro / Centro", "Vista Verde / Centro", "Michigan / Av. Eng. Francisco José Longo", "Ch. Reunidas/ Olímpio Catão",
+            "Jd. Portugal / Olímpio Catão", "Jd. Morumbi / Olímpio Catão", "Jd. das Indústrias / Olímpio Catão", "Terras do Sul / Olímpio Catão",
+            "Chácaras Havaí / Av. Eng. Francisco José Longo"
   ),
   stringsAsFactors = FALSE
 )
