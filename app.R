@@ -17,11 +17,15 @@ library(plotly)
 library(DT)
 library(scales)
 library(rsconnect)
+library(sf)
+library(leaflet)
+
+library(maps)
 
 
 # 1. Data -----------------------------------------------------------------
 
-#source("script_dados.R", encoding = "UTF-8")
+source("script_dados.R", encoding = "UTF-8")
 
 # 2. User interface -------------------------------------------------------
 
@@ -67,12 +71,12 @@ ui <- fluidPage(
                         mainPanel(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
-                          plotlyOutput("demografia", height = 700),
+                          plotOutput("demografia", height = 700),
                           plotlyOutput("empregos", width = "100%"),
                           plotlyOutput("matriculas", width = "100%"),
                           plotlyOutput("renda", width = "100%"),
                           dataTableOutput("motorizacao")))),
-             
+        
              tabPanel("Transportes",
                       
                       sidebarLayout(
@@ -97,6 +101,7 @@ ui <- fluidPage(
                           tags$style(type = "text/css",
                                      ".dataTables_filter, .dataTables_info { display: none; }",
                                      ".dataTable( {'lengthChange': false});"),
+                          plotlyOutput("rotas"),
                           plotlyOutput("linhas", height = "900px"),
                           dataTableOutput("categorias", width = "100%"),
                           plotlyOutput("modal", width = "100%"),
@@ -288,6 +293,7 @@ server <- function(input, output,session){
     
   })
   
+
   
   # 4.2.2. Linhas -----------------------------------------------------------
   
@@ -296,6 +302,17 @@ server <- function(input, output,session){
     b_linhas()
   )
   
+  
+  output$rotas <- renderPlot(
+   
+      # Get subset based on selection
+      #event.data <- event_data("plotly_selected", source = "subset"),
+      
+      # If NULL dont do anything
+      #if(is.null(event.data) == T) return(NULL),
+    
+      brotas()
+  )
   
   
   # 5. Botao de acao --------------------------------------------------------
@@ -429,12 +446,75 @@ server <- function(input, output,session){
     if("Linhas" %in% input$INDICADOR_TR){
       ggplotly(
         plot_ly(linhas2, ids = ~ids, labels = ~labels, parents = ~parents, type = 'sunburst', colors = paleta,
-                hovertext = ~nomes)%>%
-          layout(title = "Linhas"
+                hovertext = ~nomes, source = )%>%
+          layout(title = "Linhas",
+                 dragmode = "select"
                  ))
       
   }
   })
+  
+  
+  # Rotas 
+  
+  
+  m <- leaflet() %>%
+    addTiles() %>%  # Add default OpenStreetMap map tiles
+    addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R")
+  m  # Print the map
+  
+  #PDC.graph <- function(df, na.rm = TRUE, ...){
+    
+    codigo <- c(lrotas$Código)
+   
+   
+    brotas <- eventReactive(input$BA2,  {
+      if("Linhas" %in% input$INDICADOR_TR){
+        for (i in seq_along(codigo)){
+    grap <-  lrotas %>% 
+       filter(Código == codigo[i]) %>% 
+              ggplot() +
+              geom_sf(aes(fill = codigo[i], color = codigo[i])) + 
+              coord_sf()+
+              labs(
+                fill = "Código da linha"
+              ) +
+              ggtitle(paste("Rota da linha ", codigo[i], sep='')) +
+              theme(
+                plot.title = element_text(hjust = 0.5),
+                plot.caption = element_text(),
+                legend.title = element_blank(),
+                legend.position = "none")
+    
+    grap <- leaflet() %>% setView(lng = -45.8872, lat = -23.1791, zoom = 12) %>% 
+      addTiles() %>%  addPolylines(data = lrotas$geometry)
+    
+      print(grap)
+      }}})
+    
+    
+    
+    
+    
+     
+     
+    
+    #ggsave(plot = last_plot(), file= paste("linha",codigo[i], ".pdf", sep=''), scale=2)
+   #}}
+              
+      
+ #PDC.graph(lrotas)        
+              
+              
+  
+  
+  #output$selected_rows <- renderPlotly({
+    #if (is.null(input$plot1_click$x)) return()
+    #else {
+     # keeprows <- round(input$plot1_click$x) == as.numeric(ToothGrowth$supp)
+    #  head(ToothGrowth[keeprows, ], 10)
+    #}
+#  })
   
   
   # Categorias de transporte

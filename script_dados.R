@@ -6,10 +6,6 @@ rm(list = ls())
 
 # Pacotes utilizados
 
-
-
-
-
 # 1. Dados ----------------------------------------------------------------
 
 # Secao para importacao dos dados
@@ -18,7 +14,8 @@ rm(list = ls())
 
 Basico_SP2 <- read_delim("demograficos/Basico_SP2.txt", 
                          ";", escape_double = FALSE, locale = locale(), 
-                         trim_ws = TRUE)
+                         trim_ws = TRUE) 
+
 
 Domicilio01_SP2 <- read_delim("demograficos/Domicilio01_SP2.txt", 
                               ";", escape_double = FALSE, 
