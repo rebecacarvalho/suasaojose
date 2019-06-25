@@ -71,7 +71,7 @@ ui <- fluidPage(
                         mainPanel(
                           
                           absolutePanel(top = 0, right = 0, left = 100),
-                          plotOutput("demografia", height = 700),
+                          plotlyOutput("demografia", height = 700),
                           plotlyOutput("empregos", width = "100%"),
                           plotlyOutput("matriculas", width = "100%"),
                           plotlyOutput("renda", width = "100%"),
@@ -101,7 +101,7 @@ ui <- fluidPage(
                           tags$style(type = "text/css",
                                      ".dataTables_filter, .dataTables_info { display: none; }",
                                      ".dataTable( {'lengthChange': false});"),
-                          plotlyOutput("rotas"),
+                          #plotlyOutput("rotas"),
                           plotlyOutput("linhas", height = "900px"),
                           dataTableOutput("categorias", width = "100%"),
                           plotlyOutput("modal", width = "100%"),
