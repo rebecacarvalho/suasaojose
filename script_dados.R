@@ -138,6 +138,15 @@ macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
 
+macro$`Renda média ($)` <- NA
+macro$`Renda média ($)`[macro$Região == "Centro"] <- "1.795,00"
+macro$`Renda média ($)`[macro$Região == "Oeste"] <- "2.519,00"
+macro$`Renda média ($)`[macro$Região == "Sul"] <- "934,00"
+macro$`Renda média ($)`[macro$Região == "Leste"] <- "696,00"
+macro$`Renda média ($)`[macro$Região == "Sudeste"] <- "653,00"
+macro$`Renda média ($)`[macro$Região == "Norte"] <- "626,00"
+macro$`Renda média ($)`[macro$Região == "Extremo Norte"] <- "574,00"
+
 
 
 # 2.2. Dados escolares ----------------------------------------------------
@@ -606,7 +615,7 @@ viagens <- od2 %>%
   dplyr::group_by(`Modo de transporte`) %>% 
   dplyr::summarise(
     n = n(),
-    `Média` = mean(n/24988)
+    `Média` = mean(n)
   )
 
 # Media de viagens por faixa de renda
