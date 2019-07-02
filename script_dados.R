@@ -31,7 +31,7 @@ macro <- read_sf("demograficos/macrozonas.shp") %>%
 rotas <- read_sf("demograficos/shapes_rotas.shp") %>% 
   st_transform(4326)
 
-
+mun <- read_csv("mun.txt", locale = locale())
 
 # 1.2. Dados escolares ----------------------------------------------------
 
@@ -158,23 +158,16 @@ macro$`Renda média (R$)`[macro$Região == "Extremo Norte"] <- "574,00"
 
 macro2 <- macro
 
-mun <- data.frame(Região = "Município", População = 629.921,
-                  `Área da macrozona (km²)` = "1.098,79",
-                  `Densidade demográfica (hab/km²)` = "573,29",
-                  `Renda média (R$)` = "961,92"
-)
-mun <- mun %>% 
-  rename("Área da macrozona (km²)" = "Área.da.macrozona..km².",
-         "Densidade demográfica (hab/km²)" = "Densidade.demográfica..hab.km².",
-         "Renda média (R$)" = "Renda.média..R..")
+glimpse(mun)
+glimpse(macro)
 
-mun$`Renda média (R$)` <- as.character(mun$`Renda média (R$)`)
-mun$População <- as.numeric(mun$População)
-mun$`Densidade demográfica (hab/km²)` <- as.character(mun$`Densidade demográfica (hab/km²)`)
 mun$`Área da macrozona (km²)` <- as.character(mun$`Área da macrozona (km²)`)
-mun$Região <- as.character(mun$Região)
+mun$`Densidade demográfica (hab/km²)` <- as.character(mun$`Densidade demográfica (hab/km²)`)
+mun$`Renda média (R$)` <- as.character(mun$`Renda média (R$)`)
 
 macro <- bind_rows(macro, mun)
+
+
 
 # 2.2. Dados escolares ----------------------------------------------------
 
