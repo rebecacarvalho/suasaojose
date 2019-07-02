@@ -26,7 +26,7 @@ library(leaflet)
 library(maps)
 
 
-#source("script_dados.R", encoding = "UTF-8")
+source("script_dados.R", encoding = "UTF-8")
 
 
 # 1. User interface -------------------------------------------------------
@@ -66,15 +66,15 @@ ui <- dashboardPage(skin = "blue",
                                   valueBox(value = "12.815", subtitle = "População rural", icon = icon("tree"),
                                            color = "maroon", width = 3)),
                             fluidRow(
-                           box(title = "Demografia", width = 6, status = "primary", 
-                               solidHeader = TRUE, plotlyOutput("demografia", height = 630)),
-                           box(title = "Dados demográficos do município", width = 6, status = "primary",
-                               solidHeader = TRUE, dataTableOutput("macro", height = 350)),
+                           box(title = "Demografia (IBGE/2010)", width = 6, status = "primary", 
+                               solidHeader = TRUE, plotlyOutput("demografia", height = 680)),
+                           box(title = "Dados demográficos do município (IBGE/2010)", width = 6, status = "primary",
+                               solidHeader = TRUE, dataTableOutput("macro", height = 390)),
                            box(title = "Taxa de motorização no município", width = 6, status = "primary",
                                solidHeader = TRUE, dataTableOutput("motorizacao", height = 210)),
-                           box(title = "Relação de empregos por área de atividade", width = 6, status = "primary",
+                           box(title = "Relação de empregos por área de atividade (RAIS/2017)", width = 6, status = "primary",
                                solidHeader = TRUE, plotlyOutput("empregos", height = 310)),
-                           box(title ="Matrícula por nível de ensino", width = 6, status = "primary",
+                           box(title ="Matrícula por nível de ensino (CENSO ESCOLAR/2016-2018)", width = 6, status = "primary",
                                solidHeader = TRUE, plotlyOutput("matriculas", height = 310)))
                            
                           ),
@@ -91,10 +91,11 @@ ui <- dashboardPage(skin = "blue",
                               
                         fluidRow(
                           box(title = "Linhas", width = 6, status = "primary", solidHeader = TRUE, plotlyOutput("plot5", height = 700)),
-                          box(title = "Distribuição modal por gênero", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot7", height = 310)),
-                          box(title = "Distribuição modal por motivo da viagem", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot6", height = 310)),
-                          box(title = "Proporção de viagens por faixa de renda em cada modo", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot8", height = 330)),
-                          box(title = "Média de viagens por modo", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot9", height = 330)))
+                          box(title = "Distribuição modal por gênero (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot7", height = 310)),
+                          box(title = "Distribuição modal por motivo da viagem (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot6", height = 310)),
+                          box(title = "Proporção de viagens por faixa de renda em cada modo (OD/2011)", 
+                              width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot8", height = 350)),
+                          box(title = "Média de viagens por modo (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot9", height = 350)))
                         ),
                         
                         tabItem(tabName = "Sobre",
@@ -210,12 +211,12 @@ paleta <- c("#f39c18","#007479", "#e95b23",  "#93145a","#1d4f24","#66388D", "#C5
   
 output$demografia <- renderPlotly({
     ggplotly(textposition = "middle",
-      ggplot(data = macro) +
+      ggplot(data = macro2) +
         geom_sf(aes(fill = `Região`, 
                    text = paste("População:", `População`, "\n",
                                  "Área da macrozona:", `Área da macrozona (km²)`, "\n",
                                  "Densidade demográfica (hab/km²):", `Densidade demográfica (hab/km²)`,"\n",
-                                 "Renda média ($):", `Renda média ($)`))) + 
+                                 "Renda média (R$/2010):", `Renda média (R$)`))) + 
         coord_sf()+
         labs(
           title = "Demografia",
@@ -237,7 +238,8 @@ output$macro <- renderDataTable({
   datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
     macro %>% 
       as.data.frame() %>% 
-      select(`Região`, `População`,`Área da macrozona (km²)`, `Densidade demográfica (hab/km²)`, `Renda média ($)`)
+      select(`Região`, `População`,`Área da macrozona (km²)`, 
+             `Densidade demográfica (hab/km²)`, `Renda média (R$)`)
   }) 
 })
     
@@ -380,8 +382,8 @@ output$motorizacao <- renderDataTable({
   output$plot9 <- renderPlotly({
     
     ggplotly(
-      ggplot(data = viagens, aes(`Modo de transporte`, y = `Média`, fill = paleta)) +
-        geom_bar(stat = "identity") +
+      ggplot(data = viagens2, aes(`Modo de transporte`, y = `Média de viagens por modo`)) +
+        geom_bar(stat = "identity", fill = paleta) +
         coord_flip()+
         labs(
           title = "Média de viagens por modo")+

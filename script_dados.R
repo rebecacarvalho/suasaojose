@@ -2,7 +2,6 @@
 # Titulo: Dados SJC
 # Autor: Rebeca Carvalho
 
-rm(list = ls())
 
 # Pacotes utilizados
 
@@ -101,13 +100,24 @@ Domicilio02_SP2 <- Domicilio02_SP2 %>%
 
 renda$Renda <- as.numeric(renda$Renda)
 
+renda <- na.omit(renda)
+
+renda3 <- renda %>% 
+  summarise(
+    `Total renda` = sum(Renda),
+    `Total população` = sum(População),
+    `Renda média do município` = `Total renda`/`Total população`
+  )
+
 # Macrozonas
 
 macro <- macro %>% 
   select(MacroZona, geometry) %>% 
   rename("Região" = "MacroZona")
 
+
 # Demografia
+
 
 macro$População <- NA
 macro$População[macro$Região == "Centro"] <- 72.115
@@ -117,7 +127,6 @@ macro$População[macro$Região == "Leste"] <- 160.990
 macro$População[macro$Região == "Sudeste"] <- 46.803
 macro$População[macro$Região == "Norte"] <- 59.800
 macro$População[macro$Região == "Extremo Norte"] <- 15.514
-
 
 macro$`Área da macrozona (km²)` <- NA
 macro$`Área da macrozona (km²)`[macro$Região == "Centro"] <- "18,68"
@@ -138,16 +147,34 @@ macro$`Densidade demográfica (hab/km²)`[macro$Região == "Sudeste"] <- "552,57
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Norte"] <- "938,33"
 macro$`Densidade demográfica (hab/km²)`[macro$Região == "Extremo Norte"] <- "22,28"
 
-macro$`Renda média ($)` <- NA
-macro$`Renda média ($)`[macro$Região == "Centro"] <- "1.795,00"
-macro$`Renda média ($)`[macro$Região == "Oeste"] <- "2.519,00"
-macro$`Renda média ($)`[macro$Região == "Sul"] <- "934,00"
-macro$`Renda média ($)`[macro$Região == "Leste"] <- "696,00"
-macro$`Renda média ($)`[macro$Região == "Sudeste"] <- "653,00"
-macro$`Renda média ($)`[macro$Região == "Norte"] <- "626,00"
-macro$`Renda média ($)`[macro$Região == "Extremo Norte"] <- "574,00"
+macro$`Renda média (R$)` <- NA
+macro$`Renda média (R$)`[macro$Região == "Centro"] <- "1.795,00"
+macro$`Renda média (R$)`[macro$Região == "Oeste"] <- "2.519,00"
+macro$`Renda média (R$)`[macro$Região == "Sul"] <- "934,00"
+macro$`Renda média (R$)`[macro$Região == "Leste"] <- "696,00"
+macro$`Renda média (R$)`[macro$Região == "Sudeste"] <- "653,00"
+macro$`Renda média (R$)`[macro$Região == "Norte"] <- "626,00"
+macro$`Renda média (R$)`[macro$Região == "Extremo Norte"] <- "574,00"
 
+macro2 <- macro
 
+mun <- data.frame(Região = "Município", População = 629.921,
+                  `Área da macrozona (km²)` = "1.098,79",
+                  `Densidade demográfica (hab/km²)` = "573,29",
+                  `Renda média (R$)` = "961,92"
+)
+mun <- mun %>% 
+  rename("Área da macrozona (km²)" = "Área.da.macrozona..km².",
+         "Densidade demográfica (hab/km²)" = "Densidade.demográfica..hab.km².",
+         "Renda média (R$)" = "Renda.média..R..")
+
+mun$`Renda média (R$)` <- as.character(mun$`Renda média (R$)`)
+mun$População <- as.numeric(mun$População)
+mun$`Densidade demográfica (hab/km²)` <- as.character(mun$`Densidade demográfica (hab/km²)`)
+mun$`Área da macrozona (km²)` <- as.character(mun$`Área da macrozona (km²)`)
+mun$Região <- as.character(mun$Região)
+
+macro <- bind_rows(macro, mun)
 
 # 2.2. Dados escolares ----------------------------------------------------
 
@@ -612,11 +639,20 @@ modal_genero <- od2 %>%
 # Media de viagens por modo
 
 viagens <- od2 %>% 
-  dplyr::group_by(`Modo de transporte`) %>% 
+  dplyr::group_by(`CHAVE DOM + PESS`,`Modo de transporte`) %>% 
   dplyr::summarise(
-    n = n(),
-    `Média` = mean(n)
-  )
+    `Número de viagens por modo` = n()
+   )
+
+viagens2 <- viagens %>%
+  group_by(`Modo de transporte`) %>% 
+  summarise(
+   `Número de pessoas por modo` = n(),
+   `Total de viagens por modo` = sum(`Número de viagens por modo`),
+   `Média de viagens por modo` = `Total de viagens por modo`/`Número de pessoas por modo`)
+
+
+
 
 # Media de viagens por faixa de renda
 
@@ -627,11 +663,11 @@ renda2 <- od2 %>%
 
 renda2$Renda <- NA
 renda2$RENDA <- as.numeric(renda2$RENDA)
-renda2$Renda[renda2$RENDA <= 545] <- "Até 1 salário mínimo"
-renda2$Renda[renda2$RENDA > 545 & renda2$RENDA <= 1635] <- "Até 3 salários mínimos"
-renda2$Renda[renda2$RENDA > 1635 & renda2$RENDA <= 5450] <- "Entre 3 e 10 salários mínimos"
-renda2$Renda[renda2$RENDA > 5450 & renda2$RENDA <= 10900] <- "Entre 10 e 20 salários mínimos"
-renda2$Renda[renda2$RENDA > 10900] <- "Acima de 20 salários mínimos"
+renda2$Renda[renda2$RENDA <= 545] <- "Até 01 salário mínimo"
+renda2$Renda[renda2$RENDA > 545 & renda2$RENDA <= 1635] <- "Entre 01 e \n03 salários mínimos"
+renda2$Renda[renda2$RENDA > 1635 & renda2$RENDA <= 5450] <- "Entre 03 e \n10 salários mínimos"
+renda2$Renda[renda2$RENDA > 5450 & renda2$RENDA <= 10900] <- "Entre 10 e \n20 salários mínimos"
+renda2$Renda[renda2$RENDA > 10900] <- "Superior a 20 salários \nmínimos"
 
 
 
