@@ -26,7 +26,7 @@ library(leaflet)
 library(maps)
 
 
-source("script_dados.R", encoding = "UTF-8")
+#source("script_dados.R", encoding = "UTF-8")
 
 
 # 1. User interface -------------------------------------------------------
@@ -267,7 +267,7 @@ output$motorizacao <- renderDataTable({
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   })
   
-  
+ 
   output$empregos <- renderPlotly({
     ggplotly( 
       ggplot(data = rais, aes(Setor, Trabalhadores, fill = `Região` )) +
@@ -312,8 +312,7 @@ output$motorizacao <- renderDataTable({
   
   output$plot6 <- renderPlotly({
     
-    
-    ggplotly( 
+        ggplotly( 
       ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo)) +
         geom_bar(stat = "identity", position = "fill") +
         scale_y_continuous(labels = percent_format()) + 
@@ -350,7 +349,8 @@ output$motorizacao <- renderDataTable({
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-          plot.margin = margin(30,0,0,0)))
+          plot.margin = margin(30,0,0,0),
+          guide_legend(reverse = TRUE)))
   })
   
   
@@ -371,7 +371,8 @@ output$motorizacao <- renderDataTable({
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-          plot.margin = margin(30,0,0,0)))
+          plot.margin = margin(30,0,0,0),
+          guide_legend(reverse = TRUE)))
   })
   
   
@@ -396,7 +397,8 @@ output$motorizacao <- renderDataTable({
           legend.title = element_blank(),
           legend.position = "none",
           
-          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+          guide_legend(reverse = TRUE)))
   })
   
 }

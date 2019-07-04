@@ -158,14 +158,16 @@ macro$`Renda média (R$)`[macro$Região == "Extremo Norte"] <- "574,00"
 
 macro2 <- macro
 
-glimpse(mun)
-glimpse(macro)
 
 mun$`Área da macrozona (km²)` <- as.character(mun$`Área da macrozona (km²)`)
 mun$`Densidade demográfica (hab/km²)` <- as.character(mun$`Densidade demográfica (hab/km²)`)
 mun$`Renda média (R$)` <- as.character(mun$`Renda média (R$)`)
 
+mun$`Renda média (R$)`[mun$Região == "Município"] <- "961,92"
+mun$`Densidade demográfica (hab/km²)`[mun$Região == "Município"] <- "573,29"
+
 macro <- bind_rows(macro, mun)
+
 
 
 
@@ -609,6 +611,11 @@ od2$D_MOTIVO <- ifelse(od2$D_MOTIVO == "Residência",od2$O_MOTIVO, od2$D_MOTIVO)
  od2$`Modo de transporte`[od2$MOD_TRA == "Passag de auto"] <- "Automóvel"
  od2$`Modo de transporte`[od2$MOD_TRA == "Outros"] <- "Outros"
  
+ 
+ od2$`Modo de transporte` <- factor(od2$`Modo de transporte`, levels = c("A pé", "Bicicleta",
+                                                                                           "Motocicleta", "Transporte escolar",
+                                                                                           "Transporte fretado", "Ônibus municipal",
+                                                                                           "Automóvel", "Outros"))
  
 
  # Distribuicao modal por motivo da viagem
