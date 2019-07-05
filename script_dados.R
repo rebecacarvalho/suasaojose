@@ -23,7 +23,7 @@ Domicilio01_SP2 <- read_delim("demograficos/Domicilio01_SP2.txt",
 Domicilio02_SP2 <- read_delim("demograficos/Domicilio02_SP2.txt", 
                               ";", escape_double = FALSE, trim_ws = TRUE)
 
-renda <- read_csv("renda.txt")
+renda <- read_csv("demograficos/renda.txt")
 
 macro <- read_sf("demograficos/macrozonas.shp") %>% 
   st_transform(4326)
@@ -31,7 +31,7 @@ macro <- read_sf("demograficos/macrozonas.shp") %>%
 rotas <- read_sf("demograficos/shapes_rotas.shp") %>% 
   st_transform(4326)
 
-mun <- read_csv("mun.txt", locale = locale())
+mun <- read_csv("demograficos/mun.txt", locale = locale())
 
 # 1.2. Dados escolares ----------------------------------------------------
 
@@ -49,7 +49,7 @@ lat_lon <- read_delim("censo escolar/lat_lon.txt",
 
 # 1.3. RAIS ---------------------------------------------------------------
 
-rais <- read_csv("rais.txt")
+rais <- read_csv("rais/rais.txt")
 
 # 1.4. Pesquisa OD --------------------------------------------------------
 
