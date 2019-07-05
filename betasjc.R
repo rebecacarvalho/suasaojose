@@ -26,7 +26,7 @@ library(leaflet)
 library(maps)
 
 
-#source("script_dados.R", encoding = "UTF-8")
+source("script_dados.R", encoding = "UTF-8")
 
 
 # 1. User interface -------------------------------------------------------
@@ -235,7 +235,8 @@ output$demografia <- renderPlotly({
 })
 
 output$macro <- renderDataTable({
-  datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE),{
+  datatable(options = list(dom = 't', paging = FALSE, ordering = FALSE, columnDefs = list(list(
+    className = 'dt-right', targets = '_all'))),{
     macro %>% 
       as.data.frame() %>% 
       select(`Região`, `População`,`Área da macrozona (km²)`, 
@@ -244,9 +245,12 @@ output$macro <- renderDataTable({
 })
     
 
+  
 output$motorizacao <- renderDataTable({
   datatable(data = motorizacao, 
-            options = list(dom = 't', paging = FALSE, ordering = FALSE))
+            options = list(dom = 't', paging = FALSE, ordering = FALSE, 
+                           columnDefs = list(list(
+                             className = 'dt-right', targets = '_all'))))
 })
     
   output$matriculas <- renderPlotly({
@@ -287,11 +291,7 @@ output$motorizacao <- renderDataTable({
   })
   
   
-  output$motorizacao <- renderDataTable({
-    datatable(data = motorizacao, 
-              options = list(dom = 't', paging = FALSE, ordering = FALSE))
-  })
-
+ 
 # 2.2. Transportes ----------------------------------------
 
 
@@ -332,6 +332,8 @@ output$motorizacao <- renderDataTable({
   
   # Distribuicao modal por genero
   
+
+  
   output$plot7 <- renderPlotly({
     
     ggplotly(
@@ -349,10 +351,10 @@ output$motorizacao <- renderDataTable({
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-          plot.margin = margin(30,0,0,0),
-          guide_legend(reverse = TRUE)))
+          plot.margin = margin(30,0,0,0)))
   })
   
+ 
   
   # Proporção de viagens por faixa de renda em cada modo
   output$plot8 <- renderPlotly({
@@ -371,8 +373,7 @@ output$motorizacao <- renderDataTable({
           plot.title = element_text(hjust = 0.5),
           panel.background = element_blank(),
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-          plot.margin = margin(30,0,0,0),
-          guide_legend(reverse = TRUE)))
+          plot.margin = margin(30,0,0,0)))
   })
   
   
@@ -396,9 +397,7 @@ output$motorizacao <- renderDataTable({
           panel.background = element_blank(),
           legend.title = element_blank(),
           legend.position = "none",
-          
-          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-          guide_legend(reverse = TRUE)))
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   })
   
 }
