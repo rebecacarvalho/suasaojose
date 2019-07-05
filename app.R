@@ -364,7 +364,7 @@ output$motorizacao <- renderDataTable({
         scale_y_continuous(labels = percent_format()) +
         coord_flip()+
         labs(
-          title = "Proporção de viagens por faixa de renda em cada modo",
+          title = "Proporção de viagens por faixa de renda \nem cada modo",
           fill = "   Faixa de renda")+
         xlab("") +
         ylab("Porcentagem de viagens") +
