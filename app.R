@@ -91,11 +91,14 @@ ui <- dashboardPage(skin = "blue",
                               
                         fluidRow(
                           box(title = "Linhas", width = 6, status = "primary", solidHeader = TRUE, plotlyOutput("plot5", height = 700)),
-                          box(title = "Distribuição modal por gênero (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot7", height = 310)),
-                          box(title = "Distribuição modal por motivo da viagem (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot6", height = 310)),
+                          box(title = "Distribuição modal por gênero (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,
+                              plotlyOutput("plot7", height = 310)),
+                          box(title = "Distribuição modal por motivo da viagem (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,
+                              plotlyOutput("plot6", height = 310)),
                           box(title = "Proporção de viagens por faixa de renda em cada modo (OD/2011)", 
                               width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot8", height = 350)),
-                          box(title = "Média de viagens por modo (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,plotlyOutput("plot9", height = 350)))
+                          box(title = "Média de viagens por modo (OD/2011)", width = 6, status = "primary", solidHeader = TRUE,
+                              plotlyOutput("plot9", height = 350)))
                         ),
                         
                         tabItem(tabName = "Sobre",
