@@ -1,0 +1,13 @@
+﻿"","Ano do censo","Nível de ensino","MacroZona","n"
+"1",2016,"Superior","Centro",1536
+"2",2016,"Superior","Leste",10982
+"3",2016,"Superior","Oeste",464
+"4",2016,"Superior","Sudeste",855
+"5",2016,"Superior","Sul",12768
+"6",2018,"Básico","Centro",26229
+"7",2018,"Básico","Extremo Norte",2375
+"8",2018,"Básico","Leste",39970
+"9",2018,"Básico","Norte",15913
+"10",2018,"Básico","Oeste",5489
+"11",2018,"Básico","Sudeste",12626
+"12",2018,"Básico","Sul",52109

@@ -57,7 +57,8 @@ lat_lon <- read_delim("data/input/lat_lon.txt",
                       escape_double = FALSE, 
                       trim_ws = TRUE)
 
-
+rotas <- read_sf("data/input/rotas.shp") %>% 
+  st_transform(4326)
 # 1.2. Dados escolares ----------------------------------------------------
 
 ## Carrega os arquivos referentes a educacao do municipio de 

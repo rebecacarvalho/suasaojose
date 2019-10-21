@@ -12,7 +12,6 @@ library(tidyverse)
 #'        - Sao Jose dos Campos.
 
 
- 
 
 # 1. Limpeza --------------------------------------------------------------
 
@@ -108,7 +107,7 @@ macro$`Renda média (R$)`[macro$Região == "Sudeste"] <- "653,00"
 macro$`Renda média (R$)`[macro$Região == "Norte"] <- "626,00"
 macro$`Renda média (R$)`[macro$Região == "Extremo Norte"] <- "574,00"
 
-macro2 <- macro
+shape <- macro
 
 ## Transforma as variaveis do banco 'mun' em texto
 
@@ -132,13 +131,74 @@ mun$`Área da macrozona (km²)`[mun$Região == "Município"] <- "1.098,79"
 
 ## Junta o banco 'macro' com o banco 'mun'
 
-demografia <- bind_rows(macro, mun)
+macro <- bind_rows(macro, mun)
+
+
+
+# 3. Calculo de indicador -------------------------------------------------
+
+## Gera uma tabela com os dados demograficos de Sao Jose
+
+demografia <- data.frame(Demografia = c("População", 
+                                        "Área da macrozona (km²)", 
+                                        "Densidade demográfica (hab/km²)"), 
+                         Centro = c("72.115", "18,68", "3.860,55"), 
+                         Sul = c("233.536", "56,51", "4.132,65"), 
+                         Leste = c("160.990", "134,69", "1.195,26"),
+                         Oeste = c("41.163", "44,01", "935,31"), 
+                         Norte = c("59.800", "63,73", "938,33"),
+                         Sudeste = c("46.803", "84,70", "552,57"),
+                         `Extremo Norte` = c("15.514", "696,47", 
+                                             "22,28"), 
+                         Município = c("629.921", "1.098,79", 
+                                       "573,29"))
+
+## Gera uma tabela com os dados de motorizacao de Sao Jose
+
+motorizacao <- data.frame("x" = c("População", 
+                                  "Taxa de motorização", 
+                                  "Taxa de motorização veículos particulares",
+                                  "Habitantes/moto"),
+                          '2000' = c("539.313", "2,91", "3,39", "24,18"),
+                          "2010" = c("629.921", "1,91", "2,21", "11,83"),
+                          Crescimento = c("17%", "52%", "53%", "153%"))
+
+motorizacao <- motorizacao %>% 
+  rename("Indicadores" = "x", "2000" = "X2000", "2010" = "X2010")
+
+
+## Calcula a renda media de cada macrozona
+
+renda$Rmedia <- renda$Renda/renda$População
+
+renda$Rmedia <- round(renda$Rmedia)
+
+renda <- na.omit(renda)
+
+renda <- renda %>% 
+  group_by(Região) %>% 
+  summarise(
+  Média = round(mean(Rmedia))) 
+
+
+macro <- as.data.frame(macro)
+
+macro<- macro[,-c(2,6)]
 
 
 # 3. Salvando os dados ----------------------------------------------------
 
-## Salva o banco 'demografia' em .csv
+## Salva os bancos 'demografia', 'macro','macro2' e 'motorizacao' em .csv
 
-write.csv(demografia, "demografia.csv")
+write.csv(demografia, "data/output/demografia.csv")
 
+write_csv(macro,"data/output/macro.csv")
+
+write_sf(shape, "data/output/shape.shp")
+
+write.csv(motorizacao, "data/output/motorizacao.csv")
+
+
+rm(demografia,macro,shape,motorizacao,basico,calcrenda,domicilio01,
+   domicilio02,mun)
 

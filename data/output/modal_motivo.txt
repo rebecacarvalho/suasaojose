@@ -1,0 +1,25 @@
+﻿"","Motivo","Modo de transporte","n"
+"1","Estudo","Outros",58
+"2","Estudo","Automóvel",2065
+"3","Estudo","Ônibus municipal",968
+"4","Estudo","Transporte fretado",183
+"5","Estudo","Transporte escolar",506
+"6","Estudo","Motocicleta",63
+"7","Estudo","Bicicleta",126
+"8","Estudo","A pé",2877
+"9","Outros","Outros",149
+"10","Outros","Automóvel",3938
+"11","Outros","Ônibus municipal",2077
+"12","Outros","Transporte fretado",57
+"13","Outros","Transporte escolar",8
+"14","Outros","Motocicleta",106
+"15","Outros","Bicicleta",145
+"16","Outros","A pé",1868
+"17","Trabalho","Outros",83
+"18","Trabalho","Automóvel",4243
+"19","Trabalho","Ônibus municipal",2268
+"20","Trabalho","Transporte fretado",1103
+"21","Trabalho","Transporte escolar",22
+"22","Trabalho","Motocicleta",433
+"23","Trabalho","Bicicleta",396
+"24","Trabalho","A pé",1246

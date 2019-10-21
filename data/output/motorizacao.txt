@@ -1,0 +1,5 @@
+﻿"","Indicadores","2000","2010","Crescimento"
+"1","População","539.313","629.921","17%"
+"2","Taxa de motorização","2,91","1,91","52%"
+"3","Taxa de motorização veículos particulares","3,39","2,21","53%"
+"4","Habitantes/moto","24,18","11,83","153%"

@@ -1,0 +1,9 @@
+﻿Região,População,Área da macrozona (km²),Densidade demográfica (hab/km²),X1
+Centro,72.115,"18,68","3.860,55",NA
+Extremo Norte,15.514,"696,47","22,28",NA
+Leste,160.990,"134,69","1.195,26",NA
+Norte,59.800,"63,73","938,33",NA
+Oeste,41.163,"44,01","935,31",NA
+Sudeste,46.803,"84,70","552,57",NA
+Sul,233.536,"56,51","4.132,65",NA
+Município,629.921,"1.098,79","573,29",1

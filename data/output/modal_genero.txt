@@ -1,0 +1,17 @@
+﻿"","SEXO","Modo de transporte","n"
+"1","Feminino","Outros",122
+"2","Feminino","Automóvel",4557
+"3","Feminino","Ônibus municipal",3161
+"4","Feminino","Transporte fretado",415
+"5","Feminino","Transporte escolar",298
+"6","Feminino","Motocicleta",100
+"7","Feminino","Bicicleta",154
+"8","Feminino","A pé",3281
+"9","Masculino","Outros",168
+"10","Masculino","Automóvel",5688
+"11","Masculino","Ônibus municipal",2144
+"12","Masculino","Transporte fretado",928
+"13","Masculino","Transporte escolar",238
+"14","Masculino","Motocicleta",502
+"15","Masculino","Bicicleta",513
+"16","Masculino","A pé",2706

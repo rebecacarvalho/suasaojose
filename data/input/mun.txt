@@ -1,0 +1,2 @@
+﻿"","Região","População","Área da macrozona (km²)","Densidade demográfica (hab/km²)","Renda média (R$)"
+"1","Município",629.921,"1.098,79","573,29","961,92"

@@ -1,0 +1,65 @@
+﻿"","Modo de transporte","Renda","Média"
+"1","Outros","Até 01 salário mínimo",36.5
+"2","Outros","Entre 01 e 
+03 salários mínimos",3.23076923076923
+"3","Outros","Entre 03 e 
+10 salários mínimos",3.28571428571429
+"4","Outros","Entre 10 e 
+20 salários mínimos",2
+"5","Outros","Superior a 20 salários 
+mínimos",1
+"6","Automóvel","Até 01 salário mínimo",180.875
+"7","Automóvel","Entre 01 e 
+03 salários mínimos",25.2105263157895
+"8","Automóvel","Entre 03 e 
+10 salários mínimos",33.4
+"9","Automóvel","Entre 10 e 
+20 salários mínimos",18.1176470588235
+"10","Automóvel","Superior a 20 salários 
+mínimos",8.14285714285714
+"11","Ônibus municipal","Até 01 salário mínimo",68.25
+"12","Ônibus municipal","Entre 01 e 
+03 salários mínimos",17.9873417721519
+"13","Ônibus municipal","Entre 03 e 
+10 salários mínimos",10.7142857142857
+"14","Ônibus municipal","Entre 10 e 
+20 salários mínimos",1.75
+"15","Ônibus municipal","Superior a 20 salários 
+mínimos",1
+"16","Transporte fretado","Até 01 salário mínimo",22.1111111111111
+"17","Transporte fretado","Entre 01 e 
+03 salários mínimos",9.42857142857143
+"18","Transporte fretado","Entre 03 e 
+10 salários mínimos",10.2173913043478
+"19","Transporte fretado","Entre 10 e 
+20 salários mínimos",2.83333333333333
+"20","Transporte fretado","Superior a 20 salários 
+mínimos",2
+"21","Transporte escolar","Até 01 salário mínimo",241.5
+"22","Transporte escolar","Entre 01 e 
+03 salários mínimos",1.66666666666667
+"23","Transporte escolar","Entre 03 e 
+10 salários mínimos",2
+"24","Motocicleta","Até 01 salário mínimo",15.2
+"25","Motocicleta","Entre 01 e 
+03 salários mínimos",7.57142857142857
+"26","Motocicleta","Entre 03 e 
+10 salários mínimos",4.58333333333333
+"27","Motocicleta","Entre 10 e 
+20 salários mínimos",8
+"28","Bicicleta","Até 01 salário mínimo",23.8888888888889
+"29","Bicicleta","Entre 01 e 
+03 salários mínimos",8.57142857142857
+"30","Bicicleta","Entre 03 e 
+10 salários mínimos",1.83333333333333
+"31","Bicicleta","Entre 10 e 
+20 salários mínimos",2
+"32","A pé","Até 01 salário mínimo",114.545454545455
+"33","A pé","Entre 01 e 
+03 salários mínimos",14.0727272727273
+"34","A pé","Entre 03 e 
+10 salários mínimos",11.0526315789474
+"35","A pé","Entre 10 e 
+20 salários mínimos",4.28571428571429
+"36","A pé","Superior a 20 salários 
+mínimos",1.5

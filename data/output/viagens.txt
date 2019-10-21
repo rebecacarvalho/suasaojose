@@ -1,0 +1,9 @@
+﻿"","Modo de transporte","Número de pessoas por modo","Total de viagens por modo","Média de viagens por modo"
+"1","Outros",157,290,1.84713375796178
+"2","Automóvel",3795,10246,2.69986824769433
+"3","Ônibus municipal",2411,5313,2.20364993778515
+"4","Transporte fretado",694,1343,1.93515850144092
+"5","Transporte escolar",277,536,1.93501805054152
+"6","Motocicleta",254,602,2.37007874015748
+"7","Bicicleta",295,667,2.26101694915254
+"8","A pé",2619,5991,2.28751431844215

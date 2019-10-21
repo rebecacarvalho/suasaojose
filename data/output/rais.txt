@@ -1,0 +1,27 @@
+﻿"","Setor","Região","Trabalhadores"
+"1","Administração pública","Centro",8091
+"2","Administração pública","Leste",103
+"3","Administração pública","Norte",102
+"4","Administração pública","Sudeste",4065
+"5","Administração pública","Sul",1498
+"6","Agricultura","Centro",239
+"7","Agricultura","Extremo Norte",63
+"8","Agricultura","Leste",290
+"9","Agricultura","Norte",23
+"10","Agricultura","Oeste",51
+"11","Agricultura","Sudeste",6
+"12","Agricultura","Sul",98
+"13","Comércio e serviços","Centro",48706
+"14","Comércio e serviços","Extremo Norte",169
+"15","Comércio e serviços","Leste",16717
+"16","Comércio e serviços","Norte",4145
+"17","Comércio e serviços","Oeste",20085
+"18","Comércio e serviços","Sudeste",6386
+"19","Comércio e serviços","Sul",37164
+"20","Indústria","Centro",4606
+"21","Indústria","Extremo Norte",5
+"22","Indústria","Leste",559
+"23","Indústria","Norte",402
+"24","Indústria","Oeste",604
+"25","Indústria","Sudeste",361
+"26","Indústria","Sul",3302
