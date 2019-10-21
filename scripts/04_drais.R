@@ -52,4 +52,6 @@ rais <- rais %>%
 
 ## Salva o arquivo 'rais' em .csv
 
-write.csv(rais, "rais.csv")
+write.csv(rais, "data/output/rais.csv")
+
+rm(rais)
