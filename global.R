@@ -31,4 +31,17 @@ library(maps)
 
 ## Carrega os arquivos com os indicadores pré-calculados
 
-#source("script_dados.R", encoding = "UTF-8")
+files <- list.files(file.path(getwd(),"/data/output"))
+
+for(i in files){
+  df <- read_csv(file.path(getwd(),"/data/output",i), col_types = cols(.default = 'c'))
+  df <- df[,2:length(df)]
+  assign(paste(substr(i,1,nchar(i)-4)), df)
+  
+}
+
+shape <- read_sf("data/shapes/shape.shp") %>% 
+  st_transform(4326)
+
+rm(df)
+

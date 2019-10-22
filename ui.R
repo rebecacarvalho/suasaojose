@@ -11,7 +11,7 @@ ui <-
                
                
              
-               tabPanel("Caracterização do município", useShinydashboardPlus(),  ## Definicao das ferramentas de selecao para a guia
+               tabPanel("Caracterização do município",   ## Definicao das ferramentas de selecao para a guia
                         ##  'Caracterizacao do municipio'
                         
                         sidebarLayout( 
@@ -47,11 +47,13 @@ ui <-
                           
                           mainPanel(id = "Main1",
                                     
-                                    tags$style(type = "text/css", "#mymap {height: calc(100vh - 80px) !important;}"),
                                     
                           leafletOutput("mymap", 
                                         width = "100%",
-                                        height = 1000)
+                                        height = 1000),
+                          
+                          plotOutput("plot", height="300px"),
+                          br()
                          
                          
                                     ))),
