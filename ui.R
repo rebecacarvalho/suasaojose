@@ -47,10 +47,10 @@ ui <-
                           
                           mainPanel(id = "Main1",
                                     
-                                    
+                          column(12,          
                           leafletOutput("mymap", 
                                         width = "100%",
-                                        height = 1000),
+                                        height = 1000)),
                           
                           plotOutput("plot", height="300px"),
                           br()
@@ -58,7 +58,10 @@ ui <-
                          
                                     ))),
                
-               tabPanel("Sobre"),
+               tabPanel("Sobre",
+                        h4(align = "center",
+                        column(8,offset = 2,
+                        htmlOutput("sobre")))),
    
     
     tags$footer(class = "rodape",
