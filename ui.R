@@ -2,66 +2,50 @@ ui <-
   
   fluidPage(
     
-    
-    title = "Sua São José", ## Titulo da pagina do aplicativo em versao web
-    
+    useShinydashboard(),
+  
+   title = "Sua São José", ## Titulo da pagina do aplicativo em versao web
     
    
     tags$head(
       tags$style(HTML("
                       .navbar .navbar-nav {
+                      height: 90px;
                       float: right;
                       margin-right: 300px;
-                      border-color: #5f9ea0;
-                      border: 5px;}
+                      padding-top: 50px;}
 
                       .navbar .navbar-header {
                       float: left;
-                      border-color: #5f9ea0;
-                      border: 5px;}
+                      height: 20px;
+                      position: relative;
+                      padding: 10px 45px;
+                      left: 0px;
+                      top: 0px;
+                      right: 0px;
+                      font-size: 200px;
+                      padding-left: 20px;}
 
-                      .container, 
-                      .navbar-inner {
+                      
+                      .navbar-default {
+                      border-style: solid;
                       border-color: #5f9ea0;
                       border: 5px;
-                      } 
-
-.navbar-default{
-border: 5px;
-border-color: #5f9ea0;
-}
-                      
-                      .navbar-static-top {
-                      position: static;
-                      margin-bottom: 0px;
-border-color: #5f9ea0;
-border: 5px;
+                      border-width: medium;
+                      padding-bottom: 20px;
                       }
                       "))),
-    tags$div(class = "navbar-header",
-             style = 
-               "height: 20px;
-             position: relative;
-             padding: 20px 45px;
-             left: 0px;
-             top: 0px;
-             right: 0px;
-             font-size: 200px;
-             width: 100%;
-             align-items: center;
-             padding-left: 20px;
-             border: #1897d5;
-             background-color: 	#D4E6F1;
-             border-width: medium;
-             "  ),
     
+   
     navbarPage(title = h1(style="vertical-align:middle;
-                          margin-top:-20px;
+                          margin-top:5px;
                           margin-left: 340px;
+                          font-size: 40px;
                           font-family: monospace","Sua São José"),id = "suasaojose", 
                theme = shinytheme("simplex"),
                
                
+            
                
                tabPanel(h4("Caracterização do município"),   ## Definicao das ferramentas de selecao para a guia
                         ##  'Caracterizacao do municipio'
@@ -71,14 +55,17 @@ border: 5px;
                           
                         
                           
-                        sidebarPanel(h5(align = "center","Faça sua consulta:"),width = 12,
+                        sidebarPanel(h5(style ="margin-left:650px;
+                                         font-size: 15px;",
+                                        "Faça sua consulta:"),width = 12,
                                      style="margin-left:1.5vw;
+                                      background-color: 	#D4E6F1;
                                      min-height: 20px;
                                      padding: 40px;
                                      padding-top:5px;
                                      padding-left: 180px;
                                      padding-right: 0px;
-                                     margin-bottom: 25px;
+                                     padding-bottom: 55px;
                                      align-items: center;",
                                      
                                                               
@@ -110,16 +97,44 @@ border: 5px;
                             ),
                           
                           
-                          mainPanel(id = "Main1", width = 10,
-                                    style="margin-left:8vw;",      
-                          column(12,
+                          mainPanel(id = "Main1", width = 12,
+                                    
+                                    absolutePanel(top = 53, right = 0, left = -150,
+                                                  
+                                                  
+                                                  fluidRow(
+                                                    valueBox(value = h1(style = "font-size:30px;
+                                                                                 font-weight:bold;","629.921"), subtitle = "População total", icon = icon("users"), 
+                                                             color = "red", width = 1 )),
+                                                  fluidRow(
+                                                    valueBox(value = h1(style = "font-size:30px;
+                                                                                 font-weight:bold;","615.175"), subtitle = "População urbana", icon = icon("city"),
+                                                             color = "olive", width = 1)),
+                                                  fluidRow(
+                                                    valueBox(value = h1(style = "font-size:30px;
+                                                                                 font-weight:bold;","12.815"), subtitle = "População rural", icon = icon("tree"),
+                                                             color = "maroon", width = 1)),
+                                                  fluidRow(
+                                                    valueBox(value = h1(style = "font-size:30px;
+                                                                        font-weight:bold;",
+                                                                        "308.624"), subtitle = "Homens", icon = icon("male"),
+                                                             color = "yellow", width = 1)),
+                                                  fluidRow(
+                                                    valueBox(value = h1(style = "font-size:30px;
+                                                                        font-weight:bold;","321.297"), subtitle = "Mulheres", icon = icon("female"),
+                                                             color = "teal", width = 1))),
+                                    
+                                    style="margin-left:8vw;",
+                                    
+                          absolutePanel(top = 0, right = -50, left = 30,          
+                                 column(12,
                                  br(),
                                  br(),
                                  br(),
                                 
                           leafletOutput("mymap", 
-                                        width = "100%",
-                                        height = 750)),
+                                        width = "90%",
+                                        height = 750))),
                           
                           plotOutput("plot", height="300px"),
                           br()
@@ -133,7 +148,8 @@ border: 5px;
                         h4(align = "center",
                         column(8,offset = 2,
                         htmlOutput("sobre")))),
-   
+               
+              
     
     tags$footer(class = "rodape",
                 
@@ -152,7 +168,7 @@ border: 5px;
                 text-align: left;
                 z-index: 10;
                 height: 3em;
-                margin-top: 20em;",
+                margin-top: 40em;",
                 
                 tags$div(class = "rodape-container",
                          

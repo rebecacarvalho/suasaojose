@@ -254,7 +254,11 @@ server <- function(input, output, session) {
           column(12,
                  htmlOutput("def_exnort")),
           column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE))),
+                 plotlyOutput("matriculas", height = 310, inline = TRUE),
+                 br(),
+                 br()),
+        column(12,
+               plotlyOutput("empregos", height = 310, inline = TRUE))),
         easyClose = TRUE,
         style = "
                           overflow: hidden;
@@ -280,7 +284,11 @@ server <- function(input, output, session) {
           column(12,
                  htmlOutput("def_leste")),
           column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE))),
+                 plotlyOutput("matriculas", height = 310, inline = TRUE),
+                 br(),
+                 br()),
+          column(12,
+                 plotlyOutput("empregos", height = 310, inline = TRUE))),
         easyClose = TRUE,
         style = "
                           overflow: hidden;
@@ -306,7 +314,11 @@ server <- function(input, output, session) {
           column(12,
                  htmlOutput("def_nort")),
           column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE))),
+                 plotlyOutput("matriculas", height = 310, inline = TRUE),
+                 br(),
+                 br()),
+          column(12,
+                 plotlyOutput("empregos", height = 310, inline = TRUE))),
         easyClose = TRUE,
         style = "
                           overflow: hidden;
@@ -332,7 +344,11 @@ server <- function(input, output, session) {
           column(12,
                  htmlOutput("def_oeste")),
           column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE))),
+                 plotlyOutput("matriculas", height = 310, inline = TRUE),
+                 br(),
+                 br()),
+          column(12,
+                 plotlyOutput("empregos", height = 310, inline = TRUE))),
         easyClose = TRUE,
         style = "
         overflow: hidden;
@@ -358,7 +374,11 @@ server <- function(input, output, session) {
           column(12,
                  htmlOutput("def_sudest")),
           column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE))),
+                 plotlyOutput("matriculas", height = 310, inline = TRUE),
+                 br(),
+                 br()),
+          column(12,
+                 plotlyOutput("empregos", height = 310, inline = TRUE))),
         easyClose = TRUE,
         style = "
         overflow: hidden;
@@ -384,7 +404,11 @@ server <- function(input, output, session) {
         column(12,
                htmlOutput("def_sul")),
         column(12,
-               plotlyOutput("matriculas", height = 310, inline = TRUE))),
+               plotlyOutput("matriculas", height = 310, inline = TRUE),
+               br(),
+               br()),
+        column(12,
+               plotlyOutput("empregos", height = 310, inline = TRUE))),
       easyClose = TRUE,
       style = "
                           overflow: hidden;
