@@ -163,7 +163,10 @@ ui <-
                                               selectizeInput(inputId = "INDICADOR",
                                                              label = NULL, 
                                                              choices = c("", "Linhas operantes",
-                                                                         ""),
+                                                                         "Distribuição modal por gênero",
+                                                                         "Distribuição modal por motivo da viagem",
+                                                                         "Média de viagens por modo",
+                                                                         "Proporção de viagens por faixa de renda e modo"),
                                                              selected = NULL,
                                                              options = list(placeholder = 'Escolha um indicador'))),
                                        
