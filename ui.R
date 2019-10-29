@@ -39,8 +39,10 @@ ui <-
    
     navbarPage(title = h1(style="vertical-align:middle;
                           margin-top:5px;
-                          margin-left: 340px;
-                          font-size: 40px;
+                          margin-left: 250px;
+                          font-size: 50px;
+                          text-shadow: 3px 2px red;
+                          color: #5f9ea0;
                           font-family: monospace","Sua São José"),id = "suasaojose", 
                theme = shinytheme("simplex"),
                
@@ -55,14 +57,12 @@ ui <-
                           
                         
                           
-                        sidebarPanel(h5(style ="margin-left:650px;
-                                         font-size: 15px;",
-                                        "Faça sua consulta:"),width = 12,
+                        sidebarPanel(width = 12,
                                      style="margin-left:1.5vw;
                                       background-color: 	#D4E6F1;
                                      min-height: 20px;
                                      padding: 40px;
-                                     padding-top:5px;
+                                     padding-top:15px;
                                      padding-left: 180px;
                                      padding-right: 0px;
                                      padding-bottom: 55px;
@@ -99,34 +99,33 @@ ui <-
                           
                           mainPanel(id = "Main1", width = 12,
                                     
-                                    absolutePanel(top = 53, right = 0, left = -150,
-                                                  
+                                   
                                                   
                                                   fluidRow(
                                                     valueBox(value = h1(style = "font-size:30px;
                                                                                  font-weight:bold;","629.921"), subtitle = "População total", icon = icon("users"), 
-                                                             color = "red", width = 1 )),
-                                                  fluidRow(
+                                                             color = "red", width = 2 ),
+                                                 
                                                     valueBox(value = h1(style = "font-size:30px;
                                                                                  font-weight:bold;","615.175"), subtitle = "População urbana", icon = icon("city"),
-                                                             color = "olive", width = 1)),
-                                                  fluidRow(
+                                                             color = "olive", width = 2),
+                                                 
                                                     valueBox(value = h1(style = "font-size:30px;
                                                                                  font-weight:bold;","12.815"), subtitle = "População rural", icon = icon("tree"),
-                                                             color = "maroon", width = 1)),
-                                                  fluidRow(
+                                                             color = "maroon", width = 2),
+                                                 
                                                     valueBox(value = h1(style = "font-size:30px;
                                                                         font-weight:bold;",
                                                                         "308.624"), subtitle = "Homens", icon = icon("male"),
-                                                             color = "yellow", width = 1)),
-                                                  fluidRow(
+                                                             color = "yellow", width = 2),
+                                                  
                                                     valueBox(value = h1(style = "font-size:30px;
                                                                         font-weight:bold;","321.297"), subtitle = "Mulheres", icon = icon("female"),
-                                                             color = "teal", width = 1))),
+                                                             color = "teal", width = 2)),
                                     
                                     style="margin-left:8vw;",
                                     
-                          absolutePanel(top = 0, right = -50, left = 30,          
+                          absolutePanel(top = 90, right = -30, left = -100,          
                                  column(12,
                                  br(),
                                  br(),
@@ -142,7 +141,50 @@ ui <-
                          
                                     ))),
                
-               tabPanel(h4("Transportes")),
+               tabPanel(h4("Transportes"),
+                        sidebarLayout( 
+                          
+                          
+                          
+                          sidebarPanel(width = 12,
+                                       style="margin-left:1.5vw;
+                                      background-color: 	#D4E6F1;
+                                     min-height: 20px;
+                                     padding: 40px;
+                                     padding-top:15px;
+                                     padding-left: 180px;
+                                     padding-right: 0px;
+                                     padding-bottom: 55px;
+                                     align-items: center;",
+                                       
+                                       
+                                       
+                                       column(4, align = "center",                               
+                                              selectizeInput(inputId = "INDICADOR",
+                                                             label = NULL, 
+                                                             choices = c("", "Linhas operantes",
+                                                                         ""),
+                                                             selected = NULL,
+                                                             options = list(placeholder = 'Escolha um indicador'))),
+                                       
+                                       column(4, align = "center", 
+                                              selectizeInput(inputId = "OBJETIVO",
+                                                             label = NULL, 
+                                                             choices = c("", "Destino",
+                                                                         "Origem"),
+                                                             selected = NULL,
+                                                             options = list(placeholder = 'Escolha o objetivo da viagem'))),
+                                       column(4, 
+                                              
+                                              
+                                              
+                                              actionButton(inputId = "BCALC2",
+                                                           label = strong("Atualizar"), ## Botao de acao calcular
+                                                           width = "50%"))
+                                       
+                                       
+                          ),
+                          mainPanel(id = "Main2", width = 12))),
                
                tabPanel(h4("Sobre"),
                         h4(align = "center",
