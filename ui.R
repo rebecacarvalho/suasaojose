@@ -10,7 +10,7 @@ ui <-
     tags$head(
       tags$style(HTML("
                       .navbar .navbar-nav {
-                      height: 90px;
+                      height: 70px;
                       float: right;
                       margin-right: 300px;
                       padding-top: 50px;}
@@ -19,10 +19,7 @@ ui <-
                       float: left;
                       height: 20px;
                       position: relative;
-                      padding: 10px 45px;
-                      left: 0px;
-                      top: 0px;
-                      right: 0px;
+                      padding: -20px 40px;
                       font-size: 200px;
                       padding-left: 20px;}
 
@@ -32,9 +29,17 @@ ui <-
                       border-color: #5f9ea0;
                       border: 5px;
                       border-width: medium;
-                      padding-bottom: 20px;
+                      padding-bottom: 25px;
                       }
-                      "))),
+
+                      .small-box{
+                      height: 91px;
+                      margin-top:-10px;
+                      margin-bottom: -20px;
+                      width: 170px;
+                      }"
+
+                     ))),
     
    
     navbarPage(title = h1(style="vertical-align:middle;
@@ -56,36 +61,35 @@ ui <-
                         sidebarLayout( 
                           
                         
-                          
-                        sidebarPanel(width = 12,
-                                     style="margin-left:1.5vw;
+                           
+                        sidebarPanel(width = 10,
+                                     style="
+margin-left:15.5vw;
                                       background-color: 	#D4E6F1;
                                      min-height: 20px;
                                      padding: 40px;
-                                     padding-top:15px;
-                                     padding-left: 180px;
+                                     padding-top:10px;
+                                     padding-left: 150px;
                                      padding-right: 0px;
                                      padding-bottom: 55px;
                                      align-items: center;",
                                      
                                                               
                                                               
-                                     column(4, align = "center",                               
+                                     column(6, align = "center",                               
                                                               selectizeInput(inputId = "AGREGACAO",
                                                                              label = NULL, 
-                                                                             choices = c("", "Macrozona",
-                                                                                         "Zona de tráfego"),
+                                                                             choices = c("", "Distribuição de trabalhadores na Administração pública",
+                                                                                         "Distribuição de trabalhadores na Agricultura",
+                                                                                         "Distribuição de trabalhadores no Comércio e serviços",
+                                                                                         "Distribuição de trabalhadores na Indústria",
+                                                                                         "Informações demográficas agregadas por macrozona",
+                                                                                         "Matrículas no ensino fundamental",
+                                                                                         "Matrículas no ensino superior"),
                                                                              selected = NULL,
-                                                                             options = list(placeholder = 'Escolha uma agregação'))),
+                                                                             options = list(placeholder = 'Escolha um indicador'))),
                                                               
-                                    column(4, align = "center", 
-                                                              selectizeInput(inputId = "OBJETIVO",
-                                                                             label = NULL, 
-                                                                             choices = c("", "Destino",
-                                                                                         "Origem"),
-                                                                             selected = NULL,
-                                                                             options = list(placeholder = 'Escolha o objetivo da viagem'))),
-                                    column(4, 
+                                     column(6, 
                                                               
                                                               
                                                               
@@ -101,31 +105,11 @@ ui <-
                                     
                                    
                                                   
-                                                  fluidRow(
-                                                    valueBox(value = h1(style = "font-size:30px;
-                                                                                 font-weight:bold;","629.921"), subtitle = "População total", icon = icon("users"), 
-                                                             color = "red", width = 2 ),
                                                  
-                                                    valueBox(value = h1(style = "font-size:30px;
-                                                                                 font-weight:bold;","615.175"), subtitle = "População urbana", icon = icon("city"),
-                                                             color = "olive", width = 2),
-                                                 
-                                                    valueBox(value = h1(style = "font-size:30px;
-                                                                                 font-weight:bold;","12.815"), subtitle = "População rural", icon = icon("tree"),
-                                                             color = "maroon", width = 2),
-                                                 
-                                                    valueBox(value = h1(style = "font-size:30px;
-                                                                        font-weight:bold;",
-                                                                        "308.624"), subtitle = "Homens", icon = icon("male"),
-                                                             color = "yellow", width = 2),
-                                                  
-                                                    valueBox(value = h1(style = "font-size:30px;
-                                                                        font-weight:bold;","321.297"), subtitle = "Mulheres", icon = icon("female"),
-                                                             color = "teal", width = 2)),
                                     
                                     style="margin-left:8vw;",
                                     
-                          absolutePanel(top = 90, right = -30, left = -100,          
+                          absolutePanel(top = -50, right = -30, left = -125,          
                                  column(12,
                                  br(),
                                  br(),
@@ -133,7 +117,7 @@ ui <-
                                 
                           leafletOutput("mymap", 
                                         width = "90%",
-                                        height = 750))),
+                                        height = 800))),
                           
                           plotOutput("plot", height="300px"),
                           br()

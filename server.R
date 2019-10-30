@@ -488,10 +488,49 @@ server <- function(input, output, session) {
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   })
   
-}
+  
+# 4.3. Informações desagregadas -------------------------------------------
+
+  
+shape2 <- left_join(shape,rais, by = "Região")  
+  
+  shape3 <- shape2 %>% 
+    filter(Setor == "Agricultura")
+  
+ shape3$Trabalhadores <- as.numeric(shape3$Trabalhadores)
+  
+  pal <- colorNumeric(
+    palette = "Blues",
+    domain = shape3$Trabalhadores)
+  
+## Matriculas no ensino superior
+  
+  output$msup <- renderLeaflet({
+    leaflet(data = shape3) %>%
+      addPolygons(color = ~pal(Trabalhadores), 
+                  layerId = ~`Região`,
+                  weight = 1, 
+                  smoothFactor = 0.5,
+                  opacity = 1.0, 
+                  fillOpacity = 0.5,
+                  fillColor = ~pal(Trabalhadores),
+                  label = ~`Região`,
+                  
+                  highlightOptions = highlightOptions(color = "black", 
+                                                      weight = 2,
+                                                      bringToFront = TRUE)) %>%
+    
+      addLegend(pal = pal, values = ~Trabalhadores,
+                opacity = 1
+      )
+      addProviderTiles(providers$Stamen.TonerLite,
+                       options = providerTileOptions(noWrap = TRUE) 
+                       
+      ) 
+  })
   
 
 
-
+}
 
 
