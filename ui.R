@@ -114,8 +114,12 @@ margin-left:15.5vw;
                                  br(),
                                  br(),
                                  br(),
-                                
+                                 
                           leafletOutput("mymap", 
+                                        width = "90%",
+                                        height = 800),
+                                
+                          leafletOutput("map", 
                                         width = "90%",
                                         height = 800))),
                           

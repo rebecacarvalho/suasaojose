@@ -50,7 +50,16 @@ server <- function(input, output, session) {
   
 # 2. Configuracoes do mapa inicial ----------------------------------------
     
+  shape2 <- left_join(shape,rais, by = "Região")  
   
+  shape3 <- shape2 %>% 
+    filter(Setor == "Agricultura")
+  
+  shape3$Trabalhadores <- as.numeric(shape3$Trabalhadores)
+  
+  pal <- colorNumeric(
+    palette = "Blues",
+    domain = shape3$Trabalhadores)
   
 ## Cria uma paleta de cores para o mapa  
   
@@ -62,7 +71,7 @@ server <- function(input, output, session) {
   }
 
   
-## Define as caracteristicas do mapa  
+## Define as caracteristicas do mapa
   
   output$mymap <- renderLeaflet({
     leaflet(data = shape) %>%
@@ -80,9 +89,70 @@ server <- function(input, output, session) {
                                                       bringToFront = TRUE)) %>%
       addProviderTiles(providers$Stamen.TonerLite,
                        options = providerTileOptions(noWrap = TRUE) 
-                      
+                       
       ) 
   })
+  
+  
+  rmap <- reactive({
+    indicador <- input$INDICADOR
+    if(indicador == input$INDICADOR){
+      return(map)
+    }
+  })
+  
+  output$map <- renderLeaflet({
+    bmap()
+  })    
+  
+  
+  bmap <- eventReactive(input$BCALC1,{
+    indicador <- input$INDICADOR
+    if(indicador == "Informações demográficas agregadas por macrozona"){
+      leaflet(data = shape) %>%
+        addPolygons(color = "#444444", 
+                    layerId = ~`Região`,
+                    weight = 1, 
+                    smoothFactor = 0.5,
+                    opacity = 1.0, 
+                    fillOpacity = 0.5,
+                    fillColor = ~paleta(`Região`),
+                    label = ~`Região`,
+                    
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE)) %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                         options = providerTileOptions(noWrap = TRUE) 
+                         
+        ) 
+    }else if(indicador == "Distribuição de trabalhadores na Agricultura"){
+    leaflet(data = shape3) %>%
+      addPolygons(color = ~pal(Trabalhadores), 
+                  layerId = ~`Região`,
+                  weight = 1, 
+                  smoothFactor = 0.5,
+                  opacity = 1.0, 
+                  fillOpacity = 0.5,
+                  fillColor = ~pal(Trabalhadores),
+                  label = ~`Região`,
+                  highlightOptions = highlightOptions(color = "black", 
+                                                      weight = 2,
+                                                      bringToFront = TRUE)) %>%
+      
+      addLegend(pal = pal, 
+                values = ~Trabalhadores,
+                title = "Número de trabalhadores",
+                opacity = 1
+      ) %>% 
+      addProviderTiles(providers$Stamen.TonerLite,
+                       options = providerTileOptions(noWrap = TRUE) 
+                       
+      )
+      } 
+  })
+  
+  
   
 
   
@@ -488,49 +558,6 @@ server <- function(input, output, session) {
           axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
   })
   
-  
-# 4.3. Informações desagregadas -------------------------------------------
-
-  
-shape2 <- left_join(shape,rais, by = "Região")  
-  
-  shape3 <- shape2 %>% 
-    filter(Setor == "Agricultura")
-  
- shape3$Trabalhadores <- as.numeric(shape3$Trabalhadores)
-  
-  pal <- colorNumeric(
-    palette = "Blues",
-    domain = shape3$Trabalhadores)
-  
-## Matriculas no ensino superior
-  
-  output$msup <- renderLeaflet({
-    leaflet(data = shape3) %>%
-      addPolygons(color = ~pal(Trabalhadores), 
-                  layerId = ~`Região`,
-                  weight = 1, 
-                  smoothFactor = 0.5,
-                  opacity = 1.0, 
-                  fillOpacity = 0.5,
-                  fillColor = ~pal(Trabalhadores),
-                  label = ~`Região`,
-                  
-                  highlightOptions = highlightOptions(color = "black", 
-                                                      weight = 2,
-                                                      bringToFront = TRUE)) %>%
-    
-      addLegend(pal = pal, values = ~Trabalhadores,
-                opacity = 1
-      )
-      addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE) 
-                       
-      ) 
-  })
-  
-
-
 }
 
 
