@@ -79,16 +79,16 @@ margin-left:15.5vw;
                                      column(6, align = "center",                               
                                                               selectizeInput(inputId = "AGREGACAO",
                                                                              label = NULL, 
-                                                                             choices = c("", "Distribuição de trabalhadores na Administração pública",
-                                                                                         "Distribuição de trabalhadores na Agricultura",
-                                                                                         "Distribuição de trabalhadores no Comércio e serviços",
-                                                                                         "Distribuição de trabalhadores na Indústria",
-                                                                                         "Informações demográficas agregadas por macrozona",
-                                                                                         "Matrículas no ensino fundamental",
-                                                                                         "Matrículas no ensino superior"),
+                                                                             choices = c("", "Distribuição de trabalhadores na Administração pública" = "adm",
+                                                                                         "Distribuição de trabalhadores na Agricultura" = "Agricultura",
+                                                                                         "Distribuição de trabalhadores no Comércio e serviços" = "cserv",
+                                                                                         "Distribuição de trabalhadores na Indústria" = "Indústria",
+                                                                                         "Informações demográficas agregadas por macrozona" = "demo",
+                                                                                         "Matrículas no ensino fundamental" = "fund",
+                                                                                         "Matrículas no ensino superior" = "sup"),
                                                                              selected = NULL,
                                                                              options = list(placeholder = 'Escolha um indicador'))),
-                                                              
+                                    
                                      column(6, 
                                                               
                                                               
@@ -96,6 +96,7 @@ margin-left:15.5vw;
                                                                  actionButton(inputId = "BCALC1",
                                                                               label = strong("Atualizar"), ## Botao de acao calcular
                                                                               width = "50%"))
+                                     
                                                               
                                                               
                             ),
@@ -115,13 +116,10 @@ margin-left:15.5vw;
                                  br(),
                                  br(),
                                  
-                          leafletOutput("mymap", 
-                                        width = "90%",
-                                        height = 800),
                                 
-                          leafletOutput("map", 
-                                        width = "90%",
-                                        height = 800))),
+                                 leafletOutput("mymap",
+                                               height = 800))),
+                         
                           
                           plotOutput("plot", height="300px"),
                           br()
@@ -201,7 +199,7 @@ margin-left:15.5vw;
                 text-align: left;
                 z-index: 10;
                 height: 3em;
-                margin-top: 40em;",
+                margin-top: 49em;",
                 
                 tags$div(class = "rodape-container",
                          

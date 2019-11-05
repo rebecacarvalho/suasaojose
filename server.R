@@ -52,12 +52,9 @@ server <- function(input, output, session) {
     
   shape2 <- left_join(shape,rais, by = "Região")  
   
-  shape3 <- shape2 %>% 
-    filter(Setor == "Agricultura")
-  
-  shape3$Trabalhadores <- as.numeric(shape3$Trabalhadores)
-  
-  pal <- colorNumeric(
+  shape2$Trabalhadores <- as.numeric(shape2$Trabalhadores)
+ 
+   pal <- colorNumeric(
     palette = "Blues",
     domain = shape3$Trabalhadores)
   
@@ -71,92 +68,65 @@ server <- function(input, output, session) {
   }
 
   
+  reac <- reactive({
+    "Distribuição de trabalhadores na Agricultura" = "Agricultura"
+    "Distribuição de trabalhadores na Indústria" = "Indústria"
+  })
+  
 ## Define as caracteristicas do mapa
   
   output$mymap <- renderLeaflet({
-    leaflet(data = shape) %>%
-      addPolygons(color = "#444444", 
-                  layerId = ~`Região`,
-                  weight = 1, 
+    leaflet(teste) %>%
+      addPolygons(weight = 1, 
                   smoothFactor = 0.5,
                   opacity = 1.0, 
                   fillOpacity = 0.5,
-                  fillColor = ~paleta(`Região`),
-                  label = ~`Região`,
-                  
                   highlightOptions = highlightOptions(color = "white", 
                                                       weight = 2,
                                                       bringToFront = TRUE)) %>%
       addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE) 
-                       
-      ) 
+                       options = providerTileOptions(noWrap = TRUE)) 
   })
+
   
-  
-  rmap <- reactive({
-    indicador <- input$INDICADOR
-    if(indicador == input$INDICADOR){
-      return(map)
+  observeEvent(input$INDICADOR == "Agricultura",{
+    paleta <- function(objeto){
+      
+      c("#007479", "#e95b23",  "#93145a",
+        "#1d4f24","#66388D", "#C56416",
+        "#f39c18", "#008FD6")
     }
-  })
-  
-  output$map <- renderLeaflet({
-    bmap()
-  })    
-  
-  
-  bmap <- eventReactive(input$BCALC1,{
-    indicador <- input$INDICADOR
-    if(indicador == "Informações demográficas agregadas por macrozona"){
-      leaflet(data = shape) %>%
-        addPolygons(color = "#444444", 
-                    layerId = ~`Região`,
-                    weight = 1, 
-                    smoothFactor = 0.5,
-                    opacity = 1.0, 
-                    fillOpacity = 0.5,
-                    fillColor = ~paleta(`Região`),
-                    label = ~`Região`,
-                    
-                    highlightOptions = highlightOptions(color = "white", 
-                                                        weight = 2,
-                                                        bringToFront = TRUE)) %>%
-        addProviderTiles(providers$Stamen.TonerLite,
-                         options = providerTileOptions(noWrap = TRUE) 
-                         
-        ) 
-    }else if(indicador == "Distribuição de trabalhadores na Agricultura"){
-    leaflet(data = shape3) %>%
-      addPolygons(color = ~pal(Trabalhadores), 
-                  layerId = ~`Região`,
-                  weight = 1, 
+    leafletProxy("mymap", data=teste) %>%
+      clearShapes() %>%
+      addPolygons(weight = 1, 
                   smoothFactor = 0.5,
                   opacity = 1.0, 
                   fillOpacity = 0.5,
-                  fillColor = ~pal(Trabalhadores),
+                  color = ~paleta(`Região`), 
+                  layerId = ~`Região`,
+                  fillColor = ~paleta(`Região`),
                   label = ~`Região`,
-                  highlightOptions = highlightOptions(color = "black", 
+                  highlightOptions = highlightOptions(color = "white", 
                                                       weight = 2,
-                                                      bringToFront = TRUE)) %>%
-      
-      addLegend(pal = pal, 
-                values = ~Trabalhadores,
-                title = "Número de trabalhadores",
-                opacity = 1
-      ) %>% 
-      addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE) 
-                       
-      )
-      } 
+                                                      bringToFront = TRUE))
+  }) 
+  
+  observeEvent(input$INDICADOR == "Indústria",{
+    leafletProxy("mymap", data = teste) %>%
+      clearShapes() %>%
+      addPolygons(weight = 1, 
+                  smoothFactor = 0.5,
+                  opacity = 1.0, 
+                  fillOpacity = 0.5,
+                  layerId = ~`Região`,
+                  label = ~`Região`,
+                  highlightOptions = highlightOptions(color = "white", 
+                                                      weight = 2,
+                                                      bringToFront = TRUE))
   })
   
   
-  
-
-  
-
+     
 # 3. Popup ----------------------------------------------------------------
 
 ## Definicao das caracteristicas de cada regiao

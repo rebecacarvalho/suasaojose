@@ -22,6 +22,10 @@ library(shinyjs)
 library(rintrojs)
 library(jsonlite)
 library(shinyWidgets)
+library(ggmap)
+library(widgetframe)
+library(mapview)
+library(mapedit)
 
 
 
@@ -48,4 +52,7 @@ shape <- read_sf("data/shapes/shape.shp") %>%
   st_transform(4326)
 
 rm(df)
+
+teste <- shape2 %>% 
+  spread(Setor,Trabalhadores)
 
