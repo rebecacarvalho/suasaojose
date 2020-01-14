@@ -64,7 +64,7 @@ ui <-
                            
                         sidebarPanel(width = 10,
                                      style="
-margin-left:15.5vw;
+                                      margin-left:15.5vw;
                                       background-color: 	#D4E6F1;
                                      min-height: 20px;
                                      padding: 40px;
@@ -76,20 +76,19 @@ margin-left:15.5vw;
                                      
                                                               
                                                               
-                                     column(6, align = "center",                               
-                                                              selectizeInput(inputId = "AGREGACAO",
+                                     column(4, align = "center",                               
+                                                              selectizeInput(inputId = "INDICADOR",
                                                                              label = NULL, 
-                                                                             choices = c("", "Distribuição de trabalhadores na Administração pública" = "adm",
-                                                                                         "Distribuição de trabalhadores na Agricultura" = "Agricultura",
-                                                                                         "Distribuição de trabalhadores no Comércio e serviços" = "cserv",
-                                                                                         "Distribuição de trabalhadores na Indústria" = "Indústria",
-                                                                                         "Informações demográficas agregadas por macrozona" = "demo",
-                                                                                         "Matrículas no ensino fundamental" = "fund",
-                                                                                         "Matrículas no ensino superior" = "sup"),
+                                                                             choices = c("", "Distribuição de trabalhadores por macrozona",
+                                                                                         "Informações demográficas agregadas por macrozona",
+                                                                                         "Distribuição de matrículas por macrozona"),
                                                                              selected = NULL,
                                                                              options = list(placeholder = 'Escolha um indicador'))),
+                                     
+                                     column(4, align = "center", 
+                                            uiOutput("TIPO_IND")),
                                     
-                                     column(6, 
+                                     column(4, 
                                                               
                                                               
                                                               
@@ -110,8 +109,8 @@ margin-left:15.5vw;
                                     
                                     style="margin-left:8vw;",
                                     
-                          absolutePanel(top = -50, right = -30, left = -125,          
-                                 column(12,
+                          absolutePanel(top = -50, right = -10, left = -125,          
+                                 column(11,
                                  br(),
                                  br(),
                                  br(),

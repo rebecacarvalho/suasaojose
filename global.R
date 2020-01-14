@@ -53,6 +53,28 @@ shape <- read_sf("data/shapes/shape.shp") %>%
 
 rm(df)
 
-teste <- shape2 %>% 
-  spread(Setor,Trabalhadores)
+matriculas <- matriculas %>% 
+  rename("Região" = "MacroZona",
+         "Matrículas" = "n")
 
+shape <- left_join(shape, matriculas, by = "Região")
+
+shape <- left_join(shape, rais, by = "Região")
+
+
+shape <- shape %>% 
+  select(Região, 
+         Populaç,
+         `Ádm.k².`,
+         `Dd.h.².`,
+         `Rnm.R..`,
+         `Ano do censo`,
+         `Nível de ensino`,
+         `Matrículas`,
+         Setor,
+         Trabalhadores,
+         geometry) %>% 
+  rename("População" = "Populaç",
+         "Área da macrozona (km²)" = "Ádm.k².",
+         "Densidade demográfica (hab/km²)" = "Dd.h.².",
+         "Renda média (R$)" = "Rnm.R..")

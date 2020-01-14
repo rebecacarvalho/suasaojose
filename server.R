@@ -5,6 +5,37 @@ server <- function(input, output, session) {
   
 # 1. Sobre ---------------------------------------------------------------- 
   
+  tipo_indicadores <- reactive({
+    indicador <- req(input$INDICADOR)
+    if(length(indicador) > 0){
+      return(input$TIPO_IND)
+    } 
+  })
+  
+
+  output$TIPO_IND <- renderUI({
+    indicador <- req(input$INDICADOR)
+    if(indicador == "Distribuição de trabalhadores por macrozona"){
+      selectizeInput(inputId = "TIPO_IND",
+                     label = NULL,
+                     choices = c("","Administração Pública",
+                               "Agricultura",
+                               "Comércio e Serviços",
+                               "Indústria"),
+                     selected = NULL,
+                     options = list(placeholder = 'Escolha um setor'))
+    } else if(indicador == "Distribuição de matrículas por macrozona"){
+      selectizeInput(inputId = "TIPO_IND",
+                     label = NULL,
+                     choices = c("","Ensino Fundamental",
+                                 "Ensino Superior"),
+                     selected = NULL,
+                     options = list(placeholder = 'Escolha um nível de ensino'))
+    } else{
+      return()
+    }
+  })
+  
   
   output$sobre <- renderUI({
     sobre <- paste0(
@@ -50,15 +81,7 @@ server <- function(input, output, session) {
   
 # 2. Configuracoes do mapa inicial ----------------------------------------
     
-  shape2 <- left_join(shape,rais, by = "Região")  
-  
-  shape2$Trabalhadores <- as.numeric(shape2$Trabalhadores)
- 
-   pal <- colorNumeric(
-    palette = "Blues",
-    domain = shape3$Trabalhadores)
-  
-## Cria uma paleta de cores para o mapa  
+   ## Cria uma paleta de cores para o mapa  
   
   paleta <- function(objeto){
     
@@ -66,65 +89,54 @@ server <- function(input, output, session) {
       "#1d4f24","#66388D", "#C56416",
       "#f39c18", "#008FD6")
   }
-
   
-  reac <- reactive({
-    "Distribuição de trabalhadores na Agricultura" = "Agricultura"
-    "Distribuição de trabalhadores na Indústria" = "Indústria"
-  })
   
-## Define as caracteristicas do mapa
+ 
+  shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
+ 
+  pal <- colorNumeric(
+    palette = "Blues",
+    domain = shape$Trabalhadores)
+ ## Define as caracteristicas do mapa
+  
   
   output$mymap <- renderLeaflet({
-    leaflet(teste) %>%
-      addPolygons(weight = 1, 
-                  smoothFactor = 0.5,
-                  opacity = 1.0, 
-                  fillOpacity = 0.5,
-                  highlightOptions = highlightOptions(color = "white", 
-                                                      weight = 2,
-                                                      bringToFront = TRUE)) %>%
-      addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE)) 
+    leaflet() %>%
+      addTiles() %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                     options = providerTileOptions(noWrap = TRUE)) %>% 
+      setView(lng = -45.8872, lat = -23.1791, zoom = 9)
   })
+  
+ 
+  
 
-  
-  observeEvent(input$INDICADOR == "Agricultura",{
-    paleta <- function(objeto){
-      
-      c("#007479", "#e95b23",  "#93145a",
-        "#1d4f24","#66388D", "#C56416",
-        "#f39c18", "#008FD6")
+  observeEvent(input$BCALC1,{
+    indicador <- req(input$INDICADOR)
+    if(indicador == "Distribuição de trabalhadores por macrozona"){
+  leafletProxy("mymap", data = shape) %>%
+    clearShapes() %>%
+       addPolygons(color = "black",
+                fillColor = ~pal(Trabalhadores),
+                layerId = ~paste(Região,
+                                Trabalhadores),
+                label = ~`Região`,
+                weight = 2, 
+                smoothFactor = 0.2,
+                opacity = 1.0, 
+                fillOpacity = 1,
+                highlightOptions = highlightOptions(color = "white", 
+                                                     weight = 2,
+                                                     bringToFront = TRUE),
+                labelOptions = labelOptions(
+                  style = list("font-weight" = "normal", padding = "3px 8px"),
+                  textsize = "15px",
+                  direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 11)
     }
-    leafletProxy("mymap", data=teste) %>%
-      clearShapes() %>%
-      addPolygons(weight = 1, 
-                  smoothFactor = 0.5,
-                  opacity = 1.0, 
-                  fillOpacity = 0.5,
-                  color = ~paleta(`Região`), 
-                  layerId = ~`Região`,
-                  fillColor = ~paleta(`Região`),
-                  label = ~`Região`,
-                  highlightOptions = highlightOptions(color = "white", 
-                                                      weight = 2,
-                                                      bringToFront = TRUE))
-  }) 
-  
-  observeEvent(input$INDICADOR == "Indústria",{
-    leafletProxy("mymap", data = teste) %>%
-      clearShapes() %>%
-      addPolygons(weight = 1, 
-                  smoothFactor = 0.5,
-                  opacity = 1.0, 
-                  fillOpacity = 0.5,
-                  layerId = ~`Região`,
-                  label = ~`Região`,
-                  highlightOptions = highlightOptions(color = "white", 
-                                                      weight = 2,
-                                                      bringToFront = TRUE))
   })
-  
+   
+    
   
      
 # 3. Popup ----------------------------------------------------------------
@@ -469,20 +481,27 @@ server <- function(input, output, session) {
 
 # 4. Graficos -------------------------------------------------------------
   
-  paleta2 <- c("#f39c18","#007479", "#e95b23",  "#93145a","#1d4f24","#66388D", "#C56416", "#008FD6")
+  paleta2 <- c("#f39c18",
+               "#007479", 
+               "#e95b23",  
+               "#93145a",
+               "#1d4f24",
+               "#66388D", 
+               "#C56416", 
+               "#008FD6")
 
 # 4.1. Matriculas ---------------------------------------------------------
 
-  matriculas$n <- as.numeric(matriculas$n)
+  matriculas$`Matrículas` <- as.numeric(matriculas$`Matrículas`)
   
   margins = unit(c(6, 4, 1, 1), 'lines')
   
   output$matriculas <- renderPlotly({
     event <- input$mymap_shape_click
     matriculas2 <- matriculas %>% 
-    filter(MacroZona == event$id)
+    filter( `Região` == event$id)
     ggplotly(
-      ggplot(matriculas2,aes(`MacroZona`,n,fill = `Nível de ensino`)) +
+      ggplot(matriculas2,aes(`Região`,`Matrículas`,fill = `Nível de ensino`)) +
         geom_bar(stat = "identity",position = "fill") +
         scale_y_continuous(labels = scales::percent_format()) +
         coord_flip()+
@@ -517,7 +536,7 @@ server <- function(input, output, session) {
         coord_flip()+
         labs(
           title = "Relação de empregos por por área de atividade",
-          fill = "   Macrozona")+
+          fill = "   Região")+
         ylab("Porcentagem de trabalhadores") +
         xlab("")+
         scale_fill_manual(values = paleta2)+
