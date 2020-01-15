@@ -40,6 +40,7 @@ ui <-
                       }"
 
                      ))),
+ 
     
    
     navbarPage(title = h1(style="vertical-align:middle;
@@ -54,97 +55,61 @@ ui <-
                
             
                
-               tabPanel(h4("Caracterização do município"),   ## Definicao das ferramentas de selecao para a guia
-                        ##  'Caracterizacao do municipio'
+               tabPanel(h4("Caracterização do município"),
                         
-                        
-                        sidebarLayout( 
+                        tags$head(
+                          # Include our custom CSS
+                          includeCSS("styles.css")),
                           
+                        br(),
+                        br(),
+                       
                         
-                           
-                        sidebarPanel(width = 10,
-                                     style="
-                                      margin-left:15.5vw;
-                                      background-color: 	#D4E6F1;
-                                     min-height: 20px;
-                                     padding: 40px;
-                                     padding-top:10px;
-                                     padding-left: 150px;
-                                     padding-right: 0px;
-                                     padding-bottom: 55px;
-                                     align-items: center;",
-                                     
-                                                              
-                                                              
-                                     column(4, align = "center",                               
-                                                              selectizeInput(inputId = "INDICADOR",
-                                                                             label = NULL, 
-                                                                             choices = c("", "Distribuição de trabalhadores por macrozona",
-                                                                                         "Informações demográficas agregadas por macrozona",
-                                                                                         "Distribuição de matrículas por macrozona"),
-                                                                             selected = NULL,
-                                                                             options = list(placeholder = 'Escolha um indicador'))),
-                                     
-                                     column(4, align = "center", 
-                                            uiOutput("TIPO_IND")),
+                              leafletOutput("mymap", height = 800),
+                            
+                          absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                          draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
+                                          width = 370, height = "auto",
+                                          
+                                          style = "background-color:#D4E6F1;
+                                                   align-items: center;",
+                                          
+                                          h2(),
+                                          column(12,align = "center",
+                                          selectizeInput(inputId = "INDICADOR",
+                                                         label = NULL, 
+                                                         choices = c("", "Distribuição de trabalhadores por macrozona",
+                                                                     "Informações demográficas agregadas por macrozona",
+                                                                     "Distribuição de matrículas por macrozona"),
+                                                         selected = NULL,
+                                                         options = list(placeholder = 'Escolha um indicador')),
+                        
+                       
+                               uiOutput("TIPO_IND"),
+                        
+                        
+                               actionButton(inputId = "BCALC1",
+                                            label = strong("Atualizar"), ## Botao de acao calcular
+                                            width = "100%"))
+                            )),
+                            
+                            
+                        
+                           tabPanel(h4("Transportes"),
                                     
-                                     column(4, 
-                                                              
-                                                              
-                                                              
-                                                                 actionButton(inputId = "BCALC1",
-                                                                              label = strong("Atualizar"), ## Botao de acao calcular
-                                                                              width = "50%"))
-                                     
-                                                              
-                                                              
-                            ),
-                          
-                          
-                          mainPanel(id = "Main1", width = 12,
                                     
-                                   
+                                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                                  draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
+                                                  width = 370, height = "auto",
                                                   
-                                                 
-                                    
-                                    style="margin-left:8vw;",
-                                    
-                          absolutePanel(top = -50, right = -10, left = -125,          
-                                 column(11,
-                                 br(),
-                                 br(),
-                                 br(),
-                                 
-                                
-                                 leafletOutput("mymap",
-                                               height = 800))),
-                         
-                          
-                          plotOutput("plot", height="300px"),
-                          br()
-                         
-                         
-                                    ))),
-               
-               tabPanel(h4("Transportes"),
-                        sidebarLayout( 
-                          
-                          
-                          
-                          sidebarPanel(width = 12,
-                                       style="margin-left:1.5vw;
-                                      background-color: 	#D4E6F1;
-                                     min-height: 20px;
-                                     padding: 40px;
-                                     padding-top:15px;
-                                     padding-left: 180px;
-                                     padding-right: 0px;
-                                     padding-bottom: 55px;
-                                     align-items: center;",
+                                                  style = "background-color:#D4E6F1;
+                                                   align-items: center;",
+                                                  
+                                                  h2(),
                                        
                                        
                                        
-                                       column(4, align = "center",                               
+                                       column(12, align = "center",                               
                                               selectizeInput(inputId = "INDICADOR",
                                                              label = NULL, 
                                                              choices = c("", "Linhas operantes",
@@ -153,26 +118,26 @@ ui <-
                                                                          "Média de viagens por modo",
                                                                          "Proporção de viagens por faixa de renda e modo"),
                                                              selected = NULL,
-                                                             options = list(placeholder = 'Escolha um indicador'))),
+                                                             options = list(placeholder = 'Escolha um indicador')),
                                        
-                                       column(4, align = "center", 
+                                      
                                               selectizeInput(inputId = "OBJETIVO",
                                                              label = NULL, 
                                                              choices = c("", "Destino",
                                                                          "Origem"),
                                                              selected = NULL,
-                                                             options = list(placeholder = 'Escolha o objetivo da viagem'))),
-                                       column(4, 
+                                                             options = list(placeholder = 'Escolha o objetivo da viagem')),
+                                      
                                               
                                               
                                               
                                               actionButton(inputId = "BCALC2",
                                                            label = strong("Atualizar"), ## Botao de acao calcular
-                                                           width = "50%"))
+                                                           width = "100%"))
                                        
                                        
-                          ),
-                          mainPanel(id = "Main2", width = 12))),
+                          )),
+                          
                
                tabPanel(h4("Sobre"),
                         h4(align = "center",
@@ -198,7 +163,7 @@ ui <-
                 text-align: left;
                 z-index: 10;
                 height: 3em;
-                margin-top: 49em;",
+                margin-top: 10em;",
                 
                 tags$div(class = "rodape-container",
                          

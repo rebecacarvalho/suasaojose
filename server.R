@@ -93,10 +93,16 @@ server <- function(input, output, session) {
   
  
   shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
+  
+  shape$Matrículas <- as.numeric(shape$Matrículas)
  
   pal <- colorNumeric(
     palette = "Blues",
     domain = shape$Trabalhadores)
+  
+  pal2 <- colorNumeric(
+    palette = "Blues",
+    domain = shape$Matrículas)
  ## Define as caracteristicas do mapa
   
   
@@ -113,14 +119,16 @@ server <- function(input, output, session) {
 
   observeEvent(input$BCALC1,{
     indicador <- req(input$INDICADOR)
-    if(indicador == "Distribuição de trabalhadores por macrozona"){
-  leafletProxy("mymap", data = shape) %>%
+    tipo <- req(input$TIPO_IND)
+      if(indicador == "Distribuição de trabalhadores por macrozona"){
+       leafletProxy("mymap", data = shape) %>%
     clearShapes() %>%
        addPolygons(color = "black",
                 fillColor = ~pal(Trabalhadores),
-                layerId = ~paste(Região,
-                                Trabalhadores),
-                label = ~`Região`,
+                layerId = ~paste("Região:",`Região`,
+                                 "Número de trabalhadores:", `Trabalhadores`),
+                label = ~paste("Região:",`Região`,HTML("<br/>"),
+                               "Número de trabalhadores:", `Trabalhadores`),
                 weight = 2, 
                 smoothFactor = 0.2,
                 opacity = 1.0, 
@@ -132,6 +140,27 @@ server <- function(input, output, session) {
                   style = list("font-weight" = "normal", padding = "3px 8px"),
                   textsize = "15px",
                   direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 11)
+    } else if(indicador == "Distribuição de matrículas por macrozona"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        addPolygons(color = "black",
+                    fillColor = ~pal2(Matrículas),
+                    layerId = ~paste("Região:", Região,"<br/>",
+                                     "Matrículas:", Matrículas),
+                    label = ~paste("Região:", Região, "<br/>",
+                                   "Número de matrículas:", Matrículas),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
         setView(lng = -45.8872, lat = -23.1791, zoom = 11)
     }
   })
