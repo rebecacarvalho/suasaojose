@@ -66,6 +66,9 @@ ui <-
                        
                         
                               leafletOutput("mymap", height = 800),
+                        
+                        plotOutput("plot", height="300px"),
+                        br(),
                             
                           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                           draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
