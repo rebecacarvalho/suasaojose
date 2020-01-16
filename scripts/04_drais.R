@@ -41,17 +41,37 @@ rais$Setor[rais$Subsetor == "Administraçao pública direta e autárquica"] <- "
 ## Calcula a quantidade de empregos por setor de atividade e macrozona
 
 rais <- rais %>% 
-  group_by(Setor, Região) %>%
+ group_by(Região, Setor) %>%
   summarise(
-    Trabalhadores = sum(Trabalhadores)
-  )
+    Trabalhadores = sum(Trabalhadores))
+  
 
 
 
-# 3. Salva o arquivo ------------------------------------------------------
+# 3. Junta as bases -------------------------------------------------------
+
+shape2 <- left_join(shape, matriculas)
+
+shape2 <- rbind.fill(shape2, shape)
+
+shape2 <- shape2[-c(13, 15, 17,18,19), ]  
+
+
+shape2 <- full_join(shape2, rais, by = "Região")
+
+shape2 <- rbind.fill(shape2, shape)
+
+shape2 <- shape2[-c(53, 55, 56,58,59), ]
+
+shape2 <- rbind.fill(shape2, shape)
+
+shape2 <- shape2[-c(55, 57, 58,60,61), ]
+
+
+# 4. Salva o arquivo ------------------------------------------------------
 
 ## Salva o arquivo 'rais' em .csv
 
-write.csv(rais, "data/output/rais.csv")
+write_sf(shape2, "data/shapes/shape.shp")
 
-rm(rais)
+rm(rais, matriculas, shape, shape2)

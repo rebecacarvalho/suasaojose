@@ -5,11 +5,13 @@ rm(list = ls()) # Limpa a área de trabalho do R
 ## Pacotes
 
 
+library(plyr)
 library(dplyr)
 library(tidyverse)
 library(lubridate)
 library(sp)
 library(sf)
+
 
 
 ## Dados

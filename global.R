@@ -57,24 +57,17 @@ matriculas <- matriculas %>%
   rename("Região" = "MacroZona",
          "Matrículas" = "n")
 
-shape <- left_join(shape, matriculas, by = "Região")
-
-shape <- left_join(shape, rais, by = "Região")
-
 
 shape <- shape %>% 
-  select(Região, 
-         Populaç,
-         `Ádm.k².`,
-         `Dd.h.².`,
-         `Rnm.R..`,
-         `Ano do censo`,
-         `Nível de ensino`,
-         `Matrículas`,
-         Setor,
-         Trabalhadores,
-         geometry) %>% 
   rename("População" = "Populaç",
          "Área da macrozona (km²)" = "Ádm.k².",
          "Densidade demográfica (hab/km²)" = "Dd.h.².",
-         "Renda média (R$)" = "Rnm.R..")
+         "Renda média (R$)" = "Rnm.R..",
+         "Ano do censo" = "Andcens",
+         "Nível de ensino" = "Nvldens",
+         "Matrículas" = "Matrcls",
+         "Trabalhadores" = "Trblhdr")
+
+shape[53,6] <- 2018
+shape[53,7] <- "Fundamental"
+shape[53,9] <- "Administração pública"

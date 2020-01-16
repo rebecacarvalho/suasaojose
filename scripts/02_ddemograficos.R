@@ -55,7 +55,7 @@ calcrenda <- renda %>%
 
 macro <- macro %>% 
   select(MacroZona, geometry) %>% 
-  rename("Região" = "MacroZona")
+  dplyr::rename("Região" = "MacroZona")
 
 
 # 2. Organizacao dos dados -----------------
@@ -164,7 +164,7 @@ motorizacao <- data.frame("x" = c("População",
                           Crescimento = c("17%", "52%", "53%", "153%"))
 
 motorizacao <- motorizacao %>% 
-  rename("Indicadores" = "x", "2000" = "X2000", "2010" = "X2010")
+  dplyr::rename("Indicadores" = "x", "2000" = "X2000", "2010" = "X2010")
 
 
 ## Calcula a renda media de cada macrozona
@@ -194,11 +194,8 @@ write.csv(demografia, "data/output/demografia.csv")
 
 write_csv(macro,"data/output/macro.csv")
 
-write_sf(shape, "data/output/shape.shp")
-
 write.csv(motorizacao, "data/output/motorizacao.csv")
 
-
-rm(demografia,macro,shape,motorizacao,basico,calcrenda,domicilio01,
+rm(demografia,macro,motorizacao,basico,calcrenda,domicilio01,
    domicilio02,mun)
 

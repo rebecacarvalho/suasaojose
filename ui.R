@@ -81,9 +81,9 @@ ui <-
                                           column(12,align = "center",
                                           selectizeInput(inputId = "INDICADOR",
                                                          label = NULL, 
-                                                         choices = c("", "Distribuição de trabalhadores por macrozona",
+                                                         choices = c("", "Distribuição de trabalhadores agregados por macrozona",
                                                                      "Informações demográficas agregadas por macrozona",
-                                                                     "Distribuição de matrículas por macrozona"),
+                                                                     "Distribuição de matrículas agregadas por macrozona"),
                                                          selected = NULL,
                                                          options = list(placeholder = 'Escolha um indicador')),
                         

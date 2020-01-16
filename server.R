@@ -15,20 +15,20 @@ server <- function(input, output, session) {
 
   output$TIPO_IND <- renderUI({
     indicador <- req(input$INDICADOR)
-    if(indicador == "Distribuição de trabalhadores por macrozona"){
+    if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
       selectizeInput(inputId = "TIPO_IND",
                      label = NULL,
-                     choices = c("","Administração Pública",
+                     choices = c("","Administração pública",
                                "Agricultura",
-                               "Comércio e Serviços",
+                               "Comércio e serviços",
                                "Indústria"),
                      selected = NULL,
                      options = list(placeholder = 'Escolha um setor'))
-    } else if(indicador == "Distribuição de matrículas por macrozona"){
+    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
       selectizeInput(inputId = "TIPO_IND",
                      label = NULL,
-                     choices = c("","Ensino Fundamental",
-                                 "Ensino Superior"),
+                     choices = c("","Fundamental",
+                                 "Superior"),
                      selected = NULL,
                      options = list(placeholder = 'Escolha um nível de ensino'))
     } else{
@@ -80,15 +80,13 @@ server <- function(input, output, session) {
   
   
 # 2. Configuracoes do mapa inicial ----------------------------------------
-    
-   ## Cria uma paleta de cores para o mapa  
   
-  paleta <- function(objeto){
-    
-    c("#007479", "#e95b23",  "#93145a",
-      "#1d4f24","#66388D", "#C56416",
-      "#f39c18", "#008FD6")
-  }
+  
+    ## Cria uma paleta de cores para o mapa  
+  
+   paleta <- colorFactor(
+                    palette = "Set3",
+                    domain = shape$Região)
   
   
  
@@ -98,16 +96,40 @@ server <- function(input, output, session) {
  
   pal <- colorNumeric(
     palette = "Blues",
-    domain = shape$Trabalhadores)
+    domain = shape$Trabalhadores,
+    na.color = "#dddada")
   
   pal2 <- colorNumeric(
     palette = "Blues",
-    domain = shape$Matrículas)
+    domain = shape$Matrículas,
+    na.color = "#dddada")
  ## Define as caracteristicas do mapa
   
   
+  
+  filtros <- reactive({
+    indicador <- req(input$INDICADOR)
+    if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
+      shape %>% 
+        dplyr::filter(Setor == input$TIPO_IND)
+    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+      shape %>% 
+        dplyr::filter(`Nível de ensino` == input$TIPO_IND)
+    }
+  })
+  
+  
   output$mymap <- renderLeaflet({
-    leaflet() %>%
+    leaflet(shape) %>%
+      addPolygons(color = "black",
+                  fillColor = "#800000",
+                  fillOpacity = 0.1,
+                  weight = 0.3, 
+                  smoothFactor = 0.2,
+                  opacity = 0.2, 
+                  highlightOptions = highlightOptions(color = "white", 
+                                                      weight = 2,
+                                                      bringToFront = TRUE)) %>% 
       addTiles() %>%
         addProviderTiles(providers$Stamen.TonerLite,
                      options = providerTileOptions(noWrap = TRUE)) %>% 
@@ -115,41 +137,65 @@ server <- function(input, output, session) {
   })
   
  
-  
-
   observeEvent(input$BCALC1,{
     indicador <- req(input$INDICADOR)
-    tipo <- req(input$TIPO_IND)
-      if(indicador == "Distribuição de trabalhadores por macrozona"){
-       leafletProxy("mymap", data = shape) %>%
+        if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
+       leafletProxy("mymap", data = filtros()) %>%
     clearShapes() %>%
        addPolygons(color = "black",
                 fillColor = ~pal(Trabalhadores),
-                layerId = ~paste("Região:",`Região`,
-                                 "Número de trabalhadores:", `Trabalhadores`),
-                label = ~paste("Região:",`Região`,HTML("<br/>"),
-                               "Número de trabalhadores:", `Trabalhadores`),
+                layerId = ~`Região`,
+                label = ~Região,
+                popup = ~paste0("<strong>Região: </strong>",
+                                `Região`,
+                                "<br>",
+                                "<strong>Número de trabalhadores: </strong>", 
+                                `Trabalhadores`),
                 weight = 2, 
                 smoothFactor = 0.2,
                 opacity = 1.0, 
                 fillOpacity = 1,
                 highlightOptions = highlightOptions(color = "white", 
                                                      weight = 2,
-                                                     bringToFront = TRUE),
-                labelOptions = labelOptions(
-                  style = list("font-weight" = "normal", padding = "3px 8px"),
-                  textsize = "15px",
-                  direction = "auto")) %>% 
+                                                     bringToFront = TRUE)) %>% 
         setView(lng = -45.8872, lat = -23.1791, zoom = 11)
-    } else if(indicador == "Distribuição de matrículas por macrozona"){
-      leafletProxy("mymap", data = shape) %>%
+    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+      leafletProxy("mymap", data = filtros()) %>%
         clearShapes() %>%
         addPolygons(color = "black",
                     fillColor = ~pal2(Matrículas),
                     layerId = ~paste("Região:", Região,"<br/>",
                                      "Matrículas:", Matrículas),
-                    label = ~paste("Região:", Região, "<br/>",
-                                   "Número de matrículas:", Matrículas),
+                    label = ~Região,
+                    popup = ~paste0("<strong>Região: </strong>",
+                                    `Região`,
+                                    "<br>",
+                                    "<strong>Número de matrículas: </strong>", 
+                                    `Matrículas`),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 11)
+    } else if(indicador == "Informações demográficas agregadas por macrozona"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        addPolygons(color = "black",
+                    fillColor = ~paleta(Região),
+                    layerId = ~Região,
+                    label = ~Região,
+                    popup = ~paste0("<h4 align = 'center'><strong>", `Região`, "</h4></strong>",
+                                    "<br /><strong>População: </strong>", `População`,
+                                    "<br /><strong>Área da macrozona (km²): </strong>", `Área da macrozona (km²)`,
+                                    "<br /><strong>Densidade demográfica (hab/km²): </strong>", `Densidade demográfica (hab/km²)`,
+                                    "<br /><strong>Renda média (R$): </strong>", `Renda média (R$)`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -164,418 +210,11 @@ server <- function(input, output, session) {
         setView(lng = -45.8872, lat = -23.1791, zoom = 11)
     }
   })
+  
+}
    
     
   
      
-# 3. Popup ----------------------------------------------------------------
-
-## Definicao das caracteristicas de cada regiao
-  
-### Centro
-  
-  output$def_center <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 72.115
-              <p>Àrea da macrozona (km²): 18,68
-              <p>Densidade demográfica (hab/km²): 3.860,55
-              <p>Renda média: R$ 1.795,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Extremo Norte
-  
-  output$def_exnort <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 15.514
-              <p>Àrea da macrozona (km²): 696,47
-              <p>Densidade demográfica (hab/km²): 22,28
-              <p>Renda média: R$ 574,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Leste
-  
-  output$def_leste <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 160.990
-              <p>Àrea da macrozona (km²): 134,69
-              <p>Densidade demográfica (hab/km²): 1.195,26
-              <p>Renda média: R$ 696,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Norte
-  
-  output$def_nort <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 59.800
-              <p>Àrea da macrozona (km²): 63,73
-              <p>Densidade demográfica (hab/km²): 938,33
-              <p>Renda média: R$ 626,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Oeste
-  
-  output$def_oeste <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 41.163
-              <p>Àrea da macrozona (km²): 44,01
-              <p>Densidade demográfica (hab/km²): 935,31
-              <p>Renda média: R$ 2.519,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Sudeste
-  
-  output$def_sudest <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 46.803
-              <p>Àrea da macrozona (km²): 84,70
-              <p>Densidade demográfica (hab/km²): 552,57
-              <p>Renda média: R$ 653,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-  ### Sul
-  
-  output$def_sul <- renderUI({
-    def <- paste0(
-      "<h4 align = 'justify'>
-              <p>População: 233.536
-              <p>Àrea da macrozona (km²): 56,51
-              <p>Densidade demográfica (hab/km²): 4.132,65
-              <p>Renda média: R$ 934,00</h4>
-              <h4 align ='center'><strong>
-              <p><br/>")
-    HTML(def)
-    
-  })
-  
-## Definicao do popup de cada regiao 
-  
-  observe({
-    
-    event <- input$mymap_shape_click
-    
-  }) 
-  
-  
-  output$plot <- renderPlot({
-  event <- input$mymap_shape_click
-   if(is.null(event)){
-     return()
-   }else if(event =="Centro"){
-         showModal(modalDialog(
-         title = list(tags$h4(align = "right",
-                      modalButton(label =  NULL,
-                                  icon = icon("times"))),
-                      tags$h3(align = "center",
-                              "Centro")),
-         footer = modalButton("Fechar"), 
-         size = "m",
-         fluidRow(
-           column(12,
-         htmlOutput("def_center")),
-         column(12,
-                plotlyOutput("matriculas", height = 310, inline = TRUE),
-                br(),
-                br()),
-         column(12,
-                plotlyOutput("empregos", height = 310, inline = TRUE))),
-         easyClose = TRUE,
-         style = "
-                          overflow: hidden;
-                          overflow-y: scroll;
-                          flex: 1 1 auto;
-                          padding: 1rem;
-                          max-width: 850px;
-                          margin: 1.75rem auto;
-                          max-height: 500px;
-                          display: flex;
-                          width: auto;
-                          "))
-     
-    }else if(event =="Extremo Norte"){
-      
-      showModal(modalDialog(
-        title = list(tags$h4(align = "right",
-                             modalButton(label =  NULL,
-                                         icon = icon("times"))),
-                     tags$h3(align = "center",
-                             "Extremo Norte")),
-        footer = modalButton("Fechar"), 
-        size = "m",
-        fluidRow(
-          column(12,
-                 htmlOutput("def_exnort")),
-          column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE),
-                 br(),
-                 br()),
-        column(12,
-               plotlyOutput("empregos", height = 310, inline = TRUE))),
-        easyClose = TRUE,
-        style = "
-                          overflow: hidden;
-                          overflow-y: scroll;
-                          flex: 1 1 auto;
-                          padding: 1rem;
-                          max-width: 850px;
-                          margin: 1.75rem auto;
-                          max-height: 500px;
-                          display: flex;
-                          width: auto;
-                          "))
-    } else if(event == "Leste"){
-      showModal(modalDialog(
-        title = list(tags$h4(align = "right",
-                             modalButton(label =  NULL,
-                                         icon = icon("times"))),
-                     tags$h3(align = "center",
-                             "Leste")),
-        footer = modalButton("Fechar"), 
-        size = "m",
-        fluidRow(
-          column(12,
-                 htmlOutput("def_leste")),
-          column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE),
-                 br(),
-                 br()),
-          column(12,
-                 plotlyOutput("empregos", height = 310, inline = TRUE))),
-        easyClose = TRUE,
-        style = "
-                          overflow: hidden;
-                          overflow-y: scroll;
-                          flex: 1 1 auto;
-                          padding: 1rem;
-                          max-width: 850px;
-                          margin: 1.75rem auto;
-                          max-height: 500px;
-                          display: flex;
-                          width: auto;
-                          "))
-    } else if(event == "Norte"){
-      showModal(modalDialog(
-        title = list(tags$h4(align = "right",
-                             modalButton(label =  NULL,
-                                         icon = icon("times"))),
-                     tags$h3(align = "center",
-                             "Norte")),
-        footer = modalButton("Fechar"), 
-        size = "m",
-        fluidRow(
-          column(12,
-                 htmlOutput("def_nort")),
-          column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE),
-                 br(),
-                 br()),
-          column(12,
-                 plotlyOutput("empregos", height = 310, inline = TRUE))),
-        easyClose = TRUE,
-        style = "
-                          overflow: hidden;
-                          overflow-y: scroll;
-                          flex: 1 1 auto;
-                          padding: 1rem;
-                          max-width: 850px;
-                          margin: 1.75rem auto;
-                          max-height: 500px;
-                          display: flex;
-                          width: auto;
-                          "))
-    } else if(event == "Oeste"){
-      showModal(modalDialog(
-        title = list(tags$h4(align = "right",
-                             modalButton(label =  NULL,
-                                         icon = icon("times"))),
-                     tags$h3(align = "center",
-                             "Oeste")),
-        footer = modalButton("Fechar"), 
-        size = "m",
-        fluidRow(
-          column(12,
-                 htmlOutput("def_oeste")),
-          column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE),
-                 br(),
-                 br()),
-          column(12,
-                 plotlyOutput("empregos", height = 310, inline = TRUE))),
-        easyClose = TRUE,
-        style = "
-        overflow: hidden;
-        overflow-y: scroll;
-        flex: 1 1 auto;
-        padding: 1rem;
-        max-width: 850px;
-        margin: 1.75rem auto;
-        max-height: 500px;
-        display: flex;
-        width: auto;
-        "))
-    } else if(event == "Sudeste"){
-      showModal(modalDialog(
-        title = list(tags$h4(align = "right",
-                             modalButton(label =  NULL,
-                                         icon = icon("times"))),
-                     tags$h3(align = "center",
-                             "Sudeste")),
-        footer = modalButton("Fechar"), 
-        size = "m",
-        fluidRow(
-          column(12,
-                 htmlOutput("def_sudest")),
-          column(12,
-                 plotlyOutput("matriculas", height = 310, inline = TRUE),
-                 br(),
-                 br()),
-          column(12,
-                 plotlyOutput("empregos", height = 310, inline = TRUE))),
-        easyClose = TRUE,
-        style = "
-        overflow: hidden;
-        overflow-y: scroll;
-        flex: 1 1 auto;
-        padding: 1rem;
-        max-width: 850px;
-        margin: 1.75rem auto;
-        max-height: 500px;
-        display: flex;
-        width: auto;
-        "))
-    } else if(event == "Sul"){ 
-  showModal(modalDialog(
-      title = list(tags$h4(align = "right",
-                           modalButton(label =  NULL,
-                                       icon = icon("times"))),
-                   tags$h3(align = "center",
-                           "Sul")),
-      footer = modalButton("Fechar"), 
-      size = "m",
-      fluidRow(
-        column(12,
-               htmlOutput("def_sul")),
-        column(12,
-               plotlyOutput("matriculas", height = 310, inline = TRUE),
-               br(),
-               br()),
-        column(12,
-               plotlyOutput("empregos", height = 310, inline = TRUE))),
-      easyClose = TRUE,
-      style = "
-                          overflow: hidden;
-                          overflow-y: scroll;
-                          flex: 1 1 auto;
-                          padding: 1rem;
-                          max-width: 850px;
-                          margin: 1.75rem auto;
-                          max-height: 500px;
-                          display: flex;
-                          width: auto;
-                          "))
-    }
-  
-  })
-  
-  
-
-# 4. Graficos -------------------------------------------------------------
-  
-  paleta2 <- c("#f39c18",
-               "#007479", 
-               "#e95b23",  
-               "#93145a",
-               "#1d4f24",
-               "#66388D", 
-               "#C56416", 
-               "#008FD6")
-
-# 4.1. Matriculas ---------------------------------------------------------
-
-  matriculas$`Matrículas` <- as.numeric(matriculas$`Matrículas`)
-  
-  margins = unit(c(6, 4, 1, 1), 'lines')
-  
-  output$matriculas <- renderPlotly({
-    event <- input$mymap_shape_click
-    matriculas2 <- matriculas %>% 
-    filter( `Região` == event$id)
-    ggplotly(
-      ggplot(matriculas2,aes(`Região`,`Matrículas`,fill = `Nível de ensino`)) +
-        geom_bar(stat = "identity",position = "fill") +
-        scale_y_continuous(labels = scales::percent_format()) +
-        coord_flip()+
-        labs(
-        title = "Matrículas por nível de ensino",
-        fill = "Nível de \nensino")+
-        ylab("Porcentagem de matrículas") +
-        xlab("") +
-        scale_fill_manual(values = paleta2)+
-        theme(
-          plot.title = element_text(hjust = 0.5, face = "bold"),
-          panel.background = element_blank(),
-          plot.margin=margins,
-          legend.justification = "justify",
-          legend.position=c(2, 0),
-          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
-  })
-  
-
-# 4.2. Empregos -----------------------------------------------------------
-
- rais$Trabalhadores <- as.numeric(rais$Trabalhadores)
-  
-  output$empregos <- renderPlotly({
-    event <- input$mymap_shape_click
-    rais2 <- rais %>% 
-      filter(`Região` == event$id)
-    ggplotly( 
-      ggplot(rais2,aes(`Região`, Trabalhadores, fill = Setor)) +
-        geom_bar(stat = "identity", position = "fill") +
-        scale_y_continuous(labels = percent_format()) +
-        coord_flip()+
-        labs(
-          title = "Relação de empregos por por área de atividade",
-          fill = "   Região")+
-        ylab("Porcentagem de trabalhadores") +
-        xlab("")+
-        scale_fill_manual(values = paleta2)+
-        theme(
-          plot.title = element_text(hjust = 0.65, face = "bold"),
-          plot.margin=margins,
-          panel.background = element_blank(),
-          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)))
-  })
-  
-}
 
 

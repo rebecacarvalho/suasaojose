@@ -21,10 +21,12 @@ library(tidyverse)
 
 mbas_2018 <- mbas_2018 %>% 
   dplyr::select(nu_ano_censo,id_matricula, lon, lat) %>% 
-  dplyr::rename("Ano do censo" = "nu_ano_censo","Código da matrícula" = "id_matricula", 
-                "Longitude" = "lon", "Latitude" = "lat")
+  dplyr::rename("Ano do censo" = "nu_ano_censo",
+                "Código da matrícula" = "id_matricula", 
+                "Longitude" = "lon", 
+                "Latitude" = "lat")
 
-mbas_2018$`Nível de ensino` <- "Básico"
+mbas_2018$`Nível de ensino` <- "Fundamental"
 
 # Ensino Superior
 
@@ -54,17 +56,18 @@ matriculas <- bind_rows(mbas_2018, msup_2016)
 ## Calcula a quantidade de matriculas por ano, nivel de ensino e macrozona
 
 matriculas <- matriculas %>% 
-  dplyr::group_by(`Ano do censo`, `Nível de ensino`, MacroZona) %>% 
-  count() %>% 
+  dplyr::group_by(`Ano do censo`, 
+                  `Nível de ensino`, 
+                  MacroZona) %>% 
+  dplyr::count() %>% 
   distinct() %>% 
   na.omit()   
 
 
-# 3. Salva o arquivo ------------------------------------------------------
+matriculas <- matriculas %>% 
+  dplyr::rename("Região" = "MacroZona",
+         "Matrículas" = "n")
 
-## Salva o banco 'matriculas' em .csv
+## Remove os bancos que nao serao mais utilizados
 
-
-write.csv(matriculas, "data/output/matriculas.csv")
-
-rm(matriculas,mbas_2018,msup_2016)
+rm(mbas_2018,msup_2016)
