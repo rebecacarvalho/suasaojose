@@ -68,7 +68,40 @@ shape2 <- rbind.fill(shape2, shape)
 shape2 <- shape2[-c(55, 57, 58,60,61), ]
 
 
-# 4. Salva o arquivo ------------------------------------------------------
+
+# 4. Adiciona informações ausentes ----------------------------------------
+
+shape2[46,7] <- 2016
+shape2[46,8] <- "Superior"
+shape2[47,7] <- 2016
+shape2[47,8] <- "Superior"
+shape2[48,7] <- 2016
+shape2[48,8] <- "Superior"
+shape2[49,7] <- 2016
+shape2[49,8] <- "Superior"
+shape2[50,7] <- 2016
+shape2[50,8] <- "Superior"
+shape2[51,7] <- 2016
+shape2[51,8] <- "Superior"
+shape2[52,7] <- 2016
+shape2[52,8] <- "Superior"
+shape2[53,7] <- 2018
+shape2[53,8] <- "Fundamental"
+shape2[53,10] <- "Administração pública"
+shape2[54,7] <- 2018
+shape2[54,8] <- "Fundamental"
+shape2[54,10] <- "Administração pública"
+shape2[56,7] <- 2016
+shape2[56,8] <- "Superior"
+shape2[56,10] <- "Administração pública"
+shape2[59,7] <- 2016
+shape2[54,8] <- "Superior"
+shape2[54,10] <- "Administração pública"
+
+shape2 <- shape2[-c(57, 58, 59), ]
+
+
+# 5. Salva o arquivo ------------------------------------------------------
 
 ## Salva o arquivo 'rais' em .csv
 

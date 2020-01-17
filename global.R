@@ -68,6 +68,8 @@ shape <- shape %>%
          "Matrículas" = "Matrcls",
          "Trabalhadores" = "Trblhdr")
 
-shape[53,6] <- 2018
-shape[53,7] <- "Fundamental"
-shape[53,9] <- "Administração pública"
+shape[55,6] <- 2016
+shape[55,7] <- "Superior"
+shape[55,9] <- "Administração pública"
+
+shape <- shape[-c(57), ]
