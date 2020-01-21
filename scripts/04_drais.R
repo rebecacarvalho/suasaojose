@@ -11,7 +11,6 @@ library(tidyverse)
 #'        - Sao Jose dos Campos.
 
 
-
 # 1. Reorganizacao --------------------------------------------------------------
 
 ## Reorganiza os setores economicos da rais
@@ -103,7 +102,7 @@ shape2 <- shape2[-c(57, 58, 59), ]
 
 # 5. Salva o arquivo ------------------------------------------------------
 
-## Salva o arquivo 'rais' em .csv
+## Salva o arquivo 'shape' em .shp
 
 write_sf(shape2, "data/shapes/shape.shp")
 

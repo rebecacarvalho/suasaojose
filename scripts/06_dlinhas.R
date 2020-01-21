@@ -109,6 +109,7 @@ lrotas <- subset(lrotas,
 lrotas <- na.omit(lrotas)
 
 
+
 ## Cria uma tabela que gerara o grafico 'bola'
 
 linhas2 <- data.frame(
@@ -250,6 +251,6 @@ linhas2 <- data.frame(
 
 ## Salva o banco 'linhas2' em .csv
 
-write.csv(linhas2, "data/output/linhas.csv")
+write_sf(lrotas, "data/shapes/linhas.shp")
 
 rm(list = ls())

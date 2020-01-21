@@ -37,7 +37,10 @@ ui <-
                       margin-top:-10px;
                       margin-bottom: -20px;
                       width: 170px;
-                      }"
+                      }
+                      
+                      div.info.legend.leaflet-control br {
+                      clear: both;}"
 
                      ))),
  
@@ -61,15 +64,10 @@ ui <-
                           # Include our custom CSS
                           includeCSS("styles.css")),
                           
-                        br(),
-                        br(),
-                       
                         
                               leafletOutput("mymap", height = 800),
                         
-                        plotOutput("plot", height="300px"),
-                        br(),
-                            
+                       
                           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                           draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
                                           width = 370, height = "auto",
@@ -101,6 +99,36 @@ ui <-
                            tabPanel(h4("Transportes"),
                                     
                                     
+                                    fluidRow(
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 15,
+                                                         leafletOutput("mymap2", height = 800))),
+                                    
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 15,
+                                                         plotlyOutput("plot_dmg", height = 500))),
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 15,
+                                                         plotlyOutput("plot_dmm", height = 500))),
+                                    
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 15,
+                                                         plotlyOutput("plot_mvm", height = 500))),
+                                    
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 15,
+                                                         plotlyOutput("plot_rm", height = 500)))),
+                                    
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                                   draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
                                                   width = 370, height = "auto",
@@ -113,7 +141,7 @@ ui <-
                                        
                                        
                                        column(12, align = "center",                               
-                                              selectizeInput(inputId = "INDICADOR",
+                                              selectizeInput(inputId = "INDICADOR2",
                                                              label = NULL, 
                                                              choices = c("", "Linhas operantes",
                                                                          "Distribuição modal por gênero",
@@ -122,18 +150,12 @@ ui <-
                                                                          "Proporção de viagens por faixa de renda e modo"),
                                                              selected = NULL,
                                                              options = list(placeholder = 'Escolha um indicador')),
-                                       
+                                              
+                                              
+                                              uiOutput("EMPRESA"),
+                                              
+                                              uiOutput("LINHA"),
                                       
-                                              selectizeInput(inputId = "OBJETIVO",
-                                                             label = NULL, 
-                                                             choices = c("", "Destino",
-                                                                         "Origem"),
-                                                             selected = NULL,
-                                                             options = list(placeholder = 'Escolha o objetivo da viagem')),
-                                      
-                                              
-                                              
-                                              
                                               actionButton(inputId = "BCALC2",
                                                            label = strong("Atualizar"), ## Botao de acao calcular
                                                            width = "100%"))
@@ -153,7 +175,7 @@ ui <-
                 
                 style =
                   
-                  "max-width: 100%;
+                "max-width: 100%;
                 noprint: none; 
                 padding: 10px 0;
                 min-height: 40px;
@@ -166,7 +188,7 @@ ui <-
                 text-align: left;
                 z-index: 10;
                 height: 3em;
-                margin-top: 10em;",
+                margin-top: 65em;",
                 
                 tags$div(class = "rodape-container",
                          
@@ -181,7 +203,8 @@ ui <-
                                   padding: 0;",
                          
                          
-                         tags$div(class = "rodape-texto", "© 2019 CEPESP Todos os direitos reservados.",
+                         tags$div(class = "rodape-texto", 
+                                  "© 2019 CEPESP Todos os direitos reservados.",
                                   
                                   style = 
                                     
@@ -189,6 +212,7 @@ ui <-
                                            max-width: 50%;
                                            align: left;
                                            flex: 1 1 200px;
+                                           position: relative;
                                            display: flex;
                                            padding-left: 5%;
                                            padding-top: 10px;

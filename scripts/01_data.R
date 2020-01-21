@@ -47,6 +47,7 @@ macro <- read_sf("data/input/macrozonas.shp") %>%
   st_transform(4326)
 
 
+
 mun <- read_csv("data/input/mun.txt", 
                 locale = locale())
 
