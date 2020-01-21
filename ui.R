@@ -39,8 +39,13 @@ ui <-
                       width: 170px;
                       }
                       
-                      div.info.legend.leaflet-control br {
-                      clear: both;}"
+                      .div.info.legend.leaflet-control br {
+                      clear: both;}
+                      
+                      .hide{
+                      color: #ffffff;
+                      background-color: #2e2f2f;
+                      border-color: #292a2a;}"
 
                      ))),
  
@@ -67,14 +72,18 @@ ui <-
                         
                               leafletOutput("mymap", height = 800),
                         
-                       
+                        
                           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                           draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
-                                          width = 370, height = "auto",
+                                          width = 350, height = "auto",
                                           
                                           style = "background-color:#D4E6F1;
                                                    align-items: center;",
-                                          
+                                        h2(),
+                                        #column(2,
+                                        #HTML('<button data-toggle="collapse" data-target="#demo"><i class="fa fa-bars"></i></button>'),
+                                        #tags$div(id = 'demo',  class="collapse"),
+                                                 
                                           h2(),
                                           column(12,align = "center",
                                           selectizeInput(inputId = "INDICADOR",
@@ -104,25 +113,26 @@ ui <-
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
                                                          left = 15,
-                                                         leafletOutput("mymap2", height = 800))),
-                                    
+                                                         leafletOutput("mymap2", height = 800)))),
+                                    fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
                                                          left = 15,
-                                                         plotlyOutput("plot_dmg", height = 500))),
+                                                         plotlyOutput("plot_dmg", height = 500)))),
+                                    fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
                                                          left = 15,
-                                                         plotlyOutput("plot_dmm", height = 500))),
+                                                         plotlyOutput("plot_dmm", height = 500)))),
                                     
-                                    column(12,  
-                                           absolutePanel(top = 0, 
-                                                         right = 0 , 
-                                                         left = 15,
-                                                         plotlyOutput("plot_mvm", height = 500))),
-                                    
+                                    #column(12,  
+                                           #absolutePanel(top = 0, 
+                                                         #right = 0 , 
+                                                         #left = 15,
+                                                         #plotlyOutput("plot_mvm", height = 500))),
+                                    fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
@@ -136,17 +146,17 @@ ui <-
                                                   style = "background-color:#D4E6F1;
                                                    align-items: center;",
                                                   
+                                                  
                                                   h2(),
                                        
-                                       
-                                       
+                                                  
                                        column(12, align = "center",                               
                                               selectizeInput(inputId = "INDICADOR2",
                                                              label = NULL, 
                                                              choices = c("", "Linhas operantes",
                                                                          "Distribuição modal por gênero",
                                                                          "Distribuição modal por motivo da viagem",
-                                                                         "Média de viagens por modo",
+                                                                         #"Média de viagens por modo",
                                                                          "Proporção de viagens por faixa de renda e modo"),
                                                              selected = NULL,
                                                              options = list(placeholder = 'Escolha um indicador')),

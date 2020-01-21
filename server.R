@@ -5,7 +5,8 @@ server <- function(input, output, session) {
   
 # 1. Sobre ---------------------------------------------------------------- 
   
-  tipo_indicadores <- reactive({
+  
+   tipo_indicadores <- reactive({
     indicador <- req(input$INDICADOR)
     if(length(indicador) > 0){
       return(input$TIPO_IND)
