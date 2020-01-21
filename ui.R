@@ -70,7 +70,12 @@ ui <-
                           includeCSS("styles.css")),
                           
                         
-                              leafletOutput("mymap", height = 800),
+                        fluidRow(
+                          column(12,  
+                                 absolutePanel(top = 0, 
+                                               right = 0 , 
+                                               left = 0,
+                              leafletOutput("mymap", height = 800)))),
                         
                         
                           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
@@ -112,31 +117,26 @@ ui <-
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
-                                                         left = 15,
+                                                         left = 0,
                                                          leafletOutput("mymap2", height = 800)))),
                                     fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
-                                                         left = 15,
+                                                         left = 0,
                                                          plotlyOutput("plot_dmg", height = 500)))),
                                     fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
-                                                         left = 15,
+                                                         left = 0,
                                                          plotlyOutput("plot_dmm", height = 500)))),
                                     
-                                    #column(12,  
-                                           #absolutePanel(top = 0, 
-                                                         #right = 0 , 
-                                                         #left = 15,
-                                                         #plotlyOutput("plot_mvm", height = 500))),
-                                    fluidRow(
+                                   fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
-                                                         left = 15,
+                                                         left = 0,
                                                          plotlyOutput("plot_rm", height = 500)))),
                                     
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
@@ -146,8 +146,7 @@ ui <-
                                                   style = "background-color:#D4E6F1;
                                                    align-items: center;",
                                                   
-                                                  
-                                                  h2(),
+                                                h2(),
                                        
                                                   
                                        column(12, align = "center",                               
@@ -168,7 +167,13 @@ ui <-
                                       
                                               actionButton(inputId = "BCALC2",
                                                            label = strong("Atualizar"), ## Botao de acao calcular
-                                                           width = "100%"))
+                                                           width = "100%"),
+                                              
+                                              ctionBttn(inputId = "reset",
+                                                        color = "default",
+                                                        icon = icon("broom"), 
+                                                        style = "material-circle",
+                                                        size = "md"))
                                        
                                        
                           )),

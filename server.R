@@ -3,9 +3,13 @@ server <- function(input, output, session) {
   
 
   
-# 1. Sobre ---------------------------------------------------------------- 
+# 1. Indicadores ---------------------------------------------------------------- 
   
-  
+
+
+# 1.1. Opcoes para caracterizacao do municipio ----------------------------
+
+    
    tipo_indicadores <- reactive({
     indicador <- req(input$INDICADOR)
     if(length(indicador) > 0){
@@ -98,7 +102,11 @@ server <- function(input, output, session) {
       return()
     }
   })
-  
+
+
+# 2. Sobre ----------------------------------------------------------------
+
+    
   
   output$sobre <- renderUI({
     sobre <- paste0(
@@ -142,33 +150,37 @@ server <- function(input, output, session) {
   
   
   
-# 2. Configuracoes do mapa inicial ----------------------------------------
+# 3. Configuracoes do mapa inicial do municipio ----------------------------------------
   
   
-    ## Cria uma paleta de cores para o mapa  
+  ## Cria uma paleta de cores para o mapa denografico 
   
-   paleta <- colorFactor(
-                    palette = "Set3",
-                    domain = shape$Região)
+  paletad <- colorFactor(
+    palette = "Set3",
+    domain = shape$Região)
   
+  ## Cria uma paleta de cores para o mapa de trabalhadores
   
- 
-  shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
-  
-  shape$Matrículas <- as.numeric(shape$Matrículas)
- 
-  pal <- colorNumeric(
+  paletat <- colorNumeric(
     palette = "Blues",
     domain = shape$Trabalhadores,
     na.color = "#dddada")
   
-  pal2 <- colorNumeric(
+  ## Cria uma paleta de cores para o mapa de matriculas
+  
+  paletam <- colorNumeric(
     palette = "Blues",
     domain = shape$Matrículas,
     na.color = "#dddada")
- ## Define as caracteristicas do mapa
   
   
+ ## Transforma as variaveis em as.numeric
+  
+  shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
+  
+  shape$Matrículas <- as.numeric(shape$Matrículas)
+ 
+  ## Cria um filtro para o shape do mapa 
   
   filtros <- reactive({
     indicador <- req(input$INDICADOR)
@@ -181,6 +193,8 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  ## Caracteristicas do mapa quando nao ha nenhum indicador selecionado
   
   output$mymap <- renderLeaflet({
     leaflet(shape) %>%
@@ -199,6 +213,7 @@ server <- function(input, output, session) {
       setView(lng = -45.8872, lat = -23.1791, zoom = 9)
   })
   
+  ## Caracteristicas do mapa em funcao do indicador selecionado
  
   observeEvent(input$BCALC1,{
     indicador <- req(input$INDICADOR)
@@ -208,13 +223,13 @@ server <- function(input, output, session) {
             clearControls() %>% 
             addLegend(
               position = "topleft",
-              pal = pal,
+              pal = paletat,
               labFormat = labelFormat(big.mark = "."),
               values = ~Trabalhadores,
               title = "Número de trabalhadores"
             ) %>% 
        addPolygons(color = "black",
-                fillColor = ~pal(Trabalhadores),
+                fillColor = ~paletat(Trabalhadores),
                 layerId = ~`Região`,
                 label = ~Região,
                 popup = ~paste0("<strong>Região: </strong>",
@@ -236,13 +251,13 @@ server <- function(input, output, session) {
         clearControls() %>% 
         addLegend(
           position = "topleft",
-          pal = pal,
+          pal = paletam,
           labFormat = labelFormat(big.mark = "."),
           values = ~`Matrículas`,
           title = "Número de matrículas"
         ) %>% 
         addPolygons(color = "black",
-                    fillColor = ~pal2(Matrículas),
+                    fillColor = ~paletam(Matrículas),
                     layerId = ~paste("Região:", Região,"<br/>",
                                      "Matrículas:", Matrículas),
                     label = ~Região,
@@ -268,7 +283,7 @@ server <- function(input, output, session) {
         clearShapes() %>%
         clearControls() %>% 
         addPolygons(color = "black",
-                    fillColor = ~paleta(Região),
+                    fillColor = ~paletad(Região),
                     layerId = ~Região,
                     label = ~Região,
                     popup = ~paste0("<h4 align = 'center'><strong>", `Região`, "</h4></strong>",
@@ -294,14 +309,16 @@ server <- function(input, output, session) {
 
   
 
-# 3. Configuracoes do mapa de transportes ---------------------------------
+# 4. Configuracoes do mapa de transportes ---------------------------------
   
+  ## Cria uma paleta de cores para as empresas de onibus
   
   lpal <- colorFactor(
     palette = "Set3",
     domain = linhas$Empresa)
   
-  
+ 
+  ## Cria um filtro para o shape do mapa 
   
   fl_linhas <- reactive({
     indicador <- req(input$LINHA)
@@ -312,7 +329,8 @@ server <- function(input, output, session) {
      return()
     }
   })
-  
+
+  ## Condicao para que o mapa seja exibido no app  
 
   map <- reactive({ 
     indicador <- req(input$INDICADOR2)
@@ -322,6 +340,8 @@ server <- function(input, output, session) {
       return()
     }
   })
+  
+  ## Caracteristicas do mapa quando nao ha nenhum indicador selecionado
   
 output$mymap2 <- renderLeaflet({
   indicador <- req(input$INDICADOR2)
@@ -344,7 +364,7 @@ output$mymap2 <- renderLeaflet({
   }
 })
      
-
+## Caracteristicas do mapa em funcao do indicador selecionado
 
   observeEvent(input$BCALC2,{
     indicador <- req(input$INDICADOR2)
@@ -365,10 +385,12 @@ output$mymap2 <- renderLeaflet({
     })
 
 
-# 4. Configuracoes dos graficos de transportes ----------------------------
+# 5. Configuracoes dos graficos de transportes ----------------------------
 
   
-### Distribuicao modal por genero
+## Distribuicao modal por genero
+  
+  ### Cria niveis de exibicao para o modo de transporte
   
   modal_genero$`Modo de transporte` <- factor(modal_genero$`Modo de transporte`, 
                                          levels = c("Outros", 
@@ -380,7 +402,13 @@ output$mymap2 <- renderLeaflet({
                                                     "Bicicleta",
                                                     "A pé"))
   
-  dmg <- reactive({ ## Atributos da tabela
+  ## Tranforma a variavel em as.numeric
+  
+  modal_genero$n <- as.numeric(modal_genero$n)
+  
+ ## Condicao para que o grafico seja exibido
+  
+  dmg <- reactive({ 
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por gênero"){
       return(input$plot_dmg)
@@ -389,12 +417,14 @@ output$mymap2 <- renderLeaflet({
     }
   })
 
-output$plot_dmg <- renderPlotly({
+ ##  Outupt do grafico  
+  
+  output$plot_dmg <- renderPlotly({
   dm_genero()
 })
 
-modal_genero$n <- as.numeric(modal_genero$n)
- 
+  ## Caractericas do grafico
+
   dm_genero <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por gênero"){
@@ -422,6 +452,8 @@ modal_genero$n <- as.numeric(modal_genero$n)
   
 ### Distribuicao modal por motivo da viagem
   
+  ### Cria niveis de exibicao para o modo de transporte
+  
   modal_motivo$`Modo de transporte` <- factor(modal_motivo$`Modo de transporte`, 
                                          levels = c("Outros", 
                                                     "Automóvel", 
@@ -432,8 +464,13 @@ modal_genero$n <- as.numeric(modal_genero$n)
                                                     "Bicicleta",
                                                     "A pé"))
   
+  ## Tranforma a variavel em as.numeric
   
-  dmm <- reactive({ ## Atributos da tabela
+  modal_motivo$n <- as.numeric(modal_motivo$n)
+  
+  ## Condicao para que o grafico seja exibido
+  
+  dmm <- reactive({ 
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por motivo da viagem"){
       return(input$plot_dmm)
@@ -442,17 +479,23 @@ modal_genero$n <- as.numeric(modal_genero$n)
     }
   })
   
+  ##  Outupt do grafico  
+  
   output$plot_dmm <- renderPlotly({
     dm_motivo()
   })
   
-  modal_motivo$n <- as.numeric(modal_motivo$n)
+  
+  ## Caractericas do grafico
   
   dm_motivo <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por motivo da viagem"){
   ggplotly( 
-    ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo)) +
+    ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo,
+                                    text = paste(' Modo de transporte :', `Modo de transporte`,"\n",
+                                                 'Motivo da viagem :', Motivo,"\n",
+                                                 'Porcentagem de viagens :', n))) +
       geom_bar(stat = "identity", position = "fill") +
       scale_y_continuous(labels = percent_format()) + 
       coord_flip()+
@@ -466,13 +509,14 @@ modal_genero$n <- as.numeric(modal_genero$n)
         plot.title = element_text(hjust = 0.5),
         panel.background = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-        plot.margin = margin(30,0,0,0)))
-    }
+        plot.margin = margin(30,0,0,0)),
+    tooltip = c("text"))
+    } 
 })
   
-  ### Media de viagens por modo
+  ## Media de viagens por modo
+    ### Cria niveis de exibicao para o modo de transporte
   
-   viagens$`Média de viagens por modo` <- as.numeric(viagens$`Média de viagens por modo`)
   
   viagens$`Modo de transporte` <- factor(viagens$`Modo de transporte`, 
                                          levels = c("Outros", 
@@ -483,8 +527,20 @@ modal_genero$n <- as.numeric(modal_genero$n)
                                                     "Motocicleta", 
                                                     "Bicicleta",
                                                     "A pé"))
+  
+  ## Tranforma a variavel em as.numeric
+  
+  viagens$`Média de viagens por modo` <- as.numeric(viagens$`Média de viagens por modo`)
+  
+  
+  ## Arredonda para somente dois digitos a variavel media
+  
+  viagens$`Média de viagens por modo` <- round(viagens$`Média de viagens por modo`,
+                                               digits = 2)
+  
+  ## Condicao para que o grafico seja exibido
  
-  mvm <- reactive({ ## Atributos da tabela
+  mvm <- reactive({ 
     indicador <- req(input$INDICADOR2)
     if(indicador == "Média de viagens por modo"){
       return(input$plot_mvm)
@@ -493,13 +549,14 @@ modal_genero$n <- as.numeric(modal_genero$n)
     }
   })
   
+  ##  Outupt do grafico  
+  
   output$plot_mvm <- renderPlotly({
     mv_modo()
   })
   
-  viagens$`Média de viagens por modo` <- round(viagens$`Média de viagens por modo`,
-                                               digits = 2)
-  
+  ## Caractericas do grafico
+ 
   mv_modo <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Média de viagens por modo"){
@@ -524,7 +581,8 @@ modal_genero$n <- as.numeric(modal_genero$n)
 })
   
   
-  ### Proporcao de viagens por faixa de renda e modo
+  ## Proporcao de viagens por faixa de renda e modo
+  ### Cria niveis de exibicao para o modo de transporte
   
   renda$`Modo de transporte` <- factor(renda$`Modo de transporte`, 
                                          levels = c("Outros", 
@@ -536,6 +594,12 @@ modal_genero$n <- as.numeric(modal_genero$n)
                                                     "Bicicleta",
                                                     "A pé"))
   
+  ## Tranforma a variavel em as.numeric
+  
+  renda$Média <- as.numeric(renda$Média)
+  
+  ## Condicao para que o grafico seja exibido
+  
   rm <- reactive({ ## Atributos da tabela
     indicador <- req(input$INDICADOR2)
     if(indicador == "Proporção de viagens por faixa de renda e modo"){
@@ -545,12 +609,14 @@ modal_genero$n <- as.numeric(modal_genero$n)
     }
   })
   
+  ##  Outupt do grafico  
+  
   output$plot_rm <- renderPlotly({
     pv_rm()
   })
   
   
-  renda$Média <- as.numeric(renda$Média)
+  ## Caractericas do grafico
   
   pv_rm <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
@@ -571,7 +637,7 @@ modal_genero$n <- as.numeric(modal_genero$n)
         panel.background = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
         plot.margin = margin(30,0,0,0)))
-    }
+    } 
 })
   
 }

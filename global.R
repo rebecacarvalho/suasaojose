@@ -66,6 +66,9 @@ linhas[114,2] <- "Michigan / Av. Eng. Francisco José Longo"
 linhas[115,2] <- "Canindu / Av. Eng. Francisco José Longo"
 linhas[116,2] <- "Terras do Sul / Olímpio Catão"
 linhas[117,2] <- "Jd. Guimarães / Centro"
+linhas[39,2] <- "Sertãozinho - Via Vila Cândida / Terminal Central"
+linhas[45,2] <- "Jd. Califórnia - Via Vista Verde / Santana - Via Vl. Cristina"
+linhas[87,2] <- "Jd. Santa Rosa - Via São Judas E Colinas / Terminal Central"
 
 
 rm(df)
