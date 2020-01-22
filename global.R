@@ -41,6 +41,8 @@ library(mapedit)
 
 ## Carrega os arquivos com os indicadores pré-calculados
 
+options(OutDec= ",")
+
 files <- list.files(file.path(getwd(),"/data/output"))
 
 for(i in files){
@@ -50,7 +52,15 @@ for(i in files){
   
 }
 
-shape <- read_sf("data/shapes/shape.shp") %>% 
+shape <- read_delim("data/shape.txt", ";", 
+                    escape_double = FALSE, col_types = cols(X1 = col_skip()), 
+                    trim_ws = TRUE)
+
+shape$`Densidade demográfica (hab/km²)` <- pont_virg(shape$`Densidade demográfica (hab/km²)`)
+
+
+
+shape2 <- read_sf("data/shapes/shape.shp") %>% 
   st_transform(4326)
 
 linhas <- read_sf("data/shapes/linhas.shp") %>% 
@@ -93,3 +103,6 @@ shape[55,7] <- "Superior"
 shape[55,9] <- "Administração pública"
 
 shape <- shape[-c(57), ]
+
+
+

@@ -26,7 +26,7 @@ mbas_2018 <- mbas_2018 %>%
                 "Longitude" = "lon", 
                 "Latitude" = "lat")
 
-mbas_2018$`Nível de ensino` <- "Fundamental"
+mbas_2018$`Nível de ensino` <- "Básico"
 
 # Ensino Superior
 

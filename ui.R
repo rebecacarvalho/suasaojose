@@ -2,6 +2,8 @@ ui <-
   
   fluidPage(
     
+    useShinyjs(),
+    
     useShinydashboard(),
   
    title = "Sua São José", ## Titulo da pagina do aplicativo em versao web
@@ -42,15 +44,12 @@ ui <-
                       .div.info.legend.leaflet-control br {
                       clear: both;}
                       
-                      .hide{
-                      color: #ffffff;
-                      background-color: #2e2f2f;
-                      border-color: #292a2a;}"
+                      .leaflet-grab {
+                       cursor: -webkit-grab;"
 
                      ))),
  
     
-   
     navbarPage(title = h1(style="vertical-align:middle;
                           margin-top:5px;
                           margin-left: 250px;
@@ -112,32 +111,33 @@ ui <-
                         
                            tabPanel(h4("Transportes"),
                                     
+                                    fluidRow(
+                                    mainPanel(width = 12,
                                     
-                                    fluidRow(
+                                   
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
                                                          left = 0,
-                                                         leafletOutput("mymap2", height = 800)))),
-                                    fluidRow(
-                                    column(12,  
-                                           absolutePanel(top = 0, 
-                                                         right = 0 , 
-                                                         left = 0,
-                                                         plotlyOutput("plot_dmg", height = 500)))),
-                                    fluidRow(
-                                    column(12,  
-                                           absolutePanel(top = 0, 
-                                                         right = 0 , 
-                                                         left = 0,
-                                                         plotlyOutput("plot_dmm", height = 500)))),
+                                                         plotlyOutput("plot_dmg", height = 500))),
                                     
-                                   fluidRow(
                                     column(12,  
                                            absolutePanel(top = 0, 
                                                          right = 0 , 
                                                          left = 0,
-                                                         plotlyOutput("plot_rm", height = 500)))),
+                                                         plotlyOutput("plot_dmm", height = 500))),
+                                    
+                                  
+                                    column(12,  
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 0,
+                                                         plotlyOutput("plot_rm", height = 500))),
+                                    column(12,
+                                           absolutePanel(top = 0, 
+                                                         right = 0 , 
+                                                         left = 0,
+                                                         leafletOutput("mymap2", height = 800))),)),
                                     
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                                   draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
@@ -167,14 +167,8 @@ ui <-
                                       
                                               actionButton(inputId = "BCALC2",
                                                            label = strong("Atualizar"), ## Botao de acao calcular
-                                                           width = "100%"),
-                                              
-                                              ctionBttn(inputId = "reset",
-                                                        color = "default",
-                                                        icon = icon("broom"), 
-                                                        style = "material-circle",
-                                                        size = "md"))
-                                       
+                                                           width = "100%"))
+                                             
                                        
                           )),
                           

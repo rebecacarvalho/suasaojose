@@ -5,7 +5,7 @@ server <- function(input, output, session) {
   
 # 1. Indicadores ---------------------------------------------------------------- 
   
-
+  
 
 # 1.1. Opcoes para caracterizacao do municipio ----------------------------
 
@@ -23,20 +23,32 @@ server <- function(input, output, session) {
     if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
       selectizeInput(inputId = "TIPO_IND",
                      label = NULL,
-                     choices = c("","Administração pública",
+                     choices = c("","Todos os setores","Administração pública",
                                "Agricultura",
                                "Comércio e serviços",
                                "Indústria"),
                      selected = NULL,
                      options = list(placeholder = 'Escolha um setor'))
-    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+    } else if(indicador == "Informações demográficas agregadas por macrozona"){
       selectizeInput(inputId = "TIPO_IND",
                      label = NULL,
-                     choices = c("","Fundamental",
+                     choices = c("","Todos os indicadores demográficos",
+                                 "Área da macrozona (km²)",
+                                 "Densidade demográfica (hab/km²)",
+                                 "População",
+                                 "Renda média (R$)"),
+                     selected = NULL,
+                     options = list(placeholder = 'Escolha um indicador demográfico'))
+      
+    }else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+      selectizeInput(inputId = "TIPO_IND",
+                     label = NULL,
+                     choices = c("","Todos os níveis",
+                                 "Básico",
                                  "Superior"),
                      selected = NULL,
                      options = list(placeholder = 'Escolha um nível de ensino'))
-    } else{
+    } else {
       return()
     }
   })
@@ -60,7 +72,8 @@ server <- function(input, output, session) {
     if(indicador == "Linhas operantes"){
       selectizeInput(inputId = "EMPRESA",
                      label = NULL,
-                     choices = c("","Alternativo",
+                     choices = c("", "Todas as empresas",
+                                 "Alternativo",
                                  "CS Brasil",
                                  "Expresso Maringá",
                                  "Saens Peña"),
@@ -93,7 +106,7 @@ server <- function(input, output, session) {
        empresa > 0){
       selectizeInput(inputId = "LINHA",
                      label = NULL,
-                     choices = c("",
+                     choices = c("","Todas as linhas",
                                  unique(linhas2[linhas2$Empresa == req(input$EMPRESA), 
                                                "Nome"])),
                      selected = NULL,
@@ -112,13 +125,11 @@ server <- function(input, output, session) {
     sobre <- paste0(
       "
       <h2 align = 'center'>
-      <font size ='6' color = 'black'><strong>
-      
-      Sobre </font></h4>
-      
-      <font size = '1' color = 'black'>
+      <font size ='5' color = 'black'><strong>Sobre</strong></font></h2>
       
       <h3 align = 'justify'><br />
+      <font size = '4' color = 'black'>
+      
       <p style='line-height:150%'>A mobilidade faz parte do dia-a-dia das pessoas que vivem em cidades. 
       Deslocamentos ocorrem, principalmente, em razão de trabalho, estudo, 
       afazeres pessoais ou lazer e impactam diretamente a qualidade de vida
@@ -140,7 +151,7 @@ server <- function(input, output, session) {
       a reestruturação do novo transporte público estejam informadas sobre o assunto.
       <p><br />
       <p style='line-height:150%'>As informações aqui disponibilizadas têm como fonte o Atlas da Pesquisa Origem e Destino, realizada em 2011, bem como 
-      dados mais recentes sobre a operação do transporte na cidade.</h3></font>
+      dados mais recentes sobre a operação do transporte na cidade.</font></h3>
       <p><br/>
       <p><br/>")
     
@@ -152,6 +163,13 @@ server <- function(input, output, session) {
   
 # 3. Configuracoes do mapa inicial do municipio ----------------------------------------
   
+
+  ## Transforma as variaveis em as.numeric
+  
+  shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
+  
+  shape$Matrículas <- as.numeric(shape$Matrículas)
+  
   
   ## Cria uma paleta de cores para o mapa denografico 
   
@@ -161,45 +179,81 @@ server <- function(input, output, session) {
   
   ## Cria uma paleta de cores para o mapa de trabalhadores
   
-  paletat <- colorNumeric(
+  paletat <- colorQuantile(
     palette = "Blues",
     domain = shape$Trabalhadores,
     na.color = "#dddada")
   
+  
+  paletadd <- colorQuantile(
+    palette = "Blues",
+    domain = shape$`Densidade demográfica (hab/km²)`,
+    n = 8,
+    na.color = "#dddada")
+ 
+  paletaa <- colorQuantile(
+    palette = "Blues",
+    domain = shape$`Área da macrozona (km²)`,
+    na.color = "#dddada")
+  
+  
+  paletap <- colorQuantile(
+    palette = "Blues",
+    domain = shape$População,
+    na.color = "#dddada")
+  
+  
+  paletar <- colorQuantile(
+    palette = "Blues",
+    domain = shape$`Renda média (R$)`,
+    na.color = "#dddada")
+  
+  
   ## Cria uma paleta de cores para o mapa de matriculas
   
-  paletam <- colorNumeric(
+  paletam <- colorQuantile(
     palette = "Blues",
     domain = shape$Matrículas,
     na.color = "#dddada")
   
   
- ## Transforma as variaveis em as.numeric
-  
-  shape$Trabalhadores <- as.numeric(shape$Trabalhadores)
-  
-  shape$Matrículas <- as.numeric(shape$Matrículas)
- 
   ## Cria um filtro para o shape do mapa 
   
   filtros <- reactive({
     indicador <- req(input$INDICADOR)
+    demografia <- req(input$TIPO_IND)
     if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
       shape %>% 
         dplyr::filter(Setor == input$TIPO_IND)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Área da macrozona (km²)"){
+      shape %>% 
+        dplyr::filter(`Área da macrozona (km²)`== input$TIPO_IND)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Densidade demográfica (hab/km²)"){
+      shape %>% 
+        dplyr::filter(`Densidade demográfica (hab/km²)`== input$TIPO_IND)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "População"){
+      shape %>% 
+        dplyr::filter(`População`== input$TIPO_IND)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Renda média (R$)"){
+      shape %>% 
+        dplyr::filter(`Renda média (R$)`== input$TIPO_IND)
     } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
       shape %>% 
         dplyr::filter(`Nível de ensino` == input$TIPO_IND)
     }
   })
   
-  
+
   ## Caracteristicas do mapa quando nao ha nenhum indicador selecionado
   
   output$mymap <- renderLeaflet({
     leaflet(shape) %>%
       addPolygons(color = "black",
-                  fillColor = "#800000",
+                  fillColor = "#ffe0e0",
                   fillOpacity = 0.1,
                   weight = 0.3, 
                   smoothFactor = 0.2,
@@ -217,6 +271,7 @@ server <- function(input, output, session) {
  
   observeEvent(input$BCALC1,{
     indicador <- req(input$INDICADOR)
+    demografia <- req(input$TIPO_IND)
         if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
        leafletProxy("mymap", data = filtros()) %>%
             clearShapes() %>%
@@ -231,12 +286,11 @@ server <- function(input, output, session) {
        addPolygons(color = "black",
                 fillColor = ~paletat(Trabalhadores),
                 layerId = ~`Região`,
-                label = ~Região,
-                popup = ~paste0("<strong>Região: </strong>",
-                                `Região`,
-                                "<br>",
-                                "<strong>Número de trabalhadores: </strong>", 
-                                `Trabalhadores`),
+                label = ~paste0(HTML("<strong>Região: </strong>"),
+                            ~`Região`,
+                                HTML("<br>",
+                                "<strong>Número de trabalhadores: </strong>"), 
+                                ~`Trabalhadores`),
                 weight = 2, 
                 smoothFactor = 0.2,
                 opacity = 1.0, 
@@ -278,19 +332,22 @@ server <- function(input, output, session) {
                       textsize = "15px",
                       direction = "auto")) %>% 
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
-    } else if(indicador == "Informações demográficas agregadas por macrozona"){
-      leafletProxy("mymap", data = shape) %>%
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Área da macrozona (km²)"){
+      leafletProxy("mymap", data = filtros()) %>%
         clearShapes() %>%
         clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = paletaa,
+          labFormat = labelFormat(big.mark = "."),
+          values = ~`Área da macrozona (km²)`,
+          title = "Área da macrozona (km²)"
+        ) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletad(Região),
-                    layerId = ~Região,
+                    fillColor = ~paletaa(`Área da macrozona (km²)`),
+                    layerId = ~`Região`,
                     label = ~Região,
-                    popup = ~paste0("<h4 align = 'center'><strong>", `Região`, "</h4></strong>",
-                                    "<br /><strong>População: </strong>", `População`,
-                                    "<br /><strong>Área da macrozona (km²): </strong>", `Área da macrozona (km²)`,
-                                    "<br /><strong>Densidade demográfica (hab/km²): </strong>", `Densidade demográfica (hab/km²)`,
-                                    "<br /><strong>Renda média (R$): </strong>", `Renda média (R$)`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -314,7 +371,7 @@ server <- function(input, output, session) {
   ## Cria uma paleta de cores para as empresas de onibus
   
   lpal <- colorFactor(
-    palette = "Set3",
+    palette = "Set1",
     domain = linhas$Empresa)
   
  
@@ -341,15 +398,20 @@ server <- function(input, output, session) {
     }
   })
   
+  output$mymap2 <- renderLeaflet({
+    map_tr()
+  })
+    
+  
   ## Caracteristicas do mapa quando nao ha nenhum indicador selecionado
   
-output$mymap2 <- renderLeaflet({
+map_tr <- eventReactive(input$BCALC2, {
   indicador <- req(input$INDICADOR2)
   if(indicador == "Linhas operantes"){
   leaflet(shape) %>%
     addPolygons(color = "black",
                 label = ~`Região`,
-                fillColor = "#800000",
+                fillColor = "#ffe0e0",
                 fillOpacity = 0.1,
                 weight = 0.3, 
                 smoothFactor = 0.1,
@@ -360,7 +422,7 @@ output$mymap2 <- renderLeaflet({
     addTiles() %>%
     addProviderTiles(providers$Stamen.TonerLite,
                      options = providerTileOptions(noWrap = TRUE)) %>% 
-    setView(lng = -45.8872, lat = -23.1791, zoom = 9)
+    setView(lng = -45.8872, lat = -23.1791, zoom = 10)
   }
 })
      
@@ -380,7 +442,7 @@ output$mymap2 <- renderLeaflet({
         addTiles() %>%
         addProviderTiles(providers$Stamen.TonerLite,
                          options = providerTileOptions(noWrap = TRUE)) %>% 
-        setView(lng = -45.8872, lat = -23.1791, zoom = 11)
+        setView(lng = -45.8872, lat = -23.1791, zoom = 13)
     }
     })
 
@@ -605,7 +667,7 @@ output$mymap2 <- renderLeaflet({
     if(indicador == "Proporção de viagens por faixa de renda e modo"){
       return(input$plot_rm)
     } else{
-      return()
+      NULL
     }
   })
   
