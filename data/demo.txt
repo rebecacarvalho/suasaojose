@@ -1,0 +1,8 @@
+﻿"","Região","População","Área da macrozona (km²)","Densidade demográfica (hab/km²)","Renda média (R$)"
+"1","Centro",72115,18,3860,1795
+"2","Extremo Norte",15514,696,22,574
+"3","Leste",160990,134,1195,696
+"4","Norte",59800,63,938,626
+"5","Oeste",41163,44,935,2519
+"6","Sudeste",46803,84,552,653
+"7","Sul",233536,56,4132,934

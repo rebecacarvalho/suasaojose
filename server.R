@@ -171,6 +171,9 @@ server <- function(input, output, session) {
   shape$Matrículas <- as.numeric(shape$Matrículas)
   
   
+  ## Ordena as variaveis em ordem crescente
+  
+  
   ## Cria uma paleta de cores para o mapa denografico 
   
   paletad <- colorFactor(
@@ -187,25 +190,25 @@ server <- function(input, output, session) {
   
   paletadd <- colorQuantile(
     palette = "Blues",
-    domain = shape$`Densidade demográfica (hab/km²)`,
-    n = 8,
-    na.color = "#dddada")
+    domain = demo$`Densidade demográfica (hab/km²)`,
+    na.color = "#dddada",
+    right = TRUE)
  
   paletaa <- colorQuantile(
     palette = "Blues",
-    domain = shape$`Área da macrozona (km²)`,
+    domain = demo$`Área da macrozona (km²)`,
     na.color = "#dddada")
   
-  
-  paletap <- colorQuantile(
+  paletap <-  colorQuantile(
     palette = "Blues",
-    domain = shape$População,
+    domain = populacao$População,
     na.color = "#dddada")
   
+  paletap(demo$População)
   
-  paletar <- colorQuantile(
+    paletar <- colorQuantile(
     palette = "Blues",
-    domain = shape$`Renda média (R$)`,
+    domain = demo$`Renda média (R$)`,
     na.color = "#dddada")
   
   
@@ -217,7 +220,7 @@ server <- function(input, output, session) {
     na.color = "#dddada")
   
   
-  ## Cria um filtro para o shape do mapa 
+    ## Cria um filtro para o shape do mapa 
   
   filtros <- reactive({
     indicador <- req(input$INDICADOR)
@@ -225,22 +228,6 @@ server <- function(input, output, session) {
     if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
       shape %>% 
         dplyr::filter(Setor == input$TIPO_IND)
-    } else if(indicador == "Informações demográficas agregadas por macrozona" &
-              demografia == "Área da macrozona (km²)"){
-      shape %>% 
-        dplyr::filter(`Área da macrozona (km²)`== input$TIPO_IND)
-    } else if(indicador == "Informações demográficas agregadas por macrozona" &
-              demografia == "Densidade demográfica (hab/km²)"){
-      shape %>% 
-        dplyr::filter(`Densidade demográfica (hab/km²)`== input$TIPO_IND)
-    } else if(indicador == "Informações demográficas agregadas por macrozona" &
-              demografia == "População"){
-      shape %>% 
-        dplyr::filter(`População`== input$TIPO_IND)
-    } else if(indicador == "Informações demográficas agregadas por macrozona" &
-              demografia == "Renda média (R$)"){
-      shape %>% 
-        dplyr::filter(`Renda média (R$)`== input$TIPO_IND)
     } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
       shape %>% 
         dplyr::filter(`Nível de ensino` == input$TIPO_IND)
@@ -279,7 +266,6 @@ server <- function(input, output, session) {
             addLegend(
               position = "topleft",
               pal = paletat,
-              labFormat = labelFormat(big.mark = "."),
               values = ~Trabalhadores,
               title = "Número de trabalhadores"
             ) %>% 
@@ -306,7 +292,6 @@ server <- function(input, output, session) {
         addLegend(
           position = "topleft",
           pal = paletam,
-          labFormat = labelFormat(big.mark = "."),
           values = ~`Matrículas`,
           title = "Número de matrículas"
         ) %>% 
@@ -334,20 +319,100 @@ server <- function(input, output, session) {
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
     } else if(indicador == "Informações demográficas agregadas por macrozona" &
               demografia == "Área da macrozona (km²)"){
-      leafletProxy("mymap", data = filtros()) %>%
+      leafletProxy("mymap", data = shape) %>%
         clearShapes() %>%
         clearControls() %>% 
         addLegend(
           position = "topleft",
           pal = paletaa,
-          labFormat = labelFormat(big.mark = "."),
-          values = ~`Área da macrozona (km²)`,
+          values = ~demo$`Área da macrozona (km²)`,
           title = "Área da macrozona (km²)"
         ) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletaa(`Área da macrozona (km²)`),
+                    fillColor = ~paletaa(demo$`Área da macrozona (km²)`),
                     layerId = ~`Região`,
-                    label = ~Região,
+                    label = ~paste0(Região,`Área da macrozona (km²)`),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Densidade demográfica (hab/km²)"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = paletadd,
+          values = ~sort(demo$`Densidade demográfica (hab/km²)`),
+          title = "Densidade demográfica (hab/km²)"
+        ) %>% 
+        addPolygons(color = "black",
+                    fillColor = ~paletadd(sort(demo$`Densidade demográfica (hab/km²)`)),
+                    layerId = ~`Região`,
+                    label = ~paste0(Região,`Densidade demográfica (hab/km²)`),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "População"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = paletap,
+          values = ~populacao$População,
+          title = "População"
+        ) %>% 
+        addPolygons(color = "black",
+                    fillColor = ~paletap(populacao$População),
+                    layerId = ~`Região`,
+                    label = ~paste0(Região,`População`),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Renda média (R$)"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = paletar,
+          values = ~demo$`Renda média (R$)`,
+          title = "Renda média (R$)"
+        ) %>% 
+        addPolygons(color = "black",
+                    fillColor = ~paletar(demo$`Renda média (R$)`),
+                    layerId = ~`Região`,
+                    label = ~paste0(Região,`Renda média (R$)`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
