@@ -192,7 +192,7 @@ server <- function(input, output, session) {
   
   paletad <- colorFactor(
     palette = "Set3",
-    domain = shape$Região)
+    domain = shape$`Região`)
   
   
   
@@ -224,7 +224,7 @@ server <- function(input, output, session) {
   
   paletap <-  colorQuantile(
     palette = "Blues",
-    domain = populacaodf$População,
+    domain = populacaodf$`População`,
     na.color = "#dddada")
   
  
@@ -238,7 +238,7 @@ server <- function(input, output, session) {
   
   paletam <- colorQuantile(
     palette = "Blues",
-    domain = shape$Matrículas,
+    domain = shape$`Matrículas`,
     na.color = "#dddada")
   
   paletatm <- colorQuantile(
@@ -342,7 +342,7 @@ server <- function(input, output, session) {
               })%>% 
             addPolygons(color = "black",
                         fillColor = ~paletatt(`Número de trabalhadores`),
-                        layerId = ~paste(Região),
+                        layerId = ~paste(`Região`),
                         label = ~`Região`,
                         popup = ~paste0("<strong>Região: </strong>",
                                         `Região`,
@@ -413,7 +413,7 @@ server <- function(input, output, session) {
               }) %>% 
             addPolygons(color = "black",
                         fillColor = ~paletatm(`Número de matrículas`),
-                        layerId = ~paste(Região),
+                        layerId = ~paste(`Região`),
                         label = ~`Região`,
                         popup = ~paste0("<strong>Região: </strong>",
                                         `Região`,
@@ -510,14 +510,14 @@ server <- function(input, output, session) {
         addLegend(
           position = "topleft",
           pal = paletap,
-          values = ~População,
+          values = ~`População`,
           title = "População",
           labFormat = function(type, cuts, p) {
             n = length(cuts)
             paste0(cuts[-n], " &ndash; ", cuts[-1])
           }) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletap(População),
+                    fillColor = ~paletap(`População`),
                     layerId = ~`Região`,
                     label = ~`Região`,
                     popup = ~paste0("<strong>Região: </strong>",

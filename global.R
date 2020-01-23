@@ -27,7 +27,7 @@ library(ggmap)
 library(widgetframe)
 library(mapview)
 library(mapedit)
-library(ggvis)
+
 
 
 
@@ -60,6 +60,8 @@ shape <- read_sf("data/shapes/shape.shp") %>%
 linhas <- read_sf("data/shapes/linhas.shp") %>% 
   st_transform(4326)
 
+demosjc <- read_sf("data/shapes/demosjc.shp") %>% 
+  st_transform(4326)
 
 
 
@@ -97,10 +99,6 @@ shape <- shape %>%
          "Trabalhadores" = "Trblhdr")
 
 
-
-demosjc <- read_sf("data/shapes/demosjc.shp") %>% 
-  st_transform(4326)
-
 colnames(demosjc)[2] <- "População"
 colnames(demosjc)[3] <- "Área da macrozona (km²)"
 colnames(demosjc)[4] <- "Densidade demográfica (hab/km²)"
@@ -110,7 +108,7 @@ demosjc$aream <- unique(shape$`Área da macrozona (km²)`)
 
 demosjc$densidaded <- unique(shape$`Densidade demográfica (hab/km²)`)
 
-demosjc$populacaom <- unique(shape$População)
+demosjc$populacaom <- unique(shape$`População`)
 
 demosjc$rendam <- unique(shape$`Renda média (R$)`)
 
@@ -122,7 +120,7 @@ densidadedf <- demosjc %>%
   arrange(`Densidade demográfica (hab/km²)`)
 
 populacaodf <- demosjc %>% 
-  arrange(População)
+  arrange(`População`)
 
 rendamdf <- demosjc %>% 
   arrange(`Renda média (R$)`)
