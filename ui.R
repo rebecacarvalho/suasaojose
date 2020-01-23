@@ -6,13 +6,7 @@ ui <-
     
     useShinydashboard(),
     
-    includeScript("intro.min.js"),
     
-    # Include JavaScript code to make shiny communicate with introJS
-    includeScript("app.js"),
-    
-    includeCSS("introjs.min.css"),
-  
    title = "Sua São José", ## Titulo da pagina do aplicativo em versao web
     
    
@@ -165,7 +159,6 @@ ui <-
                                                              choices = c("", "Linhas operantes",
                                                                          "Distribuição modal por gênero",
                                                                          "Distribuição modal por motivo da viagem",
-                                                                         #"Média de viagens por modo",
                                                                          "Proporção de viagens por faixa de renda e modo"),
                                                              selected = NULL,
                                                              options = list(placeholder = 'Escolha um indicador')),

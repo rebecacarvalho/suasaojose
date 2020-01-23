@@ -68,10 +68,12 @@ server <- function(input, output, session) {
   
   ### Empresa
 
-  empresa <- reactive({
+  empresa2 <- reactive({
     indicador <- req(input$INDICADOR2)
-    if(length(indicador) > 0){
+    if(indicador == "Linhas operantes"){
       return(input$EMPRESA)
+    } else{
+      return()
     } 
   })
   
@@ -96,10 +98,14 @@ server <- function(input, output, session) {
  ### Nome da linha
   
   
-  empresa <- reactive({
+  linha2 <- reactive({
+    indicador <- req(input$INDICADOR2)
     empresa <- req(input$EMPRESA)
-    if(length(indicador) > 0){
+    if(indicador == "Linhas operantes" &
+       req(empresa == input$EMPRESA)){
       return(input$LINHA)
+    } else{
+      return()
     } 
   })
   
@@ -115,7 +121,8 @@ server <- function(input, output, session) {
                                   linhas2$Nome),
                      selected = NULL,
                      options = list(placeholder = 'Escolha uma linha'))
-    } else{
+    } else if(indicador == "Linhas operantes" &
+              empresa == "Todas as empresas"){
       selectizeInput(inputId = "LINHA",
                      label = NULL,
                      choices = c("","Todas as linhas",
@@ -123,6 +130,19 @@ server <- function(input, output, session) {
                                                 "Nome"])),
                      selected = NULL,
                      options = list(placeholder = 'Escolha uma linha'))
+    } else if(indicador == "Linhas operantes" &
+              req(empresa == input$EMPRESA)){
+      selectizeInput(inputId = "LINHA",
+                     label = NULL,
+                     choices = c("","Todas as linhas",
+                                 unique(linhas2[linhas2$Empresa == req(input$EMPRESA), 
+                                                "Nome"])),
+                     selected = NULL,
+                     options = list(placeholder = 'Escolha uma linha'))
+    } else if(indicador != "Linhas operantes"){
+      return()
+    } else{
+      return()
     }
   })
 
