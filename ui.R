@@ -5,6 +5,13 @@ ui <-
     useShinyjs(),
     
     useShinydashboard(),
+    
+    includeScript("intro.min.js"),
+    
+    # Include JavaScript code to make shiny communicate with introJS
+    includeScript("app.js"),
+    
+    includeCSS("introjs.min.css"),
   
    title = "Sua São José", ## Titulo da pagina do aplicativo em versao web
     
@@ -44,8 +51,11 @@ ui <-
                       .div.info.legend.leaflet-control br {
                       clear: both;}
                       
-                      .leaflet-grab {
-                       cursor: -webkit-grab;"
+                      
+                      .leaflet-popup-tip-container {
+	                    cursor: pointer;
+	pointer-events: auto;
+	}"
 
                      ))),
  
@@ -70,8 +80,8 @@ ui <-
                           
                         
                         fluidRow(
-                          column(12,  
-                                 absolutePanel(top = 0, 
+                          column(12,   
+                                 absolutePanel(top = 40, 
                                                right = 0 , 
                                                left = 0,
                               leafletOutput("mymap", height = 800)))),
@@ -116,25 +126,25 @@ ui <-
                                     
                                    
                                     column(12,  
-                                           absolutePanel(top = 0, 
+                                           absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
                                                          plotlyOutput("plot_dmg", height = 500))),
                                     
                                     column(12,  
-                                           absolutePanel(top = 0, 
+                                           absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
                                                          plotlyOutput("plot_dmm", height = 500))),
                                     
                                   
                                     column(12,  
-                                           absolutePanel(top = 0, 
+                                           absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
                                                          plotlyOutput("plot_rm", height = 500))),
                                     column(12,
-                                           absolutePanel(top = 0, 
+                                           absolutePanel(top = 40, 
                                                          right = 0 , 
                                                          left = 0,
                                                          leafletOutput("mymap2", height = 800))),)),

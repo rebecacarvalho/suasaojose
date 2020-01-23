@@ -6,7 +6,16 @@ server <- function(input, output, session) {
 # 1. Indicadores ---------------------------------------------------------------- 
   
   
-
+  #session$sendCustomMessage(type = 'setHelpContent', message = list(steps = toJSON(steps) ))
+  
+  # listen to the action button
+  #observeEvent(input$BCALC1,{
+    
+    # on click, send custom message to start help
+    #session$sendCustomMessage(type = 'startHelp', message = list(""))
+    
+  #})
+  
 # 1.1. Opcoes para caracterizacao do municipio ----------------------------
 
     
@@ -86,10 +95,6 @@ server <- function(input, output, session) {
   
  ### Nome da linha
   
-  linhas2 <- linhas[,c(1:3)]
-  
-  st_geometry(linhas2) <- NULL
-    
   
   empresa <- reactive({
     empresa <- req(input$EMPRESA)
@@ -103,20 +108,26 @@ server <- function(input, output, session) {
     indicador <- req(input$INDICADOR2)
     empresa <- req(input$EMPRESA)
     if(indicador == "Linhas operantes" &
-       empresa > 0){
+       empresa == "Todas as empresas"){
+      selectizeInput(inputId = "LINHA",
+                     label = NULL,
+                     choices =  c("", "Todas as linhas",
+                                  linhas2$Nome),
+                     selected = NULL,
+                     options = list(placeholder = 'Escolha uma linha'))
+    } else{
       selectizeInput(inputId = "LINHA",
                      label = NULL,
                      choices = c("","Todas as linhas",
                                  unique(linhas2[linhas2$Empresa == req(input$EMPRESA), 
-                                               "Nome"])),
+                                                "Nome"])),
                      selected = NULL,
                      options = list(placeholder = 'Escolha uma linha'))
-    } else{
-      return()
     }
   })
 
-
+  
+ 
 # 2. Sobre ----------------------------------------------------------------
 
     
@@ -161,6 +172,9 @@ server <- function(input, output, session) {
   
   
   
+ 
+  
+  
 # 3. Configuracoes do mapa inicial do municipio ----------------------------------------
   
 
@@ -174,11 +188,13 @@ server <- function(input, output, session) {
   ## Ordena as variaveis em ordem crescente
   
   
-  ## Cria uma paleta de cores para o mapa denografico 
+  ## Cria uma paleta de cores para o mapa demografico 
   
   paletad <- colorFactor(
     palette = "Set3",
     domain = shape$Região)
+  
+  
   
   ## Cria uma paleta de cores para o mapa de trabalhadores
   
@@ -187,28 +203,34 @@ server <- function(input, output, session) {
     domain = shape$Trabalhadores,
     na.color = "#dddada")
   
+  paletatt <- colorQuantile(
+    palette = "Blues",
+    domain = totaltr$`Número de trabalhadores`,
+    na.color = "#dddada")
+  
+  paletatt(shape$`Número de trabalhadores`)
+  
   
   paletadd <- colorQuantile(
     palette = "Blues",
-    domain = demo$`Densidade demográfica (hab/km²)`,
+    domain = densidadedf$`Densidade demográfica (hab/km²)`,
     na.color = "#dddada",
     right = TRUE)
  
   paletaa <- colorQuantile(
     palette = "Blues",
-    domain = demo$`Área da macrozona (km²)`,
+    domain = areadf$`Área da macrozona (km²)`,
     na.color = "#dddada")
   
   paletap <-  colorQuantile(
     palette = "Blues",
-    domain = populacao$População,
+    domain = populacaodf$População,
     na.color = "#dddada")
   
-  paletap(demo$População)
-  
+ 
     paletar <- colorQuantile(
     palette = "Blues",
-    domain = demo$`Renda média (R$)`,
+    domain = rendamdf$`Renda média (R$)`,
     na.color = "#dddada")
   
   
@@ -219,19 +241,30 @@ server <- function(input, output, session) {
     domain = shape$Matrículas,
     na.color = "#dddada")
   
+  paletatm <- colorQuantile(
+    palette = "Blues",
+    domain = totalmt$`Número de matrículas`,
+    na.color = "#dddada")
+  
   
     ## Cria um filtro para o shape do mapa 
   
   filtros <- reactive({
     indicador <- req(input$INDICADOR)
     demografia <- req(input$TIPO_IND)
-    if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
+    if(indicador == "Distribuição de trabalhadores agregados por macrozona" &
+       demografia == "Administração pública" |
+       demografia == "Agricultura"|
+       demografia == "Comércio e serviços"|
+       demografia == "Indústria"){
       shape %>% 
         dplyr::filter(Setor == input$TIPO_IND)
-    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+    }else if(indicador == "Distribuição de matrículas agregadas por macrozona" &
+            demografia == "Básico" |
+            demografia == "Superior"){
       shape %>% 
         dplyr::filter(`Nível de ensino` == input$TIPO_IND)
-    }
+    } 
   })
   
 
@@ -259,7 +292,11 @@ server <- function(input, output, session) {
   observeEvent(input$BCALC1,{
     indicador <- req(input$INDICADOR)
     demografia <- req(input$TIPO_IND)
-        if(indicador == "Distribuição de trabalhadores agregados por macrozona"){
+        if(indicador == "Distribuição de trabalhadores agregados por macrozona" &
+           demografia == "Administração pública" |
+           demografia == "Agricultura"|
+           demografia == "Comércio e serviços"|
+           demografia == "Indústria"){
        leafletProxy("mymap", data = filtros()) %>%
             clearShapes() %>%
             clearControls() %>% 
@@ -267,16 +304,20 @@ server <- function(input, output, session) {
               position = "topleft",
               pal = paletat,
               values = ~Trabalhadores,
-              title = "Número de trabalhadores"
-            ) %>% 
+              title = "Número de trabalhadores",
+              labFormat = function(type, cuts, p) {
+                n = length(cuts)
+                paste0(cuts[-n], " &ndash; ", cuts[-1])
+                }) %>% 
        addPolygons(color = "black",
                 fillColor = ~paletat(Trabalhadores),
                 layerId = ~`Região`,
-                label = ~paste0(HTML("<strong>Região: </strong>"),
-                            ~`Região`,
-                                HTML("<br>",
-                                "<strong>Número de trabalhadores: </strong>"), 
-                                ~`Trabalhadores`),
+                label = ~`Região`,
+                popup = ~paste0("<strong>Região: </strong>",
+                            `Região`,
+                            "<br>",
+                            "<strong>Número de trabalhadores: </strong>", 
+                             `Trabalhadores`),
                 weight = 2, 
                 smoothFactor = 0.2,
                 opacity = 1.0, 
@@ -285,7 +326,44 @@ server <- function(input, output, session) {
                                                      weight = 2,
                                                      bringToFront = TRUE)) %>% 
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
-    } else if(indicador == "Distribuição de matrículas agregadas por macrozona"){
+        } else if(indicador == "Distribuição de trabalhadores agregados por macrozona" &
+                  demografia == "Todos os setores"){
+          leafletProxy("mymap", data = totaltr) %>%
+            clearShapes() %>%
+            clearControls() %>% 
+            addLegend(
+              position = "topleft",
+              pal = paletatt,
+              values = ~`Número de trabalhadores`,
+              title = "Total de trabalhadores por macrozona",
+              labFormat = function(type, cuts, p) {
+                n = length(cuts)
+                paste0(cuts[-n], " &ndash; ", cuts[-1])
+              })%>% 
+            addPolygons(color = "black",
+                        fillColor = ~paletatt(`Número de trabalhadores`),
+                        layerId = ~paste(Região),
+                        label = ~`Região`,
+                        popup = ~paste0("<strong>Região: </strong>",
+                                        `Região`,
+                                        "<br>",
+                                        "<strong>Total de trabalhadoress: </strong>", 
+                                        `Número de trabalhadores`),
+                        weight = 2, 
+                        smoothFactor = 0.2,
+                        opacity = 1.0, 
+                        fillOpacity = 1,
+                        highlightOptions = highlightOptions(color = "white", 
+                                                            weight = 2,
+                                                            bringToFront = TRUE),
+                        labelOptions = labelOptions(
+                          style = list("font-weight" = "normal", padding = "3px 8px"),
+                          textsize = "15px",
+                          direction = "auto")) %>% 
+            setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+        } else if(indicador == "Distribuição de matrículas agregadas por macrozona"  &
+                  demografia == "Básico" |
+                  demografia == "Superior"){
       leafletProxy("mymap", data = filtros()) %>%
         clearShapes() %>%
         clearControls() %>% 
@@ -293,13 +371,15 @@ server <- function(input, output, session) {
           position = "topleft",
           pal = paletam,
           values = ~`Matrículas`,
-          title = "Número de matrículas"
-        ) %>% 
+          title = "Número de matrículas",
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            paste0(cuts[-n], " &ndash; ", cuts[-1])
+          }) %>% 
         addPolygons(color = "black",
                     fillColor = ~paletam(Matrículas),
-                    layerId = ~paste("Região:", Região,"<br/>",
-                                     "Matrículas:", Matrículas),
-                    label = ~Região,
+                    layerId = ~paste(Região),
+                    label = ~`Região`,
                     popup = ~paste0("<strong>Região: </strong>",
                                     `Região`,
                                     "<br>",
@@ -317,21 +397,64 @@ server <- function(input, output, session) {
                       textsize = "15px",
                       direction = "auto")) %>% 
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
-    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+        } else if(indicador == "Distribuição de matrículas agregadas por macrozona" &
+                  demografia == "Todos os níveis"){
+          leafletProxy("mymap", data = totalmt) %>%
+            clearShapes() %>%
+            clearControls() %>% 
+            addLegend(
+              position = "topleft",
+              pal = paletatm,
+              values = ~`Número de matrículas`,
+              title = "Total de matrículas por macrozona",
+              labFormat = function(type, cuts, p) {
+                n = length(cuts)
+                paste0(cuts[-n], " &ndash; ", cuts[-1])
+              }) %>% 
+            addPolygons(color = "black",
+                        fillColor = ~paletatm(`Número de matrículas`),
+                        layerId = ~paste(Região),
+                        label = ~`Região`,
+                        popup = ~paste0("<strong>Região: </strong>",
+                                        `Região`,
+                                        "<br>",
+                                        "<strong>Total de matrículas: </strong>", 
+                                        `Número de matrículas`),
+                        weight = 2, 
+                        smoothFactor = 0.2,
+                        opacity = 1.0, 
+                        fillOpacity = 1,
+                        highlightOptions = highlightOptions(color = "white", 
+                                                            weight = 2,
+                                                            bringToFront = TRUE),
+                        labelOptions = labelOptions(
+                          style = list("font-weight" = "normal", padding = "3px 8px"),
+                          textsize = "15px",
+                          direction = "auto")) %>% 
+            setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+        } else if(indicador == "Informações demográficas agregadas por macrozona" &
               demografia == "Área da macrozona (km²)"){
-      leafletProxy("mymap", data = shape) %>%
+      leafletProxy("mymap", data = areadf) %>%
         clearShapes() %>%
         clearControls() %>% 
         addLegend(
           position = "topleft",
           pal = paletaa,
-          values = ~demo$`Área da macrozona (km²)`,
-          title = "Área da macrozona (km²)"
-        ) %>% 
+          values = ~`Área da macrozona (km²)`,
+          title = "Área da macrozona (km²)",
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            paste0(cuts[-n], " &ndash; ", cuts[-1])
+          }) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletaa(demo$`Área da macrozona (km²)`),
+                    fillColor = ~paletaa(`Área da macrozona (km²)`),
                     layerId = ~`Região`,
-                    label = ~paste0(Região,`Área da macrozona (km²)`),
+                    label = ~`Região`,
+                    popup = ~paste0("<strong>Região: </strong>",
+                                    `Região`,
+                                    "<br>",
+                                    "<strong>Área da macrozona (km²): </strong>", 
+                                    `aream`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -346,19 +469,27 @@ server <- function(input, output, session) {
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
     } else if(indicador == "Informações demográficas agregadas por macrozona" &
               demografia == "Densidade demográfica (hab/km²)"){
-      leafletProxy("mymap", data = shape) %>%
+      leafletProxy("mymap", data = densidadedf) %>%
         clearShapes() %>%
         clearControls() %>% 
         addLegend(
           position = "topleft",
           pal = paletadd,
-          values = ~sort(demo$`Densidade demográfica (hab/km²)`),
-          title = "Densidade demográfica (hab/km²)"
-        ) %>% 
+          values = ~`Densidade demográfica (hab/km²)`,
+          title = "Densidade demográfica (hab/km²)",
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            paste0(cuts[-n], " &ndash; ", cuts[-1])
+          }) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletadd(sort(demo$`Densidade demográfica (hab/km²)`)),
+                    fillColor = ~paletadd(`Densidade demográfica (hab/km²)`),
                     layerId = ~`Região`,
-                    label = ~paste0(Região,`Densidade demográfica (hab/km²)`),
+                    label = ~`Região`,
+                    popup = ~paste0("<strong>Região: </strong>",
+                                    `Região`,
+                                    "<br>",
+                                    "<strong>Densidade demográfica (hab/km²): </strong>", 
+                                    `densidaded`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -373,19 +504,27 @@ server <- function(input, output, session) {
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
     } else if(indicador == "Informações demográficas agregadas por macrozona" &
               demografia == "População"){
-      leafletProxy("mymap", data = shape) %>%
+      leafletProxy("mymap", data = populacaodf) %>%
         clearShapes() %>%
         clearControls() %>% 
         addLegend(
           position = "topleft",
           pal = paletap,
-          values = ~populacao$População,
-          title = "População"
-        ) %>% 
+          values = ~População,
+          title = "População",
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            paste0(cuts[-n], " &ndash; ", cuts[-1])
+          }) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletap(populacao$População),
+                    fillColor = ~paletap(População),
                     layerId = ~`Região`,
-                    label = ~paste0(Região,`População`),
+                    label = ~`Região`,
+                    popup = ~paste0("<strong>Região: </strong>",
+                                    `Região`,
+                                    "<br>",
+                                    "<strong>População: </strong>", 
+                                    `populacaom`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -400,19 +539,59 @@ server <- function(input, output, session) {
         setView(lng = -45.8872, lat = -23.1791, zoom = 10)
     } else if(indicador == "Informações demográficas agregadas por macrozona" &
               demografia == "Renda média (R$)"){
-      leafletProxy("mymap", data = shape) %>%
+      leafletProxy("mymap", data = rendamdf) %>%
         clearShapes() %>%
         clearControls() %>% 
         addLegend(
           position = "topleft",
           pal = paletar,
-          values = ~demo$`Renda média (R$)`,
-          title = "Renda média (R$)"
+          values = ~`Renda média (R$)`,
+          title = "Renda média (R$)",
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            paste0(cuts[-n], " &ndash; ", cuts[-1])
+          }) %>% 
+        addPolygons(color = "black",
+                    fillColor = ~paletar(`Renda média (R$)`),
+                    layerId = ~`Região`,
+                    label = ~`Região`,
+                    popup = ~paste0("<strong>Região: </strong>",
+                                    `Região`,
+                                    "<br>",
+                                    "<strong>Renda média (R$): </strong>", 
+                                    `rendam`),
+                    weight = 2, 
+                    smoothFactor = 0.2,
+                    opacity = 1.0, 
+                    fillOpacity = 1,
+                    highlightOptions = highlightOptions(color = "white", 
+                                                        weight = 2,
+                                                        bringToFront = TRUE),
+                    labelOptions = labelOptions(
+                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                      textsize = "15px",
+                      direction = "auto")) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 10)
+    } else if(indicador == "Informações demográficas agregadas por macrozona" &
+              demografia == "Todos os indicadores demográficos"){
+      leafletProxy("mymap", data = shape) %>%
+        clearShapes() %>%
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = paletad,
+          values = ~`Região`,
+          title = "Região"
         ) %>% 
         addPolygons(color = "black",
-                    fillColor = ~paletar(demo$`Renda média (R$)`),
+                    fillColor = ~paletad(`Região`),
                     layerId = ~`Região`,
-                    label = ~paste0(Região,`Renda média (R$)`),
+                    label = ~`Região`,
+                    popup = ~paste0("<h4 align = 'center'><strong>", `Região`, "</h4></strong>",
+                                    "<br /><strong>População: </strong>", `População`,
+                                    "<br /><strong>Área da macrozona (km²): </strong>", `Área da macrozona (km²)`,
+                                    "<br /><strong>Densidade demográfica (hab/km²): </strong>", `Densidade demográfica (hab/km²)`,
+                                    "<br /><strong>Renda média (R$): </strong>", `Renda média (R$)`),
                     weight = 2, 
                     smoothFactor = 0.2,
                     opacity = 1.0, 
@@ -439,17 +618,39 @@ server <- function(input, output, session) {
     palette = "Set1",
     domain = linhas$Empresa)
   
+  
+  lpal2 <- colorFactor(
+    palette = "Set1",
+    domain = linhas$Nome)
+  
+  
+  lpal3 <- colorFactor(
+    palette = "Set1",
+    domain = linhas$Empresa)
+  
  
   ## Cria um filtro para o shape do mapa 
   
   fl_linhas <- reactive({
-    indicador <- req(input$LINHA)
-    if(indicador > 0){
+    indicador <- req(input$INDICADOR2)
+    empresa <- req(input$EMPRESA)
+    linha <- req(input$LINHA)
+    if(indicador == "Linhas operantes" &
+       empresa != "Todas as empresas" &
+      linha != "Todas as linhas"){
       linhas %>% 
         dplyr::filter(Nome == input$LINHA)
-    } else{
-     return()
-    }
+    } else if(indicador == "Linhas operantes" &
+              req(empresa == input$EMPRESA) &
+              linha == "Todas as linhas"){
+      linhas %>% 
+        dplyr::filter(Empresa == input$EMPRESA)
+    } else if(indicador == "Linhas operantes" &
+              empresa == "Todas as empresas" &
+              req(linha == input$LINHA)){
+       linhas %>% 
+        dplyr::filter(Nome == input$LINHA)
+  }
   })
 
   ## Condicao para que o mapa seja exibido no app  
@@ -488,18 +689,91 @@ map_tr <- eventReactive(input$BCALC2, {
     addProviderTiles(providers$Stamen.TonerLite,
                      options = providerTileOptions(noWrap = TRUE)) %>% 
     setView(lng = -45.8872, lat = -23.1791, zoom = 10)
-  }
+  } 
 })
      
 ## Caracteristicas do mapa em funcao do indicador selecionado
 
   observeEvent(input$BCALC2,{
     indicador <- req(input$INDICADOR2)
-    if(indicador == "Linhas operantes"){
+    empresa <- req(input$EMPRESA)
+    linha <- req(input$LINHA)
+    if(indicador == "Linhas operantes" &
+       empresa == "Todas as empresas" &
+       linha == "Todas as linhas"){
+      leafletProxy("mymap2", data = linhas) %>%
+        clearGroup(group = "one") %>%  
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = lpal3,
+          values = ~`Empresa`,
+          title = "Empresa"
+        ) %>% 
+        addPolylines(layerId = ~Nome,
+                     group = "one",
+                     weight = 3,
+                     color = ~lpal3(Empresa),
+                     fillColor = ~lpal3(Empresa)) %>% 
+        addTiles() %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                         options = providerTileOptions(noWrap = TRUE)) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 11)
+    } else if(indicador == "Linhas operantes" &
+             empresa == "Todas as empresas" &
+            req(linha == input$LINHA)){
       leafletProxy("mymap2", data = fl_linhas()) %>%
         clearGroup(group = "one") %>%  
         clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = lpal,
+          values = ~`Empresa`,
+          title = "Empresa"
+        ) %>% 
         addPolylines(layerId = ~Nome,
+                     group = "one",
+                     weight = 3,
+                     color = ~lpal(Empresa),
+                     fillColor = ~lpal(Empresa)) %>% 
+        addTiles() %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                         options = providerTileOptions(noWrap = TRUE)) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 13)
+    } else if(indicador == "Linhas operantes" &
+              req(empresa == input$EMPRESA) &
+              linha == "Todas as linhas"){
+      leafletProxy("mymap2", data = fl_linhas()) %>%
+        clearGroup(group = "one") %>%  
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = lpal2,
+          values = ~`Nome`,
+          title = "Nome da linha"
+        ) %>% 
+        addPolylines(layerId = ~Nome,
+                     group = "one",
+                     weight = 3,
+                     color = ~lpal2(Nome),
+                     fillColor = ~lpal2(Nome)) %>% 
+        addTiles() %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                         options = providerTileOptions(noWrap = TRUE)) %>% 
+        setView(lng = -45.8872, lat = -23.1791, zoom = 13)
+    } else if(indicador == "Linhas operantes" &
+              empresa != "Todas as empresas" &
+              linha != "Todas as linhas"){
+      leafletProxy("mymap2", data = fl_linhas()) %>%
+        clearGroup(group = "one") %>%  
+        clearControls() %>% 
+        addLegend(
+          position = "topleft",
+          pal = lpal,
+          values = ~`Empresa`,
+          title = "Empresa"
+        ) %>% 
+        addPolylines(layerId = ~Empresa,
                      group = "one",
                      weight = 3,
                      color = ~lpal(Empresa),
@@ -556,13 +830,13 @@ map_tr <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por gênero"){
   ggplotly(
-    ggplot(data = modal_genero, aes(`Modo de transporte`, n, fill = SEXO)) +
+    ggplot(data = modal_genero, aes(SEXO, n, fill = `Modo de transporte`)) +
       geom_bar(stat = "identity", position = "fill") +
       scale_y_continuous(labels = percent_format()) +
       coord_flip()+
       labs(
         title = "Distribuição modal por gênero",
-        fill = "  Gênero")+
+        fill = "  Modo de transporte")+
       xlab("") +
       ylab("Porcentagem de viagens") +
       scale_fill_brewer(palette = "Set3")+
@@ -619,7 +893,7 @@ map_tr <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Distribuição modal por motivo da viagem"){
   ggplotly( 
-    ggplot(data = modal_motivo, aes(`Modo de transporte`, n, fill = Motivo,
+    ggplot(data = modal_motivo, aes(`Motivo`, n, fill = `Modo de transporte`,
                                     text = paste(' Modo de transporte :', `Modo de transporte`,"\n",
                                                  'Motivo da viagem :', Motivo,"\n",
                                                  'Porcentagem de viagens :', n))) +
@@ -628,7 +902,7 @@ map_tr <- eventReactive(input$BCALC2, {
       coord_flip()+
       labs(
         title = "Distribuição modal por motivo da viagem",
-        fill = "Motivo da \nviagem")+
+        fill = "Modo de transporte")+
       xlab("") +
       ylab("Porcentagem de viagens") +
       scale_fill_brewer(palette = "Set3")+
@@ -749,13 +1023,13 @@ map_tr <- eventReactive(input$BCALC2, {
     indicador <- req(input$INDICADOR2)
     if(indicador == "Proporção de viagens por faixa de renda e modo"){
     ggplotly(
-    ggplot(data = renda, aes(`Modo de transporte`, `Média`, fill = Renda)) +
+    ggplot(data = renda, aes(Renda, `Média`, fill =`Modo de transporte`)) +
       geom_bar(stat = "identity", position = "fill") +
       scale_y_continuous(labels = percent_format()) +
       coord_flip()+
       labs(
         title = "Proporção de viagens por faixa de renda \nem cada modo",
-        fill = "   Faixa de renda")+
+        fill = "   Modo de transporte")+
       xlab("") +
       ylab("Porcentagem de viagens") +
       scale_fill_brewer(palette = "Set3")+ 

@@ -27,6 +27,7 @@ library(ggmap)
 library(widgetframe)
 library(mapview)
 library(mapedit)
+library(ggvis)
 
 
 
@@ -52,16 +53,14 @@ for(i in files){
 }
 
 
-demo <- read_csv("data/demo.txt", 
-                 col_types = cols(X1 = col_skip()))
-
-
 shape <- read_sf("data/shapes/shape.shp") %>% 
   st_transform(4326)
 
 
 linhas <- read_sf("data/shapes/linhas.shp") %>% 
   st_transform(4326)
+
+
 
 
 linhas[104,2] <- "Jd. das Indústrias / Olímpio Catão"
@@ -87,6 +86,8 @@ matriculas <- matriculas %>%
 colnames(shape)[3] <- "Área da macrozona (km²)"
 colnames(shape)[4] <- "Densidade demográfica (hab/km²)"
 colnames(shape)[5] <- "Renda média (R$)"
+colnames(shape)[11] <- "Número de trabalhadores"
+colnames(shape)[12] <- "Número de matrículas"
 
 shape <- shape %>% 
   dplyr::rename("População" = "Populaç",
@@ -95,13 +96,52 @@ shape <- shape %>%
          "Matrículas" = "Matrcls",
          "Trabalhadores" = "Trblhdr")
 
-shape[55,6] <- 2016
-shape[55,7] <- "Superior"
-shape[55,9] <- "Administração pública"
-
-shape <- shape[-c(57), ]
 
 
-populacao <- demo %>% 
+demosjc <- read_sf("data/shapes/demosjc.shp") %>% 
+  st_transform(4326)
+
+colnames(demosjc)[2] <- "População"
+colnames(demosjc)[3] <- "Área da macrozona (km²)"
+colnames(demosjc)[4] <- "Densidade demográfica (hab/km²)"
+colnames(demosjc)[5] <- "Renda média (R$)"
+
+demosjc$aream <- unique(shape$`Área da macrozona (km²)`)
+
+demosjc$densidaded <- unique(shape$`Densidade demográfica (hab/km²)`)
+
+demosjc$populacaom <- unique(shape$População)
+
+demosjc$rendam <- unique(shape$`Renda média (R$)`)
+
+
+areadf <- demosjc %>% 
+  arrange(`Área da macrozona (km²)`)
+
+densidadedf <- demosjc %>% 
+  arrange(`Densidade demográfica (hab/km²)`)
+
+populacaodf <- demosjc %>% 
   arrange(População)
 
+rendamdf <- demosjc %>% 
+  arrange(`Renda média (R$)`)
+
+totaltr <- shape
+
+totaltr <- totaltr[,-c(2:10,12)]
+
+totaltr <- unique(totaltr)
+
+totalmt <- shape
+
+totalmt <- totalmt[,-c(2:11)]
+
+totalmt <- unique(totalmt)
+
+linhas2 <- linhas[,c(1:3)]
+
+st_geometry(linhas2) <- NULL
+
+linhas2 <- linhas2 %>% 
+  arrange(Nome)
