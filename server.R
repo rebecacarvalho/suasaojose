@@ -627,10 +627,307 @@ server <- function(input, output, session) {
     }
   })
   
-
+  # 4. Popup ----------------------------------------------------------------
+  
+  ## Definicao das caracteristicas de cada regiao
+  
+  ### Centro
+  
+#  output$def_center <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 72.115
+#              <p><strong>Área da macrozona (km²):</strong> 18,68
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 3.860,55
+#              <p><strong>Renda média:</strong> R$ 1.795,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Extremo Norte
+#  
+#  output$def_exnort <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 15.514
+#              <p><strong>Área da macrozona (km²):</strong> 696,47
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 22,28
+#              <p><strong>Renda média:</strong> R$ 574,00</h4>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Leste
+#  
+#  output$def_leste <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 160.990
+#              <p><strong>Área da macrozona (km²):</strong> 134,69
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 1.195,26
+#              <p><strong>Renda média:</strong> R$ 696,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Norte
+#  
+#  output$def_nort <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 59.800
+#              <p><strong>Área da macrozona (km²):</strong> 63,73
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 938,33
+#              <p><strong>Renda média:</strong> R$ 626,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Oeste
+#  
+#  output$def_oeste <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 41.163
+#              <p><strong>Área da macrozona (km²):</strong> 44,01
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 935,31
+#              <p><strong>Renda média:</strong> R$ 2.519,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Sudeste
+#  
+#  output$def_sudest <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 46.803
+#              <p><strong>Área da macrozona (km²):</strong> 84,70
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 552,57
+#              <p><strong>Renda média:</strong> R$ 653,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ### Sul
+#  
+#  output$def_sul <- renderUI({
+#    def <- paste0(
+#      "<h5 align = 'left'>
+#              <p><strong>População:</strong> 233.536
+#              <p><strong>Área da macrozona (km²):</strong> 56,51
+#              <p><strong>Densidade demográfica (hab/km²):</strong> 4.132,65
+#              <p><strong>Renda média:</strong> R$ 934,00</h5>
+#              <h4 align ='center'><strong>
+#              <p><br/>")
+#    HTML(def)
+#    
+#  })
+#  
+#  ## Definicao do popup de cada regiao 
+#  
+#  observe({
+#    
+#    event <- input$mymap_shape_mouseover
+#    
+#  }) 
+#  
+#  
+#  observeEvent(input$mymap_shape_mouseover,{
+#    event <- input$mymap_shape_mouseover
+#    if(is.null(event)){
+#      return()
+#    }else if(event =="Centro"){
+#      showModal(
+#       
+#        modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Centro")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12, align = "right",
+#                 htmlOutput("def_center"))),
+#        easyClose = TRUE,
+#        style = "
+#                          overflow: hidden;
+#                          overflow-y: scroll;
+#                          flex: 1 1 auto;
+#                          padding: 1rem;
+#                          max-width: 850px;
+#                          margin: 1.75rem auto;
+#                          max-height: 500px;
+#                          display: flex;
+#                          width: auto;
+#                          "))
+#      
+#    }else if(event =="Extremo Norte"){
+#      
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Extremo Norte")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_exnort"))),
+#        easyClose = TRUE,
+#        style = "
+#                          overflow: hidden;
+#                          overflow-y: scroll;
+#                          flex: 1 1 auto;
+#                          padding: 1rem;
+#                          max-width: 850px;
+#                          margin: 1.75rem auto;
+#                          max-height: 500px;
+#                          display: flex;
+#                          width: auto;
+#                          "))
+#    } else if(event == "Leste"){
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Leste")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_leste"))),
+#        easyClose = TRUE,
+#        style = "
+#                          overflow: hidden;
+#                          overflow-y: scroll;
+#                          flex: 1 1 auto;
+#                          padding: 1rem;
+#                          max-width: 850px;
+#                          margin: 1.75rem auto;
+#                          max-height: 500px;
+#                          display: flex;
+#                          width: auto;
+#                          "))
+#    } else if(event == "Norte"){
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Norte")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_nort"))),
+#        easyClose = TRUE,
+#        style = "
+#                          overflow: hidden;
+#                          overflow-y: scroll;
+#                          flex: 1 1 auto;
+#                          padding: 1rem;
+#                          max-width: 850px;
+#                          margin: 1.75rem auto;
+#                          max-height: 500px;
+#                          display: flex;
+#                          width: auto;
+#                          "))
+#    } else if(event == "Oeste"){
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Oeste")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_oeste"))),
+#        easyClose = TRUE,
+#        style = "
+#        overflow: hidden;
+#        overflow-y: scroll;
+#        flex: 1 1 auto;
+#        padding: 1rem;
+#        max-width: 850px;
+#        margin: 1.75rem auto;
+#        max-height: 500px;
+#        display: flex;
+#        width: auto;
+#        "))
+#    } else if(event == "Sudeste"){
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Sudeste")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_sudest"))),
+#        easyClose = TRUE,
+#        style = "
+#        overflow: hidden;
+#        overflow-y: scroll;
+#        flex: 1 1 auto;
+#        padding: 1rem;
+#        max-width: 850px;
+#        margin: 1.75rem auto;
+#        max-height: 500px;
+#        display: flex;
+#        width: auto;
+#        "))
+#    } else if(event == "Sul"){ 
+#      showModal(modalDialog(
+#        title = list(tags$h4(align = "right",
+#                             modalButton(label =  NULL,
+#                                         icon = icon("times"))),
+#                     tags$h3(align = "center",
+#                             "Sul")),
+#        footer = modalButton("Fechar"), 
+#        size = "s",
+#        fluidRow(
+#          column(12,
+#                 htmlOutput("def_sul"))),
+#        easyClose = TRUE,
+#        style = "
+#                          overflow: hidden;
+#                          overflow-y: scroll;
+#                          flex: 1 1 auto;
+#                          padding: 1rem;
+#                          max-width: 850px;
+#                          margin: 1.75rem auto;
+#                          max-height: 500px;
+#                          display: flex;
+#                          width: auto;
+#                          "))
+#    }
+#    
+#  })
+  
   
 
-# 4. Configuracoes do mapa de transportes ---------------------------------
+# 5. Configuracoes do mapa de transportes ---------------------------------
   
   ## Cria uma paleta de cores para as empresas de onibus
   
@@ -806,7 +1103,7 @@ map_tr <- eventReactive(input$BCALC2, {
     })
 
 
-# 5. Configuracoes dos graficos de transportes ----------------------------
+# 6. Configuracoes dos graficos de transportes ----------------------------
 
   
 ## Distribuicao modal por genero

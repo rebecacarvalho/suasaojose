@@ -45,11 +45,7 @@ ui <-
                       .div.info.legend.leaflet-control br {
                       clear: both;}
                       
-                      
-                      .leaflet-popup-tip-container {
-	                    cursor: pointer;
-	pointer-events: auto;
-	}"
+                    "
 
                      ))),
  
@@ -83,7 +79,7 @@ ui <-
                         
                           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                           draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
-                                          width = 350, height = "auto",
+                                          width = 340, height = "auto",
                                           
                                           style = "background-color:#D4E6F1;
                                                    align-items: center;",
@@ -119,20 +115,20 @@ ui <-
                                     mainPanel(width = 12,
                                     
                                    
-                                    column(12,  
+                                    column(10,  
                                            absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
                                                          plotlyOutput("plot_dmg", height = 500))),
                                     
-                                    column(12,  
+                                    column(10,  
                                            absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
                                                          plotlyOutput("plot_dmm", height = 500))),
                                     
                                   
-                                    column(12,  
+                                    column(10,  
                                            absolutePanel(top = 150, 
                                                          right = 0 , 
                                                          left = 0,
@@ -145,7 +141,7 @@ ui <-
                                     
                                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                                   draggable = TRUE, top = 150, left = "auto", right = 20, bottom = "auto",
-                                                  width = 370, height = "auto",
+                                                  width = 340, height = "auto",
                                                   
                                                   style = "background-color:#D4E6F1;
                                                    align-items: center;",
